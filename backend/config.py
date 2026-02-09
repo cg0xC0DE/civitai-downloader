@@ -8,29 +8,32 @@
 import os
 
 # ============ 模型仓库根目录 ============
-# Checkpoint 和 LoRA 的根目录（D 盘）
-CKPT_BASE_DIR = "D:/ckpt"
-LORA_BASE_DIR = "D:/lora"
+CKPT_BASE_DIR = 'D:/ckpt'
+LORA_BASE_DIR = 'D:/lora'
+EMBEDDING_BASE_DIR = 'D:/embeddings'
 
 # 模型文件扩展名
 MODEL_EXTENSIONS = ('.safetensors', '.ckpt', '.pth')
+# Embedding 额外支持 .pt 格式
+EMBEDDING_EXTENSIONS = ('.safetensors', '.ckpt', '.pth', '.pt')
 
 # ============ ComfyUI ============
-COMFYUI_URL = "127.0.0.1:8188"
-COMFYUI_PATH = os.environ.get('COMFYUI_PATH', 'C:/ComfyUI_windows_portable/ComfyUI')
+COMFYUI_URL = '127.0.0.1:8188'
+COMFYUI_PATH = 'C:/ComfyUI_windows_portable/ComfyUI'
 COMFYUI_WORKFLOWS_DIR = os.path.join(COMFYUI_PATH, 'user', 'default', 'workflows')
 
 # ============ 后端服务 ============
 SERVER_PORT = 53133
 WORKFLOW_DIR = os.path.join(os.path.dirname(__file__), 'workflows')
 CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache')
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output')
 
 # ============ Civitai API ============
-CIVITAI_API_URL = "https://civitai.com/api/v1/models"
+CIVITAI_API_BASE = 'https://civitai.com/api'
+CIVITAI_API_URL = f"{CIVITAI_API_BASE}/v1/models"
 # Civitai API Token（部分模型需要登录才能下载）
 # 获取方式：https://civitai.com/user/account -> API Keys
-# 可通过环境变量 CIVITAI_API_TOKEN 设置，或直接填写在此处
-CIVITAI_API_TOKEN = os.environ.get('CIVITAI_API_TOKEN', '9b64ab43d94baf41602ae45fa17accfc')
+CIVITAI_API_TOKEN = '9b64ab43d94baf41602ae45fa17accfc'
 
 
 # ============ 动态路径工具函数 ============
@@ -41,6 +44,8 @@ def get_base_dir(main_type):
         return CKPT_BASE_DIR
     elif main_type == 'lora':
         return LORA_BASE_DIR
+    elif main_type == 'embedding':
+        return EMBEDDING_BASE_DIR
     else:
         raise ValueError(f"Unknown main_type: {main_type}")
 
@@ -59,8 +64,11 @@ def resolve_type_subtype(type_subtype):
     if len(parts) != 2:
         return None
     main_type, subtype = parts
-    if main_type not in ('ckpt', 'lora') or not subtype:
+    if main_type not in ('ckpt', 'lora', 'embedding') or not subtype:
         return None
+    # embedding._root → 直接存到 D:/embeddings 根目录
+    if main_type == 'embedding' and subtype == '_root':
+        return main_type, '', get_base_dir(main_type)
     target_dir = get_subtype_dir(main_type, subtype)
     return main_type, subtype, target_dir
 
@@ -93,76 +101,92 @@ def scan_files(main_type, subtype):
     return files
 
 
-def find_model_on_disk(model_name, main_type=None, alt_names=None):
+def find_model_on_disk(model_name, main_type=None, alt_names=None, version_id=None):
     """
-    在仓库目录中搜索模型文件，支持多个搜索名。
-    匹配优先级：
-      1) 精确文件名匹配（忽略大小写）
-      2) alt_names 中的 file_name 精确匹配
-      3) 清理后的关键词单向 contains（关键词 ⊂ 文件名，且关键词 >= 8 字符）
+    在仓库目录中搜索模型文件。
+    严格匹配：仅通过 modelVersionId 查索引，确保版本精确一致。
+    匹配不到则返回 found: False。
     """
-    import re as _re
+    if version_id:
+        from util import model_index
+        entry = model_index.find_by_version_id(version_id)
+        if entry:
+            fp = entry['path']
+            # 验证文件确实存在于磁盘上
+            if not os.path.isfile(fp):
+                return {'found': False, 'name': model_name, 'version_id': version_id,
+                        'reason': f'索引中有记录但文件不存在: {fp}'}
+            # 从路径反推 type / subtype
+            for mt in (['ckpt', 'lora', 'embedding'] if not main_type else [main_type]):
+                base = get_base_dir(mt)
+                if fp.replace('\\', '/').startswith(base.replace('\\', '/')):
+                    rel = os.path.relpath(fp, base)
+                    sub = rel.split(os.sep)[0] if os.sep in rel else rel.split('/')[0]
+                    return {
+                        'found': True, 'type': mt, 'subtype': sub,
+                        'filename': entry.get('filename', os.path.basename(fp)),
+                        'path': fp,
+                    }
+            # 路径不在已知仓库下，仍然返回 found
+            return {
+                'found': True, 'type': main_type or 'unknown', 'subtype': '',
+                'filename': entry.get('filename', os.path.basename(fp)),
+                'path': fp,
+            }
 
-    names = [model_name]
-    if alt_names:
-        names.extend(alt_names if isinstance(alt_names, list) else [alt_names])
-    # 去空
-    names = [n for n in names if n]
+    return {'found': False, 'name': model_name, 'version_id': version_id,
+            'reason': '索引中无此 versionId 记录，请先下载模型'}
 
-    if not names:
-        return {'found': False, 'name': model_name}
 
-    # 收集所有候选文件
-    search_types = [main_type] if main_type else ['ckpt', 'lora']
-    all_files = []  # [(mt, sub, filename, filepath), ...]
-    for mt in search_types:
-        base_dir = get_base_dir(mt)
-        if not os.path.exists(base_dir):
-            continue
-        for sub in os.listdir(base_dir):
-            subdir = os.path.join(base_dir, sub)
-            if not os.path.isdir(subdir):
+def find_embedding_on_disk(emb_name):
+    """
+    在 D:/embeddings 中按文件名搜索 embedding。
+    支持 .pt / .safetensors / .ckpt / .pth 格式。
+    搜索策略（优先级从高到低）：
+      1) 精确匹配：文件名(去扩展) == 搜索名
+      2) 模糊匹配：文件名以搜索名开头（处理 badhandv4(badhandv4).pt 匹配 badhandv4）
+    """
+    base = EMBEDDING_BASE_DIR
+    if not os.path.exists(base):
+        return {'found': False, 'name': emb_name, 'reason': f'目录不存在: {base}'}
+
+    search_name = emb_name.lower().strip()
+    # 去掉可能的扩展名
+    for ext in EMBEDDING_EXTENSIONS:
+        if search_name.endswith(ext):
+            search_name = search_name[:-len(ext)]
+            break
+
+    def _make_result(fp):
+        rel = os.path.relpath(fp, base)
+        sub = rel.split(os.sep)[0] if os.sep in rel else ''
+        return {'found': True, 'type': 'embedding', 'subtype': sub,
+                'filename': os.path.basename(fp), 'path': fp}
+
+    # 收集所有 embedding 文件
+    fuzzy_match = None
+    for root, dirs, files in os.walk(base):
+        for f in files:
+            if not f.lower().endswith(EMBEDDING_EXTENSIONS):
                 continue
-            for f in os.listdir(subdir):
-                if f.lower().endswith(MODEL_EXTENSIONS):
-                    all_files.append((mt, sub, f, os.path.join(subdir, f)))
+            fname_no_ext = f.lower()
+            for ext in EMBEDDING_EXTENSIONS:
+                if fname_no_ext.endswith(ext):
+                    fname_no_ext = fname_no_ext[:-len(ext)]
+                    break
+            fp = os.path.join(root, f)
+            # 精确匹配
+            if fname_no_ext == search_name:
+                return _make_result(fp)
+            # 模糊匹配：文件名以搜索名开头（如 badhandv4(xxx) 匹配 badhandv4）
+            if fuzzy_match is None and fname_no_ext.startswith(search_name):
+                fuzzy_match = fp
 
-    def _make_result(mt, sub, f, fp):
-        return {'found': True, 'type': mt, 'subtype': sub, 'filename': f, 'path': fp}
+    if fuzzy_match:
+        return _make_result(fuzzy_match)
 
-    # Round 1: 精确文件名匹配（name 可能自带扩展名，也可能不带）
-    for n in names:
-        n_lower = n.strip().lower()
-        for mt, sub, f, fp in all_files:
-            if f.lower() == n_lower or os.path.splitext(f)[0].lower() == os.path.splitext(n_lower)[0]:
-                return _make_result(mt, sub, f, fp)
-
-    # Round 2: file_name 精确匹配（alt_names 里通常有 Civitai 返回的原始文件名）
-    for n in names[1:]:  # 跳过 model_name（已在 Round 1 试过）
-        n_stem = os.path.splitext(n.strip())[0].lower()
-        if len(n_stem) < 4:
-            continue
-        for mt, sub, f, fp in all_files:
-            f_stem = os.path.splitext(f)[0].lower()
-            if n_stem == f_stem:
-                return _make_result(mt, sub, f, fp)
-
-    # Round 3: 清理后关键词 单向 contains（关键词 ⊂ 文件名），要求长度 >= 8
-    keywords = []
-    for n in names:
-        stem = os.path.splitext(n)[0] if '.' in n else n
-        clean = _re.sub(r'[^a-z0-9]', '', stem.lower())
-        if clean and len(clean) >= 8 and clean not in keywords:
-            keywords.append(clean)
-
-    if keywords:
-        for mt, sub, f, fp in all_files:
-            clean_f = _re.sub(r'[^a-z0-9]', '', os.path.splitext(f)[0].lower())
-            for kw in keywords:
-                if kw in clean_f:
-                    return _make_result(mt, sub, f, fp)
-
-    return {'found': False, 'name': model_name}
+    return {'found': False, 'name': emb_name,
+            'reason': f'D:/embeddings 中未找到 {emb_name}'}
 
 
 def get_all_model_paths():

@@ -97,6 +97,14 @@ class CivitaiDownloader:
             
             file_info = files[0]
             
+            # 合并触发词：API trainedWords + 描述 HTML 中提取
+            from util.model_index import extract_trigger_words_from_html, merge_trigger_words
+            api_words = target_version.get("trainedWords", [])
+            desc_words = extract_trigger_words_from_html(
+                target_version.get("description", "") or data.get("description", "")
+            )
+            merged_words = merge_trigger_words(api_words, desc_words)
+
             return {
                 "status": "ok",
                 "title": data.get("name", "Unknown"),
@@ -106,7 +114,8 @@ class CivitaiDownloader:
                 "base_model": target_version.get("baseModel", ""),
                 "download_url": file_info.get("downloadUrl", ""),
                 "model_id": model_id,
-                "version_id": target_version.get("id")
+                "version_id": target_version.get("id"),
+                "trained_words": merged_words,
             }
             
         except Exception as e:
@@ -324,6 +333,21 @@ Downloaded: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         txt_path = self.save_metadata(model_info, target_dir)
         if txt_path:
             result["metadata_path"] = txt_path
+
+        # 更新模型索引
+        try:
+            from util import model_index
+            model_index.upsert(
+                model_id=model_info.get("model_id", ""),
+                model_name=model_info.get("title", ""),
+                version_id=model_info.get("version_id", ""),
+                version_name=model_info.get("version_name", ""),
+                filename=model_info.get("file_name", ""),
+                path=os.path.abspath(download_result["file_path"]),
+                trigger_words=model_info.get("trained_words", []),
+            )
+        except Exception as e:
+            print(f"[WARN] 更新模型索引失败: {e}")
 
         return {**result, "status": "ok", "message": f"下载完成: {model_info['file_name']}"}
 

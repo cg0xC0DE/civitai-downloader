@@ -28,3 +28,6 @@ backend/output/
 # Cache
 *.json
 !package.json
+
+# Credentials
+credential.py

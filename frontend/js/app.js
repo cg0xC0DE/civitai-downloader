@@ -30,6 +30,9 @@ class CivitaiApp {
 
     // ===================== Init =====================
     init() {
+        // Store API base URL for other modules
+        document.body.dataset.apiBase = this.api;
+
         this.bindTabs();
         this.initDownloadTab();
         this.initDrawTab();
@@ -82,6 +85,13 @@ class CivitaiApp {
 
     async loadDlSubtypes(mainType) {
         const sel = document.getElementById('dlSubType');
+        // embedding 无需子类型，直接存到根目录
+        if (mainType === 'embedding') {
+            sel.innerHTML = '<option value="_root" selected>（直接存入 embeddings）</option>';
+            sel.style.display = 'none';
+            return;
+        }
+        sel.style.display = '';
         sel.innerHTML = '<option value="">加载中...</option>';
         try {
             const res = await this.apiFetch(`${this.api}/api/subtypes?type=${mainType}`);
@@ -108,7 +118,7 @@ class CivitaiApp {
         const mainType = document.getElementById('dlMainType').value;
         const subType = document.getElementById('dlSubType').value;
 
-        if (!url || !subType) {
+        if (!url || (!subType && mainType !== 'embedding')) {
             this.showDlResult({ status: 'error', message: '请填写URL并选择子类型' });
             this.setBtnLoading(btn, false);
             return;
@@ -257,6 +267,20 @@ class CivitaiApp {
         this.loadWorkflowsInto(document.getElementById('autoWorkflowSelect'));
         document.getElementById('parseBtn').addEventListener('click', () => this.parseImage());
         document.getElementById('autoGenerateBtn').addEventListener('click', () => this.autoGenerate());
+        
+        // 清空 URL 按钮
+        document.getElementById('clearImageUrl').addEventListener('click', () => {
+            const input = document.getElementById('imageUrl');
+            input.value = '';
+            input.focus();
+        });
+        
+        // 输入框有内容时显示清空按钮，无内容时隐藏
+        const imageUrlInput = document.getElementById('imageUrl');
+        const clearBtn = document.getElementById('clearImageUrl');
+        const updateClearBtn = () => { clearBtn.textContent = imageUrlInput.value ? '✖' : ''; };
+        imageUrlInput.addEventListener('input', updateClearBtn);
+        updateClearBtn(); // 初始化状态
     }
 
     async parseImage() {
@@ -293,6 +317,19 @@ class CivitaiApp {
         const autoBtn = document.getElementById('autoGenerateBtn');
         div.style.display = 'block';
 
+        const ps = data.param_sources || {};
+
+        // 参数来源状态徽标
+        const _badge = (key) => {
+            const s = ps[key];
+            if (s === 'original')    return '<span class="ps-badge ps-original" title="精确获取">✅</span>';
+            if (s === 'approximate') return '<span class="ps-badge ps-approx"   title="近似值">🔶</span>';
+            if (s === 'default')     return '<span class="ps-badge ps-default"  title="使用默认">⚠️</span>';
+            if (s === 'missing')     return '<span class="ps-badge ps-missing"  title="缺失">❌</span>';
+            return '';
+        };
+
+        // Checkpoint 本地检查
         const ckptCheck = data.checks?.checkpoint;
         let ckptStatus;
         if (ckptCheck?.found) {
@@ -303,6 +340,7 @@ class CivitaiApp {
             ckptStatus = `<span class="check-fail">❌ 未找到</span>`;
         }
 
+        // LoRA 列表
         let lorasHtml = '';
         if (data.loras && data.loras.length > 0) {
             lorasHtml = data.checks.loras.map(lc => {
@@ -314,22 +352,78 @@ class CivitaiApp {
                 } else {
                     st = `<span class="check-fail">❌ 未找到</span>`;
                 }
-                return `<div class="parse-item"><span class="parse-label">LoRA: ${lc.requested_name} (${lc.weight})</span><span class="parse-value">${st}</span></div>`;
+                return `<div class="parse-item"><span class="parse-label">${_badge('loras')} LoRA: ${lc.requested_name} (${lc.weight})</span><span class="parse-value">${st}</span></div>`;
             }).join('');
         }
+
+        // Embedding 列表（含磁盘检查）
+        let embHtml = '';
+        const embChecks = (data.checks && data.checks.embeddings) || [];
+        if (embChecks.length > 0) {
+            embHtml = embChecks.map(ec => {
+                let st;
+                if (ec.found) {
+                    st = `<span class="check-ok">✅ ${ec.filename}</span>`;
+                } else if (ec.modelId) {
+                    st = `<span class="check-fail">❌ 未找到</span> <button class="btn-download-model" data-model-id="${ec.modelId}" data-version-id="${ec.modelVersionId}" data-type="embedding">⬇️ 下载</button>`;
+                } else {
+                    st = `<span class="check-fail">❌ 未找到（无 Civitai 链接）</span>`;
+                }
+                return `<div class="parse-item"><span class="parse-label">${_badge('embeddings')} Embedding: ${this.escapeHtml(ec.requested_name)}</span><span class="parse-value">${st}</span></div>`;
+            }).join('');
+        }
+
+        // 复刻完整度总结
+        const summary = ps._summary || {};
+        const total = summary.total || 0;
+        const orig = summary.original || 0;
+        const pct = total > 0 ? Math.round(orig / total * 100) : 0;
+        const barColor = pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444';
+
+        // 尺寸注释
+        const sizeNote = data._size_note ? ` <span style="color:#f59e0b;font-size:11px;">(${data._size_note})</span>` : '';
 
         div.innerHTML = `
             <div class="parse-result">
                 <h4>解析结果</h4>
-                <div class="parse-item"><span class="parse-label">Checkpoint</span><span class="parse-value">${data.checkpoint || '未知'}</span></div>
+                <div class="parse-summary" style="margin-bottom:10px;padding:8px 12px;background:#1a1a2e;border-radius:8px;font-size:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span>复刻完整度</span>
+                        <span style="font-weight:bold;color:${barColor}">${orig}/${total} 参数精确获取 (${pct}%)</span>
+                    </div>
+                    <div style="height:6px;background:#333;border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width .3s;"></div>
+                    </div>
+                    ${summary.approximate ? `<div style="margin-top:4px;">🔶 近似 ${summary.approximate} 项</div>` : ''}
+                    ${summary.default ? `<div style="margin-top:2px;">⚠️ 默认 ${summary.default} 项</div>` : ''}
+                    ${summary.missing ? `<div style="margin-top:2px;">❌ 缺失 ${summary.missing} 项</div>` : ''}
+                </div>
+                <div class="parse-item"><span class="parse-label">${_badge('checkpoint')} Checkpoint</span><span class="parse-value">${data.checkpoint || '未知'}</span></div>
                 <div class="parse-item"><span class="parse-label">本地仓库</span><span class="parse-value">${ckptStatus}</span></div>
                 ${lorasHtml}
-                <div class="parse-item"><span class="parse-label">采样器</span><span class="parse-value">${data.sampler}</span></div>
-                <div class="parse-item"><span class="parse-label">步数 / CFG</span><span class="parse-value">${data.steps} / ${data.cfg}</span></div>
-                <div class="parse-item"><span class="parse-label">尺寸</span><span class="parse-value">${data.width}×${data.height}</span></div>
-                <div class="parse-item"><span class="parse-label">Seed</span><span class="parse-value">${data.seed}</span></div>
-                ${data.prompt ? `<div style="margin-top:8px;"><strong style="font-size:13px;">Prompt:</strong><div class="prompt-preview">${this.escapeHtml(data.prompt)}</div></div>` : ''}
-                ${data.negative_prompt ? `<div style="margin-top:8px;"><strong style="font-size:13px;">Negative:</strong><div class="prompt-preview">${this.escapeHtml(data.negative_prompt)}</div></div>` : ''}
+                ${embHtml}
+                <div class="parse-item"><span class="parse-label">${_badge('sampler')} 采样器</span><span class="parse-value">${data.sampler}${data.scheduler ? ' / ' + data.scheduler : ''}</span></div>
+                <div class="parse-item"><span class="parse-label">${_badge('steps')} 步数</span><span class="parse-value">${data.steps}</span></div>
+                <div class="parse-item"><span class="parse-label">${_badge('cfg')} CFG</span><span class="parse-value">${data.cfg}</span></div>
+                <div class="parse-item"><span class="parse-label">${_badge('size')} 尺寸</span><span class="parse-value">${data.width}×${data.height}${sizeNote}</span></div>
+                <div class="parse-item"><span class="parse-label">${_badge('seed')} Seed</span><span class="parse-value">${data.seed >= 0 ? data.seed : '（未记录）'}</span></div>
+                ${data.clip_skip != null ? `<div class="parse-item"><span class="parse-label">${_badge('clip_skip')} Clip Skip</span><span class="parse-value">${data.clip_skip}</span></div>` : ''}
+                ${data.prompt ? `<div style="margin-top:8px;"><strong style="font-size:13px;">${_badge('prompt')} Prompt:</strong><div class="prompt-preview">${this.escapeHtml(data.prompt)}</div></div>` : ''}
+                ${data.negative_prompt ? `<div style="margin-top:8px;"><strong style="font-size:13px;">${_badge('negative_prompt')} Negative:</strong><div class="prompt-preview">${this.escapeHtml(data.negative_prompt)}</div></div>` : ''}
+                ${data.variations && data.variations.length > 0 ? `
+                <div style="margin-top:10px;padding:8px 12px;background:#1a1a2e;border-radius:8px;">
+                    <strong style="font-size:13px;">🎯 出图计划（${data.total_images} 张）</strong>
+                    <div style="margin-top:6px;font-size:12px;">
+                        ${data.variations.map((v, i) => {
+                            const p = v.params || {};
+                            const details = [];
+                            if (p.sampler) details.push(p.sampler);
+                            if (p.scheduler) details.push(p.scheduler);
+                            if (p.width && p.height) details.push(p.width + '×' + p.height);
+                            return '<div style="padding:2px 0;"><span style="color:#60a5fa;">#' + (i+1) + '</span> ' + v.label + (details.length ? ' <span style="color:#888;">(' + details.join(', ') + ')</span>' : '') + '</div>';
+                        }).join('')}
+                    </div>
+                </div>` : ''}
             </div>
         `;
 
@@ -344,11 +438,7 @@ class CivitaiApp {
             });
         });
 
-        if (data.all_models_found) {
-            autoBtn.style.display = 'block';
-        } else {
-            autoBtn.style.display = 'none';
-        }
+        autoBtn.disabled = !data.all_models_found;
     }
 
     async triggerModelDownload(modelId, versionId, type, btn) {
@@ -376,7 +466,7 @@ class CivitaiApp {
         const div = document.getElementById('parseResult');
         div.style.display = 'block';
         div.innerHTML = `<div class="parse-result"><div style="color:#dc2626;">❌ ${this.escapeHtml(msg)}</div></div>`;
-        document.getElementById('autoGenerateBtn').style.display = 'none';
+        document.getElementById('autoGenerateBtn').disabled = true;
     }
 
     async autoGenerate() {
@@ -399,10 +489,12 @@ class CivitaiApp {
             prompt: d.prompt,
             negative_prompt: d.negative_prompt || 'low quality, worst quality',
             width: d.width, height: d.height,
-            steps: d.steps || 20, cfg: d.cfg || 7, sampler: d.sampler || 'dpmpp_2m',
+            steps: d.steps || 20, cfg: d.cfg || 7,
+            sampler: d.sampler || 'dpmpp_2m',
+            scheduler: d.scheduler || '',
             seed: d.seed > 0 ? d.seed : null,
             loras: loraList.length > 0 ? loraList : undefined,
-            vary_sizes: true
+            variations: d.variations || null
         };
 
         try {
@@ -690,7 +782,7 @@ class CivitaiApp {
         const badge = document.getElementById('comfyuiStatus');
         const text = document.getElementById('statusText');
         btn.disabled = true;
-        btn.textContent = '⏳ 重启中...';
+        btn.textContent = '⏳';
         badge.className = 'status-badge idle';
         text.textContent = '正在重启...';
 
@@ -711,7 +803,7 @@ class CivitaiApp {
                             badge.className = 'status-badge success';
                             text.textContent = 'ComfyUI 已就绪';
                             btn.disabled = false;
-                            btn.textContent = '🔄 重启';
+                            btn.textContent = '🔄';
                         }
                     } catch {}
                     if (attempts >= 40) {
@@ -719,19 +811,19 @@ class CivitaiApp {
                         badge.className = 'status-badge error';
                         text.textContent = '重启超时，请检查 watchdog';
                         btn.disabled = false;
-                        btn.textContent = '🔄 重启';
+                        btn.textContent = '🔄';
                     }
                 }, 3000);
             } else {
                 text.textContent = data.message || '重启失败';
                 btn.disabled = false;
-                btn.textContent = '🔄 重启';
+                btn.textContent = '🔄';
             }
         } catch (err) {
             badge.className = 'status-badge error';
             text.textContent = '重启请求失败';
             btn.disabled = false;
-            btn.textContent = '🔄 重启';
+            btn.textContent = '🔄';
         }
     }
 

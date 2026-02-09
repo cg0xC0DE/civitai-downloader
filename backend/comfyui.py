@@ -19,12 +19,12 @@ from typing import Optional, Dict, Any
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 
-# 默认配置
-DEFAULT_COMFYUI_URL = "http://localhost:8188"
-DEFAULT_WORKFLOW_DIR = os.path.join(
-    os.path.dirname(__file__), 
-    'workflows'
-)
+sys.path.insert(0, os.path.dirname(__file__))
+from config import COMFYUI_URL, WORKFLOW_DIR
+
+# 默认配置（从 config.py 统一引用）
+DEFAULT_COMFYUI_URL = f"http://{COMFYUI_URL}"
+DEFAULT_WORKFLOW_DIR = WORKFLOW_DIR
 
 
 class ComfyUI:
@@ -184,10 +184,10 @@ class ComfyUI:
     def queue_prompt(self, workflow: Dict) -> Dict:
         """
         将工作流提交到队列
-        
+
         Args:
             workflow: 工作流字典
-        
+
         Returns:
             API 响应
         """
@@ -195,7 +195,7 @@ class ComfyUI:
             "prompt": workflow,
             "client_id": "civitai-downloader"
         }
-        result = self._api_request('/api.queue', data)
+        result = self._api_request('/api/prompt', data)
         
         if 'prompt_id' in result:
             print(f"[ComfyUI] 已提交任务，ID: {result['prompt_id']}")

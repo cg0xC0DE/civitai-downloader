@@ -455,6 +455,7 @@ body {
     font-size: 13px;
     font-weight: 500;
     margin-bottom: 16px;
+    white-space: nowrap;
 }
 
 .status-badge.idle {

@@ -64,6 +64,67 @@
 
         .draw-mode { display: none; }
         .draw-mode.active { display: block; }
+
+        /* ============ Gallery ============ */
+        .gallery-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .gallery-nav { display: flex; gap: 8px; }
+        .gallery-nav .btn { width: auto; padding: 10px 20px; }
+        .gallery-nav .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .gallery-counter { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+        .gallery-image-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+        }
+        .gallery-info {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            font-size: 13px;
+        }
+        .gallery-info-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .gallery-info-item:last-child { border-bottom: none; }
+        .gallery-info-label { color: var(--text-secondary); }
+        .gallery-info-value { font-weight: 500; text-align: right; word-break: break-all; max-width: 60%; }
+        .gallery-url { word-break: break-all; font-size: 11px; color: var(--accent); }
+        .gallery-error { text-align: center; padding: 32px; color: var(--error); }
+        .gallery-error button { margin-top: 12px; padding: 8px 16px; border: 1px solid var(--border); background: var(--bg-secondary); border-radius: 8px; cursor: pointer; }
+        .gallery-error-url { font-size: 11px; word-break: break-all; opacity: 0.7; margin-top: 8px; }
+        .gallery-loading { text-align: center; padding: 32px; color: var(--text-secondary); }
+        .gallery-loading .loading-spinner { width: 24px; height: 24px; margin-bottom: 12px; border-width: 2px; border-color: var(--border); border-top-color: var(--accent); }
+        .gallery-empty { text-align: center; padding: 48px 24px; color: var(--text-secondary); }
+        .gallery-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .gallery-btn-delete { color: var(--error) !important; border-color: var(--error) !important; }
+        .gallery-btn-delete:hover { background: var(--error) !important; color: white !important; }
+        .gallery-btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
+        .input-with-clear { position: relative; display: flex; align-items: center; }
+        .input-with-clear input { flex: 1; padding-right: 36px; }
+        .btn-clear {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .btn-clear:hover { opacity: 1; background: var(--bg-hover); }
+        .btn-clear:empty { display: none; }
     </style>
 </head>
 <body>
@@ -76,11 +137,15 @@
         <nav class="tabs">
             <button class="tab-btn active" data-tab="download">
                 <span class="icon">⬇️</span>
-                下载模型
+                下载
             </button>
             <button class="tab-btn" data-tab="draw">
                 <span class="icon">🎨</span>
-                ComfyUI 绘图
+                绘图
+            </button>
+            <button class="tab-btn" data-tab="gallery">
+                <span class="icon">🖼️</span>
+                画廊
             </button>
         </nav>
 
@@ -99,6 +164,7 @@
                         <select id="dlMainType">
                             <option value="ckpt">Checkpoint</option>
                             <option value="lora">LoRA</option>
+                            <option value="embedding">Embedding</option>
                         </select>
                         <select id="dlSubType">
                             <option value="">加载中...</option>
@@ -134,11 +200,11 @@
         <section id="draw" class="tab-content">
             <!-- ComfyUI 状态 -->
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-                <div class="status-badge idle" id="comfyuiStatus" style="margin-bottom:0;">
+                <div class="status-badge idle" id="comfyuiStatus" style="margin-bottom:0; flex:1;">
                     <span>●</span>
                     <span id="statusText">检查中...</span>
                 </div>
-                <button type="button" id="restartComfyBtn" class="btn btn-sm btn-outline" title="重启 ComfyUI（刷新模型列表）">🔄 重启</button>
+                <button type="button" id="restartComfyBtn" class="btn btn-sm btn-outline" style="white-space:nowrap; padding:4px 8px;" title="重启 ComfyUI（刷新模型列表）">🔄</button>
             </div>
 
             <!-- 模式切换 -->
@@ -150,35 +216,38 @@
             <!-- ========== Auto Mode ========== -->
             <div id="autoMode" class="draw-mode active">
                 <div class="form">
-                    <div class="form-group">
-                        <label>Civitai 图片 URL</label>
-                        <input type="url" id="imageUrl" placeholder="https://civitai.com/images/xxxxx"
-                            autocapitalize="off" autocorrect="off" spellcheck="false">
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <label style="margin-bottom:0; white-space:nowrap; min-width:fit-content;">Civitai 图片 URL</label>
+                        <div class="input-with-clear" style="flex:1; display:flex; position:relative;">
+                            <input type="url" id="imageUrl" placeholder="https://civitai.com/images/xxxxx"
+                                autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-bottom:0;">
+                            <button type="button" class="btn-clear" id="clearImageUrl" title="清空" style="position:absolute; right:8px; top:50%; transform:translateY(-50%);">✖</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>工作流</label>
-                        <select id="autoWorkflowSelect">
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <label style="margin-bottom:0; white-space:nowrap; min-width:fit-content;">工作流</label>
+                        <select id="autoWorkflowSelect" style="flex:1; margin-bottom:0;">
                             <option value="nolora">nolora</option>
                         </select>
                     </div>
-                    <button type="button" id="parseBtn" class="btn btn-primary">
-                        <span class="btn-text">解析参数</span>
-                        <span class="btn-loading" style="display:none;">
-                            <span class="loading-spinner"></span> 解析中...
-                        </span>
-                    </button>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="parseBtn" class="btn btn-primary" style="flex:1;">
+                            <span class="btn-text">解析参数</span>
+                            <span class="btn-loading" style="display:none;">
+                                <span class="loading-spinner"></span> 解析中...
+                            </span>
+                        </button>
+                        <button type="button" id="autoGenerateBtn" class="btn btn-primary" style="flex:1;" disabled>
+                            <span class="btn-text">🎨 开始生成</span>
+                            <span class="btn-loading" style="display:none;">
+                                <span class="loading-spinner"></span> 生成中...
+                            </span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 解析结果区域 -->
                 <div id="parseResult" style="display:none;"></div>
-
-                <!-- 自动模式生成按钮 -->
-                <button type="button" id="autoGenerateBtn" class="btn btn-primary btn-large" style="display:none; margin-top:16px;">
-                    <span class="btn-text">🎨 开始生成</span>
-                    <span class="btn-loading" style="display:none;">
-                        <span class="loading-spinner"></span> 生成中...
-                    </span>
-                </button>
 
                 <!-- 生成历史 -->
                 <div class="gen-history" id="genHistory" style="display:none; margin-top:20px;">
@@ -269,11 +338,56 @@
             </div>
         </section>
 
+        <!-- ==================== Gallery Tab ==================== -->
+        <section id="gallery" class="tab-content">
+            <!-- 控制栏 -->
+            <div class="gallery-controls">
+                <div class="gallery-nav">
+                    <button type="button" id="galleryRefreshBtn" class="btn btn-outline btn-sm" title="刷新">
+                        🔄
+                    </button>
+                </div>
+                <span class="gallery-counter" id="galleryCounter">0 / 0</span>
+                <div class="gallery-nav">
+                    <button type="button" id="galleryPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">
+                        ◀
+                    </button>
+                    <button type="button" id="galleryNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">
+                        ▶
+                    </button>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="galleryLoading" class="gallery-loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+
+            <!-- 空状态 -->
+            <div id="galleryEmptyState" class="gallery-empty" style="display: none;">
+                <div class="gallery-empty-icon">🖼️</div>
+                <p>暂无图片</p>
+                <p style="font-size: 12px; margin-top: 8px;">生成图片后会自动显示在这里</p>
+            </div>
+
+            <!-- 图片展示区 -->
+            <div id="galleryImageContainer" class="gallery-image-wrapper">
+                <!-- 图片将在这里显示 -->
+            </div>
+
+            <!-- 图片信息 -->
+            <div id="galleryImageInfo" class="gallery-info" style="display: none;">
+                <!-- 信息将在这里显示 -->
+            </div>
+        </section>
+
         <footer class="footer">
             <div class="footerInner">&copy; cg0xC0DE <img class="footerIcon" src="img/wechat.png" alt="微信" /> cq4biz</div>
         </footer>
     </div>
 
     <script src="js/app.js"></script>
+    <script src="js/gallery.js"></script>
 </body>
 </html>
