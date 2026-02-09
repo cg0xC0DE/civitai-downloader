@@ -1,0 +1,27 @@
+# CIVITAI DOWNLOADER NGINX CONFIG
+# Add these two location blocks to your nginx.conf inside the server { } block
+#
+# Path: C:/nginx-1.28/conf/nginx.conf
+#
+# After adding, run: nginx -s reload
+#
+# Access URLs:
+#   Frontend: http://localhost:8080/civitaidl/
+#   API:      http://localhost:8080/civitaidl-service/api/download
+
+    # Civitai Downloader - Frontend
+    location /civitaidl/ {
+        root   C:/workplace/civitai-downloader;
+        index  index.html;
+    }
+
+    # Civitai Downloader - Backend API
+    location /civitaidl-service/ {
+        rewrite ^/civitaidl-service/(.*) /$1 break;
+        proxy_pass http://127.0.0.1:53133/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 300s;
+    }

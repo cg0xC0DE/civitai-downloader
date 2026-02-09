@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Civitai Downloader</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        input, select, textarea { font-size: 16px !important; -webkit-text-size-adjust: 100%; }
+
+        /* 两级选择器 */
+        .two-level-select { display: grid; grid-template-columns: 2fr 3fr; gap: 8px; }
+
+        /* 模式切换 */
+        .mode-tabs { display: flex; gap: 0; margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .mode-btn { flex: 1; padding: 10px; border: none; background: var(--bg-primary); color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition); }
+        .mode-btn.active { background: var(--accent); color: #fff; }
+
+        /* 状态徽章 */
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-bottom: 16px; }
+        .status-badge.idle { background: var(--border); color: var(--text-secondary); }
+        .status-badge.success { background: #dcfce7; color: #16a34a; }
+        .status-badge.error { background: #fee2e2; color: #dc2626; }
+
+        /* 解析结果 */
+        .parse-result { background: var(--bg-primary); border-radius: 10px; padding: 16px; margin-top: 16px; }
+        .parse-result h4 { margin-bottom: 12px; font-size: 15px; }
+        .parse-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .parse-item:last-child { border-bottom: none; }
+        .parse-label { color: var(--text-secondary); }
+        .parse-value { font-weight: 500; max-width: 60%; text-align: right; word-break: break-all; }
+        .check-ok { color: #16a34a; }
+        .check-fail { color: #dc2626; }
+        .btn-download-model { display: inline-block; padding: 2px 10px; margin-left: 6px; font-size: 12px; border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 6px; cursor: pointer; vertical-align: middle; }
+        .btn-download-model:hover { opacity: 0.85; }
+        .btn-download-model:disabled { opacity: 0.5; cursor: not-allowed; }
+        .prompt-preview { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 12px; color: var(--text-secondary); max-height: 80px; overflow-y: auto; word-break: break-all; }
+
+        /* LoRA 区域 */
+        .lora-section { background: var(--bg-primary); padding: 16px; border-radius: 8px; margin-top: 8px; }
+        .lora-section.hidden { display: none; }
+        .slider-group { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+        .slider-group input[type="range"] { flex: 1; }
+        .slider-value { min-width: 40px; text-align: center; font-weight: 500; }
+
+        /* 生成历史 */
+        .gen-history-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .gen-history-item:last-child { border-bottom: none; }
+        .gen-history-item .gh-status { flex-shrink: 0; }
+        .gen-history-item .gh-url { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); text-decoration: none; }
+        .gen-history-item .gh-url:hover { text-decoration: underline; }
+        .gen-history-item .gh-info { flex-shrink: 0; color: var(--text-secondary); font-size: 12px; }
+
+        /* 加载动画 */
+        .loading-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .draw-mode { display: none; }
+        .draw-mode.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎨 Civitai Downloader</h1>
+            <p class="subtitle">模型下载 & ComfyUI 绘图</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="download">
+                <span class="icon">⬇️</span>
+                下载模型
+            </button>
+            <button class="tab-btn" data-tab="draw">
+                <span class="icon">🎨</span>
+                ComfyUI 绘图
+            </button>
+        </nav>
+
+        <!-- ==================== Download Tab ==================== -->
+        <section id="download" class="tab-content active">
+            <form id="downloadForm" class="form">
+                <div class="form-group">
+                    <label for="dlUrl">Civitai URL</label>
+                    <input type="url" id="dlUrl" placeholder="https://civitai.com/models/xxxxx" required
+                        autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false">
+                </div>
+
+                <div class="form-group">
+                    <label>模型类型</label>
+                    <div class="two-level-select">
+                        <select id="dlMainType">
+                            <option value="ckpt">Checkpoint</option>
+                            <option value="lora">LoRA</option>
+                        </select>
+                        <select id="dlSubType">
+                            <option value="">加载中...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">开始下载</span>
+                    <span class="btn-loading" style="display: none;">
+                        <span class="loading-spinner"></span> 处理中...
+                    </span>
+                </button>
+            </form>
+
+            <div id="dlResult" class="result" style="display: none;">
+                <div class="result-header">
+                    <span class="result-icon"></span>
+                    <span class="result-title"></span>
+                </div>
+                <div class="result-body"></div>
+            </div>
+
+            <div class="history">
+                <h3 class="history-toggle" id="historyToggle">📋 下载历史 <span class="toggle-arrow">▶</span></h3>
+                <div id="historyList" class="history-list" style="display:none;">
+                    <p class="empty-state">暂无下载记录</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== Draw Tab ==================== -->
+        <section id="draw" class="tab-content">
+            <!-- ComfyUI 状态 -->
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                <div class="status-badge idle" id="comfyuiStatus" style="margin-bottom:0;">
+                    <span>●</span>
+                    <span id="statusText">检查中...</span>
+                </div>
+                <button type="button" id="restartComfyBtn" class="btn btn-sm btn-outline" title="重启 ComfyUI（刷新模型列表）">🔄 重启</button>
+            </div>
+
+            <!-- 模式切换 -->
+            <div class="mode-tabs">
+                <button class="mode-btn active" data-mode="auto">📷 图片抓参数</button>
+                <button class="mode-btn" data-mode="manual">✏️ 手动指定</button>
+            </div>
+
+            <!-- ========== Auto Mode ========== -->
+            <div id="autoMode" class="draw-mode active">
+                <div class="form">
+                    <div class="form-group">
+                        <label>Civitai 图片 URL</label>
+                        <input type="url" id="imageUrl" placeholder="https://civitai.com/images/xxxxx"
+                            autocapitalize="off" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label>工作流</label>
+                        <select id="autoWorkflowSelect">
+                            <option value="nolora">nolora</option>
+                        </select>
+                    </div>
+                    <button type="button" id="parseBtn" class="btn btn-primary">
+                        <span class="btn-text">解析参数</span>
+                        <span class="btn-loading" style="display:none;">
+                            <span class="loading-spinner"></span> 解析中...
+                        </span>
+                    </button>
+                </div>
+
+                <!-- 解析结果区域 -->
+                <div id="parseResult" style="display:none;"></div>
+
+                <!-- 自动模式生成按钮 -->
+                <button type="button" id="autoGenerateBtn" class="btn btn-primary btn-large" style="display:none; margin-top:16px;">
+                    <span class="btn-text">🎨 开始生成</span>
+                    <span class="btn-loading" style="display:none;">
+                        <span class="loading-spinner"></span> 生成中...
+                    </span>
+                </button>
+
+                <!-- 生成历史 -->
+                <div class="gen-history" id="genHistory" style="display:none; margin-top:20px;">
+                    <h4 style="font-size:14px; margin-bottom:8px;">📜 生成历史</h4>
+                    <div id="genHistoryList"></div>
+                </div>
+            </div>
+
+            <!-- ========== Manual Mode ========== -->
+            <div id="manualMode" class="draw-mode">
+                <form id="drawForm" class="form">
+                    <!-- 工作流 -->
+                    <div class="form-group">
+                        <label>工作流</label>
+                        <select id="workflowSelect">
+                            <option value="nolora">nolora</option>
+                        </select>
+                    </div>
+
+                    <!-- Checkpoint 两级选择 -->
+                    <div class="form-group">
+                        <label>Checkpoint</label>
+                        <div class="two-level-select">
+                            <select id="ckptSubtype"><option value="">加载中...</option></select>
+                            <select id="ckptFile"><option value="">先选类型</option></select>
+                        </div>
+                    </div>
+
+                    <!-- LoRA 两级选择（可选） -->
+                    <div class="form-group">
+                        <label><input type="checkbox" id="useLora"> LoRA（可选）</label>
+                        <div id="loraSettings" class="lora-section hidden">
+                            <div class="two-level-select">
+                                <select id="loraSubtype"><option value="">加载中...</option></select>
+                                <select id="loraFile"><option value="">先选类型</option></select>
+                            </div>
+                            <div class="slider-group">
+                                <label>强度</label>
+                                <input type="range" id="loraStrength" min="-2" max="2" step="0.1" value="1.0">
+                                <span class="slider-value" id="loraStrengthDisplay">1.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 提示词 -->
+                    <div class="form-group">
+                        <label>正向提示词</label>
+                        <textarea id="positivePrompt" rows="3" placeholder="描述画面内容..."
+                            autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>负向提示词</label>
+                        <textarea id="negativePrompt" rows="2" placeholder="负向提示词（可选）..."
+                            autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+                    </div>
+
+                    <!-- 尺寸预设 -->
+                    <div class="form-group">
+                        <label>尺寸</label>
+                        <div class="size-grid">
+                            <button type="button" class="size-btn" data-w="512" data-h="512">512²</button>
+                            <button type="button" class="size-btn" data-w="768" data-h="768">768²</button>
+                            <button type="button" class="size-btn active" data-w="1024" data-h="1024">1024²</button>
+                            <button type="button" class="size-btn" data-w="1280" data-h="720">1280×720</button>
+                            <button type="button" class="size-btn" data-w="720" data-h="1280">720×1280</button>
+                        </div>
+                        <input type="hidden" id="width" value="1024">
+                        <input type="hidden" id="height" value="1024">
+                    </div>
+
+                    <!-- 生成按钮 -->
+                    <button type="submit" class="btn btn-primary btn-large" id="manualGenerateBtn">
+                        <span class="btn-text">🎨 开始生成</span>
+                        <span class="btn-loading" style="display:none;">
+                            <span class="loading-spinner"></span> 生成中...
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- 绘图结果（共用） -->
+            <div id="drawResult" class="result" style="display:none;">
+                <div class="result-header">
+                    <span class="result-icon"></span>
+                    <span class="result-title"></span>
+                </div>
+                <div class="result-body"></div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footerInner">&copy; cg0xC0DE <img class="footerIcon" src="img/wechat.png" alt="微信" /> cq4biz</div>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
