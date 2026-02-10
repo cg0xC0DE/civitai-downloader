@@ -47,17 +47,18 @@ echo "============================================================"
 echo.
 
 :: Create backend virtual environment
-if not exist "backend\venv" (
-    echo "[INFO] Creating Python virtual environment..."
-    python -m venv backend\venv
-    if errorlevel 1 (
-        echo "[ERROR] Failed to create virtual environment."
-        exit /b 1
-    )
-    echo "[OK] Virtual environment created."
-) else (
-    echo "[SKIP] Virtual environment already exists."
+if exist "backend\venv" goto SKIP_VENV
+echo "[INFO] Creating Python virtual environment..."
+python -m venv backend\venv
+if errorlevel 1 (
+    echo "[ERROR] Failed to create virtual environment."
+    exit /b 1
 )
+echo "[OK] Virtual environment created."
+goto AFTER_VENV
+:SKIP_VENV
+echo "[SKIP] Virtual environment already exists."
+:AFTER_VENV
 
 :: Activate virtual environment
 call backend\venv\Scripts\activate.bat
@@ -72,26 +73,10 @@ if errorlevel 1 (
 echo "[OK] Python dependencies installed."
 
 :: Create required directories
-if not exist "backend\cache" (
-    mkdir backend\cache
-    echo "[OK] Created backend\cache directory."
-) else (
-    echo "[SKIP] backend\cache already exists."
-)
-
-if not exist "backend\output" (
-    mkdir backend\output
-    echo "[OK] Created backend\output directory."
-) else (
-    echo "[SKIP] backend\output already exists."
-)
-
-if not exist "backend\workflows" (
-    mkdir backend\workflows
-    echo "[OK] Created backend\workflows directory."
-) else (
-    echo "[SKIP] backend\workflows already exists."
-)
+if not exist "backend\cache" mkdir backend\cache
+if not exist "backend\output" mkdir backend\output
+if not exist "backend\workflows" mkdir backend\workflows
+echo "[OK] Required directories ensured."
 
 echo.
 echo "[Phase 2] Installation complete."
@@ -113,22 +98,14 @@ if exist "backend\credential.py" (
 )
 
 echo "[INFO] Configuring Civitai API credentials..."
-echo "        Get your token at: https://civitai.com/user/account -> API Keys"
+echo "        Get your token at: https://civitai.com/user/account"
 echo.
 set "CIVITAI_API_TOKEN="
 set /p CIVITAI_API_TOKEN="  Enter your CIVITAI_API_TOKEN: "
 
 echo "[INFO] Writing backend\credential.py ..."
-(
-    echo "# -*- coding: utf-8 -*-"
-    echo "\"\"\"" 
-    echo "Civitai API 凭证配置"
-    echo "请在此处填入你的 API Token，此文件已加入 .gitignore，不会被提交。"
-    echo "获取方式：https://civitai.com/user/account -> API Keys"
-    echo "\"\"\""
-    echo.
-    echo "CIVITAI_API_TOKEN = '!CIVITAI_API_TOKEN!'"
-) > backend\credential.py
+echo # -*- coding: utf-8 -*-> backend\credential.py
+echo CIVITAI_API_TOKEN = '!CIVITAI_API_TOKEN!'>> backend\credential.py
 echo "[OK] backend\credential.py created."
 echo.
 
@@ -140,7 +117,7 @@ if exist "backend\llm\credential.py" (
     goto CRED3
 )
 
-echo "[INFO] Configuring OpenAI API credentials (for aesthetic analysis)..."
+echo "[INFO] Configuring OpenAI API credentials..."
 echo.
 set "OPENAI_API_KEY="
 set /p OPENAI_API_KEY="  Enter your OPENAI_API_KEY: "
@@ -152,23 +129,10 @@ set "OPENAI_MODEL=gpt-4o"
 set /p OPENAI_MODEL="  Enter OPENAI_MODEL (press ENTER for gpt-4o): "
 
 echo "[INFO] Writing backend\llm\credential.py ..."
-(
-    echo "# -*- coding: utf-8 -*-"
-    echo "\"\"\""
-    echo "LLM API 凭证配置"
-    echo "请在此处填入你的 API Key，此文件已加入 .gitignore，不会被提交。"
-    echo "\"\"\""
-    echo.
-    echo "# OpenAI API Key"
-    echo "OPENAI_API_KEY = '!OPENAI_API_KEY!'"
-    echo.
-    echo "# 可选：自定义 API Base URL（用于兼容第三方代理/中转）"
-    echo "# 留空则使用 OpenAI 官方地址 https://api.openai.com/v1"
-    echo "OPENAI_API_BASE = '!OPENAI_API_BASE!'"
-    echo.
-    echo "# 模型名称（默认 gpt-4o）"
-    echo "OPENAI_MODEL = '!OPENAI_MODEL!'"
-) > backend\llm\credential.py
+echo # -*- coding: utf-8 -*-> backend\llm\credential.py
+echo OPENAI_API_KEY = '!OPENAI_API_KEY!'>> backend\llm\credential.py
+echo OPENAI_API_BASE = '!OPENAI_API_BASE!'>> backend\llm\credential.py
+echo OPENAI_MODEL = '!OPENAI_MODEL!'>> backend\llm\credential.py
 echo "[OK] backend\llm\credential.py created."
 echo.
 
@@ -180,18 +144,15 @@ if exist "backend\azure_blob\credentials.py" (
     goto DONE
 )
 
-echo "[INFO] Configuring Azure Blob Storage credentials (for gallery cloud storage)..."
+echo "[INFO] Configuring Azure Blob Storage credentials..."
 echo "        Format: DefaultEndpointsProtocol=https;AccountName=xxx;AccountKey=xxx;EndpointSuffix=core.windows.net"
 echo.
 set "AZURE_CONN_STR="
 set /p AZURE_CONN_STR="  Enter your CONNECTION_STRING: "
 
 echo "[INFO] Writing backend\azure_blob\credentials.py ..."
-(
-    echo "# Azure Storage connection string"
-    echo "# Format: DefaultEndpointsProtocol=https;AccountName=xxx;AccountKey=xxx;EndpointSuffix=core.windows.net"
-    echo "CONNECTION_STRING = '!AZURE_CONN_STR!'"
-) > backend\azure_blob\credentials.py
+echo # Azure Storage connection string> backend\azure_blob\credentials.py
+echo CONNECTION_STRING = '!AZURE_CONN_STR!'>> backend\azure_blob\credentials.py
 echo "[OK] backend\azure_blob\credentials.py created."
 echo.
 
@@ -210,10 +171,10 @@ echo "    2. Run: start_comfyui_watchdog.cmd"
 echo "    3. Open: http://localhost:53133"
 echo.
 echo "  Configuration files:"
-echo "    - backend\config.py          (paths, ports)"
-echo "    - backend\credential.py      (Civitai API token)"
-echo "    - backend\llm\credential.py  (OpenAI API key)"
-echo "    - backend\azure_blob\credentials.py (Azure Storage)"
+echo "    - backend\config.py              (paths, ports)"
+echo "    - backend\credential.py          (Civitai API token)"
+echo "    - backend\llm\credential.py      (OpenAI API key)"
+echo "    - backend\azure_blob\credentials.py  (Azure Storage)"
 echo.
 echo "============================================================"
 echo.
