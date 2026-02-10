@@ -1602,6 +1602,32 @@ class APIHandler(BaseHTTPRequestHandler):
             model_cache.refresh_all()
             self.send_json({'status': 'success', 'message': 'Cache refreshed'})
         
+        elif path == '/api/favorite/add':
+            # 添加收藏图片 URL
+            from favorite_images import save_url_to_queue
+            url = data.get('url', '')
+            result = save_url_to_queue(url)
+            status = 200 if result['status'] == 'ok' else 400
+            self.send_json(result, status)
+
+        elif path == '/api/favorite/status':
+            # 队列状态
+            from favorite_images import get_queue_status
+            stats = get_queue_status()
+            self.send_json({'status': 'ok', 'stats': stats})
+
+        elif path == '/api/favorite/consume':
+            # 消费一条（供其他进程调用）
+            from favorite_images import consume_one
+            result = consume_one()
+            self.send_json(result)
+
+        elif path == '/api/favorite/cleanup':
+            # 清理已完成的
+            from favorite_images import cleanup_done
+            result = cleanup_done()
+            self.send_json(result)
+
         elif path == '/api/azure/delete':
             # 删除指定的 blob
             blob_path = data.get('path', '')
@@ -1661,6 +1687,10 @@ def run_server():
     print(f"  POST /api/cache/refresh                   - Refresh cache")
     print(f"  GET  /api/azure/list                      - List recent Azure blobs")
     print(f"  POST /api/azure/delete                    - Delete Azure blob")
+    print(f"  POST /api/favorite/add                   - Add favorite image URL")
+    print(f"  GET  /api/favorite/status                - Queue status")
+    print(f"  GET  /api/favorite/consume                - Consume one URL")
+    print(f"  POST /api/favorite/cleanup                - Cleanup done items")
     print(f"========================================")
     
     server.serve_forever()
