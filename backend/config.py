@@ -33,7 +33,12 @@ CIVITAI_API_BASE = 'https://civitai.com/api'
 CIVITAI_API_URL = f"{CIVITAI_API_BASE}/v1/models"
 # Civitai API Token（部分模型需要登录才能下载）
 # 获取方式：https://civitai.com/user/account -> API Keys
-CIVITAI_API_TOKEN = '9b64ab43d94baf41602ae45fa17accfc'
+# 请在 backend/credential.py 中配置（参考 example_credential.py）
+try:
+    from credential import CIVITAI_API_TOKEN
+except ImportError:
+    CIVITAI_API_TOKEN = ''
+    print("[WARN] backend/credential.py 未找到，CIVITAI_API_TOKEN 未配置（部分模型下载需要）")
 
 
 # ============ 动态路径工具函数 ============

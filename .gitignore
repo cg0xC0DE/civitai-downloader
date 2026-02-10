@@ -31,3 +31,4 @@ backend/output/
 
 # Credentials
 credential.py
+credentials.py

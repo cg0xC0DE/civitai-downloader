@@ -886,6 +886,49 @@ def _find_nodes_by_type(workflow: Dict, class_type: str) -> list:
     return results
 
 
+def _resolve_comfyui_lora_name(name: str) -> str:
+    """
+    将我们的 LoRA 名称与 ComfyUI 实际可用列表做匹配。
+    ComfyUI 验证时要求名称精确匹配（含大小写），这里做模糊匹配。
+    """
+    try:
+        with _local_opener.open(f'http://{COMFYUI_URL}/api/models/loras', timeout=5) as r:
+            comfyui_loras = json.loads(r.read())
+    except Exception:
+        return name  # 查询失败，原样返回
+
+    # 统一分隔符后做比较
+    name_norm = name.replace('\\', '/').lower()
+
+    # 1) 精确匹配（统一分隔符后）
+    for cl in comfyui_loras:
+        if cl.replace('\\', '/').lower() == name_norm:
+            return cl
+
+    # 2) 只比较文件名部分（忽略子目录）
+    name_file = name_norm.rsplit('/', 1)[-1]
+    for cl in comfyui_loras:
+        cl_file = cl.replace('\\', '/').lower().rsplit('/', 1)[-1]
+        if cl_file == name_file:
+            return cl
+
+    # 3) 文件名 contains 匹配（处理 renamer 前缀的情况）
+    # 从 "ModelName_VersionName_OrigFile.safetensors" 提取 OrigFile 部分
+    parts = name_file.rsplit('.', 1)
+    stem = parts[0] if parts else name_file
+    # 尝试用最后一个 _ 分隔的部分匹配
+    segments = stem.split('_')
+    if len(segments) >= 3:
+        orig_file = segments[-1]  # 取最后一段作为原始文件名
+        if len(orig_file) >= 4:
+            for cl in comfyui_loras:
+                if orig_file in cl.replace('\\', '/').lower():
+                    return cl
+
+    print(f"[ComfyUI] ⚠️ LoRA 未在 ComfyUI 列表中找到匹配: {name}")
+    return name  # 没找到，原样返回
+
+
 def _set_lora_nodes(workflow: Dict, loras: list):
     """
     动态替换工作流中的 LoRA 节点。
@@ -895,13 +938,16 @@ def _set_lora_nodes(workflow: Dict, loras: list):
     if not loras:
         return
 
-    # Windows 路径分隔符
+    # 将每个 LoRA 名称与 ComfyUI 实际列表做匹配
     normalized = []
     for l in loras:
+        resolved = _resolve_comfyui_lora_name(l['name'])
         normalized.append({
-            'name': l['name'].replace('/', '\\'),
+            'name': resolved,
             'weight': float(l.get('weight', 1.0))
         })
+        if resolved != l['name']:
+            print(f"[ComfyUI] LoRA 名称已匹配: {l['name']} → {resolved}")
 
     # 1) 尝试 Lora Loader Stack (rgthree) —— 支持多 LoRA
     stack_nodes = _find_nodes_by_type(workflow, 'Lora Loader Stack (rgthree)')
@@ -1393,7 +1439,83 @@ class APIHandler(BaseHTTPRequestHandler):
         
         elif path == '/api/azure/delete':
             self.send_json({'error': 'Use POST method'}, 405)
-        
+
+        elif path == '/api/favorite/list':
+            # 读取收藏队列并返回列表（含 image_id）
+            from favorite_images import QUEUE_FILE
+            items = []
+            if os.path.exists(QUEUE_FILE):
+                try:
+                    with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            line = line.strip()
+                            if not line:
+                                continue
+                            entry = json.loads(line)
+                            # 从 URL 中提取 image_id
+                            m = re.search(r'/images/(\d+)', entry.get('url', ''))
+                            if m:
+                                entry['image_id'] = int(m.group(1))
+                            items.append(entry)
+                except Exception as e:
+                    self.send_json({'status': 'error', 'message': str(e)}, 500)
+                    return
+            # 按创建时间倒序（最新在前）
+            items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+            self.send_json({'status': 'ok', 'items': items, 'total': len(items)})
+
+        elif path == '/api/image/thumb':
+            # 获取 Civitai 图片缩略图 URL（带缓存）
+            query = parse_qs(parsed.query)
+            image_id = query.get('id', [''])[0]
+            if not image_id:
+                self.send_json({'status': 'error', 'message': 'missing id'}, 400)
+                return
+            # 内存缓存
+            if not hasattr(self.__class__, '_thumb_cache'):
+                self.__class__._thumb_cache = {}
+            cache = self.__class__._thumb_cache
+            if image_id in cache:
+                self.send_json(cache[image_id])
+                return
+            # 调用 Civitai API 获取图片信息
+            try:
+                import requests as _requests
+                from config import CIVITAI_API_TOKEN
+                sess = _requests.Session()
+                sess.trust_env = False
+                params = {'input': json.dumps({'json': {'id': int(image_id)}})}
+                if CIVITAI_API_TOKEN:
+                    params['token'] = CIVITAI_API_TOKEN
+                resp = sess.get(f'{CIVITAI_API_BASE}/trpc/image.get',
+                                params=params, timeout=15,
+                                headers={'User-Agent': 'Mozilla/5.0'})
+                resp.raise_for_status()
+                img_data = resp.json().get('result', {}).get('data', {}).get('json', {})
+                raw_url = img_data.get('url', '')
+                # Civitai API 返回的 url 是 UUID，需拼接 CDN 前缀
+                CDN_BASE = 'https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA'
+                if raw_url and not raw_url.startswith('http'):
+                    thumb_url = f'{CDN_BASE}/{raw_url}/width=450'
+                elif raw_url and '/width=' not in raw_url:
+                    thumb_url = raw_url.rstrip('/') + '/width=450'
+                elif raw_url:
+                    thumb_url = re.sub(r'/width=\d+', '/width=450', raw_url)
+                else:
+                    thumb_url = ''
+                result = {
+                    'status': 'ok',
+                    'image_id': int(image_id),
+                    'thumb_url': thumb_url,
+                    'width': img_data.get('width'),
+                    'height': img_data.get('height'),
+                    'nsfw_level': img_data.get('nsfwLevel', 0),
+                }
+                cache[image_id] = result
+                self.send_json(result)
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
+
         else:
             self.send_json({'error': 'Not Found'}, 404)
     
@@ -1539,6 +1661,7 @@ class APIHandler(BaseHTTPRequestHandler):
             # 美学分析（异步）：立即返回 task_id，后台线程执行
             image_url = data.get('image_url', '')
             user_why_good = data.get('user_why_good', '')
+            favorite_id = data.get('favorite_id', '')  # 可选：关联的收藏条目 ID
 
             if not image_url:
                 self.send_json({'status': 'error', 'message': '缺少 image_url 参数'}, 400)
@@ -1566,6 +1689,8 @@ class APIHandler(BaseHTTPRequestHandler):
                     '_start_time': time.time(),
                 }
 
+            _fav_id = favorite_id  # 捕获到闭包
+
             def _run_aesthetic():
                 try:
                     from llm.aesthetic import analyze, save_blueprint
@@ -1582,6 +1707,26 @@ class APIHandler(BaseHTTPRequestHandler):
                             'message': f'分析完成: {blueprint.get("work_title", "?")}',
                         })
                     print(f"[Aesthetic] 任务 {task_id} 完成")
+                    # 如果关联了收藏条目，标记为 done
+                    if _fav_id:
+                        try:
+                            from favorite_images import QUEUE_FILE, _queue_lock
+                            with _queue_lock:
+                                if os.path.exists(QUEUE_FILE):
+                                    with open(QUEUE_FILE, 'r', encoding='utf-8') as ff:
+                                        fav_lines = ff.readlines()
+                                    for fi, fl in enumerate(fav_lines):
+                                        fe = json.loads(fl.strip())
+                                        if fe.get('id') == _fav_id:
+                                            fe['status'] = 'done'
+                                            fe['done_at'] = __import__('datetime').datetime.now().isoformat()
+                                            fav_lines[fi] = json.dumps(fe, ensure_ascii=False) + '\n'
+                                            with open(QUEUE_FILE, 'w', encoding='utf-8') as ff:
+                                                ff.writelines(fav_lines)
+                                            print(f"[Aesthetic] 收藏 {_fav_id} 已标记为 done")
+                                            break
+                        except Exception as fav_err:
+                            print(f"[Aesthetic] 更新收藏状态失败: {fav_err}")
                 except Exception as ex:
                     import traceback
                     traceback.print_exc()
@@ -1621,6 +1766,78 @@ class APIHandler(BaseHTTPRequestHandler):
             from favorite_images import consume_one
             result = consume_one()
             self.send_json(result)
+
+        elif path == '/api/favorite/update-status':
+            # 按 id 更新收藏条目状态
+            from favorite_images import QUEUE_FILE, _queue_lock
+            item_id = data.get('id', '')
+            new_status = data.get('status', '')
+            if not item_id or not new_status:
+                self.send_json({'status': 'error', 'message': '缺少 id 或 status 参数'}, 400)
+                return
+            if new_status not in ('pending', 'processing', 'done'):
+                self.send_json({'status': 'error', 'message': '无效的 status 值'}, 400)
+                return
+            try:
+                with _queue_lock:
+                    if not os.path.exists(QUEUE_FILE):
+                        self.send_json({'status': 'error', 'message': '收藏文件不存在'}, 404)
+                        return
+                    with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
+                    updated = False
+                    for i, line in enumerate(lines):
+                        entry = json.loads(line.strip())
+                        if entry.get('id') == item_id:
+                            entry['status'] = new_status
+                            if new_status == 'processing':
+                                entry['processing_at'] = __import__('datetime').datetime.now().isoformat()
+                            elif new_status == 'done':
+                                entry['done_at'] = __import__('datetime').datetime.now().isoformat()
+                            lines[i] = json.dumps(entry, ensure_ascii=False) + '\n'
+                            updated = True
+                            break
+                    if not updated:
+                        self.send_json({'status': 'error', 'message': '未找到该条目'}, 404)
+                        return
+                    with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
+                        f.writelines(lines)
+                self.send_json({'status': 'ok', 'message': f'状态已更新为 {new_status}'})
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
+
+        elif path == '/api/favorite/delete':
+            # 按 id 删除收藏条目
+            from favorite_images import QUEUE_FILE
+            item_id = data.get('id', '')
+            if not item_id:
+                self.send_json({'status': 'error', 'message': '缺少 id 参数'}, 400)
+                return
+            if not os.path.exists(QUEUE_FILE):
+                self.send_json({'status': 'error', 'message': '收藏文件不存在'}, 404)
+                return
+            try:
+                with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                remaining = []
+                found = False
+                for line in lines:
+                    line_s = line.strip()
+                    if not line_s:
+                        continue
+                    entry = json.loads(line_s)
+                    if entry.get('id') == item_id:
+                        found = True
+                    else:
+                        remaining.append(line_s + '\n')
+                if not found:
+                    self.send_json({'status': 'error', 'message': '未找到该条目'}, 404)
+                    return
+                with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
+                    f.writelines(remaining)
+                self.send_json({'status': 'ok', 'message': '已删除'})
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
 
         elif path == '/api/favorite/cleanup':
             # 清理已完成的

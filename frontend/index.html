@@ -125,13 +125,40 @@
         }
         .btn-clear:hover { opacity: 1; background: var(--bg-hover); }
         .btn-clear:empty { display: none; }
+
+        /* ============ Favorites Tab ============ */
+        .fav-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .fav-replicate-btn {
+            background: var(--accent) !important;
+            color: #fff !important;
+            border: none !important;
+        }
+        .fav-replicate-btn:hover { background: var(--accent-hover) !important; }
+        .fav-delete-btn { color: #dc2626 !important; border-color: #dc2626 !important; }
+        .fav-delete-btn:hover { background: #dc2626 !important; color: #fff !important; }
+        .fav-status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .fav-status-pending { background: #374151; color: #9ca3af; }
+        .fav-status-processing { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+        .fav-status-done { background: #05966922; color: #34d399; border: 1px solid #05966944; }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
             <h1>🎨 Civitai Downloader</h1>
-            <p class="subtitle">模型下载 & ComfyUI 绘图</p>
+            <!-- <p class="subtitle">模型下载 & ComfyUI 绘图</p> -->
         </header>
 
         <nav class="tabs">
@@ -146,6 +173,10 @@
             <button class="tab-btn" data-tab="gallery">
                 <span class="icon">🖼️</span>
                 画廊
+            </button>
+            <button class="tab-btn" data-tab="favorites">
+                <span class="icon">⭐</span>
+                收藏
             </button>
         </nav>
 
@@ -379,6 +410,44 @@
             <!-- 图片信息 -->
             <div id="galleryImageInfo" class="gallery-info" style="display: none;">
                 <!-- 信息将在这里显示 -->
+            </div>
+        </section>
+
+        <!-- ==================== Favorites Tab ==================== -->
+        <section id="favorites" class="tab-content">
+            <!-- 控制栏 -->
+            <div class="gallery-controls">
+                <div class="gallery-nav">
+                    <button type="button" id="favRefreshBtn" class="btn btn-outline btn-sm" title="刷新">🔄</button>
+                </div>
+                <span class="gallery-counter" id="favCounter">0 / 0</span>
+                <div class="gallery-nav">
+                    <button type="button" id="favPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">◀</button>
+                    <button type="button" id="favNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">▶</button>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="favLoading" class="gallery-loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+
+            <!-- 空状态 -->
+            <div id="favEmptyState" class="gallery-empty" style="display: none;">
+                <div class="gallery-empty-icon">⭐</div>
+                <p>暂无收藏</p>
+                <p style="font-size: 12px; margin-top: 8px;">使用 Chrome 插件在 Civitai 上右键收藏图片</p>
+            </div>
+
+            <!-- 图片展示区 -->
+            <div id="favImageContainer" class="gallery-image-wrapper"></div>
+
+            <!-- 操作按钮 -->
+            <div id="favActions" class="fav-actions" style="display: none;">
+                <button type="button" id="favReplicateBtn" class="btn btn-sm fav-replicate-btn">🎨 分析与复刻</button>
+                <a id="favOpenLink" class="btn btn-outline btn-sm" href="#" target="_blank">↗ 在 Civitai 打开</a>
+                <button type="button" id="favDeleteBtn" class="btn btn-outline btn-sm fav-delete-btn">🗑️ 删除</button>
             </div>
         </section>
 

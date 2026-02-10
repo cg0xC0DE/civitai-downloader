@@ -22,9 +22,9 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 
 # 配置
-CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache', 'favorite_images')
+CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache')
 MAX_QUEUE_SIZE = 10000  # 最大队列长度
-QUEUE_FILE = os.path.join(CACHE_DIR, 'queue.jsonl')
+QUEUE_FILE = os.path.join(CACHE_DIR, 'favorite_images.jsonl')
 
 # 线程安全队列
 _queue_lock = threading.Lock()
@@ -37,11 +37,6 @@ IMAGE_URL_PATTERN = re.compile(r'^https://civitai\.com/images/\d+$')
 def init_cache_dir():
     """初始化缓存目录"""
     os.makedirs(CACHE_DIR, exist_ok=True)
-    
-    # 确保队列文件存在
-    if not os.path.exists(QUEUE_FILE):
-        with open(QUEUE_FILE, 'w') as f:
-            pass
 
 
 def validate_url(url: str) -> tuple:

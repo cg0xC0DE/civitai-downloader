@@ -370,7 +370,8 @@ class Gallery {
                 body: JSON.stringify({
                     image_url: imageUrl,
                     user_why_good: userInput,
-                    force: force
+                    force: force,
+                    favorite_id: window._activeFavoriteId || ''
                 })
             });
             const data = await response.json();

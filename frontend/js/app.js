@@ -36,6 +36,7 @@ class CivitaiApp {
         this.bindTabs();
         this.initDownloadTab();
         this.initDrawTab();
+        this.initFavoritesTab();
         this.renderHistory();
         this.checkComfyUIStatus();
         setInterval(() => this.checkComfyUIStatus(), 10000);
@@ -852,6 +853,202 @@ class CivitaiApp {
             const t = new Date(item.time).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
             return `<div class="history-item"><span class="history-icon">${icon}</span><div class="history-info"><div class="history-title">${this.escapeHtml(item.title)}</div><div class="history-meta">${item.type} · ${t}</div></div></div>`;
         }).join('');
+    }
+
+    // ===================== Favorites Tab =====================
+    initFavoritesTab() {
+        this._favItems = [];
+        this._favIndex = 0;
+        this._favThumbCache = {}; // imageId -> thumb_url
+
+        document.getElementById('favRefreshBtn').addEventListener('click', () => this.loadFavorites());
+        document.getElementById('favPrevBtn').addEventListener('click', () => this.favNav(-1));
+        document.getElementById('favNextBtn').addEventListener('click', () => this.favNav(1));
+        document.getElementById('favReplicateBtn').addEventListener('click', () => {
+            const item = this._favItems[this._favIndex];
+            if (item) this.goToDrawWithUrl(item.url, item.id);
+        });
+        document.getElementById('favDeleteBtn').addEventListener('click', () => this.favDeleteCurrent());
+
+        // 切换到收藏 tab 时自动加载
+        document.querySelector('.tab-btn[data-tab="favorites"]').addEventListener('click', () => {
+            if (!this._favLoaded) this.loadFavorites();
+        });
+    }
+
+    async loadFavorites() {
+        const container = document.getElementById('favImageContainer');
+        const loading = document.getElementById('favLoading');
+        const empty = document.getElementById('favEmptyState');
+        const actions = document.getElementById('favActions');
+
+        container.innerHTML = '';
+        actions.style.display = 'none';
+        loading.style.display = 'block';
+        empty.style.display = 'none';
+
+        try {
+            const res = await this.apiFetch(`${this.api}/api/favorite/list`);
+            const data = await res.json();
+
+            loading.style.display = 'none';
+            this._favItems = data.items || [];
+            this._favIndex = 0;
+            this._favLoaded = true;
+
+            if (this._favItems.length === 0) {
+                empty.style.display = 'block';
+                this.favUpdateCounter();
+                return;
+            }
+
+            this.favRenderCurrent();
+        } catch (err) {
+            loading.style.display = 'none';
+            container.innerHTML = `<div style="text-align:center;color:var(--error);padding:24px;">加载失败: ${this.escapeHtml(err.message)}</div>`;
+        }
+    }
+
+    favNav(delta) {
+        const newIdx = this._favIndex + delta;
+        if (newIdx < 0 || newIdx >= this._favItems.length) return;
+        this._favIndex = newIdx;
+        this.favRenderCurrent();
+    }
+
+    favUpdateCounter() {
+        const total = this._favItems.length;
+        const current = total > 0 ? this._favIndex + 1 : 0;
+        const item = this._favItems[this._favIndex];
+        const status = item ? item.status || 'pending' : '';
+        const statusMap = { pending: '待处理', processing: '处理中', done: '已完成' };
+        const badge = status ? `<span class="fav-status-badge fav-status-${status}">${statusMap[status] || status}</span>` : '';
+        document.getElementById('favCounter').innerHTML = `${current} / ${total}${badge}`;
+        document.getElementById('favPrevBtn').disabled = this._favIndex <= 0;
+        document.getElementById('favNextBtn').disabled = this._favIndex >= total - 1;
+    }
+
+    async favRenderCurrent() {
+        const item = this._favItems[this._favIndex];
+        if (!item) return;
+
+        const container = document.getElementById('favImageContainer');
+        const actions = document.getElementById('favActions');
+        const openLink = document.getElementById('favOpenLink');
+
+        this.favUpdateCounter();
+
+        // 设置 Civitai 链接
+        openLink.href = item.url || '#';
+
+        // 先显示 loading placeholder
+        container.innerHTML = `<div style="text-align:center;padding:40px;"><div class="loading-spinner"></div></div>`;
+        actions.style.display = 'none';
+
+        const imageId = item.image_id;
+        if (!imageId) {
+            container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);">无效的图片 ID</div>`;
+            return;
+        }
+
+        // 获取缩略图（带缓存）
+        let thumbUrl = this._favThumbCache[imageId];
+        if (!thumbUrl) {
+            try {
+                const res = await this.apiFetch(`${this.api}/api/image/thumb?id=${imageId}`);
+                const data = await res.json();
+                if (data.status === 'ok' && data.thumb_url) {
+                    thumbUrl = data.thumb_url;
+                    this._favThumbCache[imageId] = thumbUrl;
+                }
+            } catch { /* ignore */ }
+        }
+
+        if (thumbUrl) {
+            container.innerHTML = `<img src="${thumbUrl}" alt="#${imageId}" class="gallery-image"
+                onerror="this.parentElement.innerHTML='<div style=\\'text-align:center;padding:40px;color:var(--text-secondary)\\'>图片加载失败</div>'">`;
+            actions.style.display = 'flex';
+        } else {
+            container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);">无法获取缩略图</div>`;
+            actions.style.display = 'flex';
+        }
+    }
+
+    async favDeleteCurrent() {
+        const item = this._favItems[this._favIndex];
+        if (!item || !item.id) return;
+        if (!confirm('确定删除这条收藏？')) return;
+
+        const btn = document.getElementById('favDeleteBtn');
+        btn.disabled = true;
+        btn.textContent = '删除中...';
+
+        try {
+            const res = await this.apiFetch(`${this.api}/api/favorite/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: item.id })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                this._favItems.splice(this._favIndex, 1);
+                if (this._favIndex >= this._favItems.length) {
+                    this._favIndex = Math.max(0, this._favItems.length - 1);
+                }
+                if (this._favItems.length === 0) {
+                    document.getElementById('favImageContainer').innerHTML = '';
+                    document.getElementById('favActions').style.display = 'none';
+                    document.getElementById('favEmptyState').style.display = 'block';
+                    this.favUpdateCounter();
+                } else {
+                    this.favRenderCurrent();
+                }
+            } else {
+                alert('删除失败: ' + (data.message || ''));
+            }
+        } catch (err) {
+            alert('删除失败: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🗑️ 删除';
+        }
+    }
+
+    async goToDrawWithUrl(civitaiUrl, favoriteId) {
+        // 如果来自收藏，更新状态为 processing 并存全局
+        if (favoriteId) {
+            window._activeFavoriteId = favoriteId;
+            try {
+                await this.apiFetch(`${this.api}/api/favorite/update-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: favoriteId, status: 'processing' })
+                });
+                // 同步更新本地数据
+                const item = this._favItems.find(i => i.id === favoriteId);
+                if (item) item.status = 'processing';
+                this.favUpdateCounter();
+            } catch { /* ignore */ }
+        } else {
+            window._activeFavoriteId = null;
+        }
+        // 切换到绘图 tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('.tab-btn[data-tab="draw"]').classList.add('active');
+        document.getElementById('draw').classList.add('active');
+
+        // 确保处于 auto mode
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.mode-btn[data-mode="auto"]').classList.add('active');
+        document.querySelectorAll('.draw-mode').forEach(m => m.classList.remove('active'));
+        document.getElementById('autoMode').classList.add('active');
+
+        // 填入 URL
+        const input = document.getElementById('imageUrl');
+        input.value = civitaiUrl;
+        input.dispatchEvent(new Event('input'));
+        input.focus();
     }
 
     // ===================== Utilities =====================
