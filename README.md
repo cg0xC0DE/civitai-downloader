@@ -50,7 +50,7 @@ civitai-downloader/
 │   └── js/
 │       ├── app.js             # 主逻辑（下载、绘图、收藏）
 │       └── gallery.js         # 画廊 & 美学分析
-├── init.py                    # 环境初始化 & 自检脚本
+├── init.bat                   # 一键初始化脚本（环境检查 + 依赖安装 + 凭证配置）
 ├── start_backend.cmd          # 启动后端
 └── start_comfyui_watchdog.cmd # 启动 ComfyUI（含自动重启）
 ```
@@ -64,30 +64,17 @@ civitai-downloader/
 - （可选）OpenAI API Key — 用于美学分析
 - （可选）Azure Storage — 用于画廊云端存储
 
-### 2. 安装依赖
+### 2. 一键初始化
 
-```bash
-python init.py          # 自动检测环境并安装依赖
-# 或手动：
-cd backend
-pip install -r requirements.txt
-```
+双击运行 `init.bat`，脚本会自动完成三个阶段：
 
-### 3. 配置凭证
+1. **环境检查** — 检测 Python、pip（缺失时阻塞等待安装）
+2. **自动安装** — 创建虚拟环境、安装依赖、创建目录
+3. **凭证配置** — 交互式输入 Civitai Token、OpenAI Key、Azure 连接字符串
 
-复制凭证模板并填入你的密钥：
+> 也可手动配置：复制 `example_credential*.py` 为 `credential*.py` 并填入密钥值。
 
-```bash
-# Azure Blob 存储（可选）
-cp backend/azure_blob/example_credentials.py backend/azure_blob/credentials.py
-
-# OpenAI API（美学分析需要）
-cp backend/llm/example_credential.py backend/llm/credential.py
-```
-
-编辑对应的 `credentials.py` / `credential.py`，填入实际的密钥值。
-
-### 4. 修改配置
+### 3. 修改配置
 
 编辑 `backend/config.py`：
 
@@ -109,7 +96,7 @@ SERVER_PORT = 53133
 CIVITAI_API_TOKEN = ''
 ```
 
-### 5. 启动服务
+### 4. 启动服务
 
 ```bash
 # 启动后端 API
