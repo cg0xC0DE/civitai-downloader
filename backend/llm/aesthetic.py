@@ -26,8 +26,24 @@ if _BACKEND_DIR not in sys.path:
     sys.path.insert(0, _BACKEND_DIR)
 
 from llm.llm_client import chat_with_image_json
+_LOCAL_PATH = os.path.join(_BACKEND_DIR, 'cache', 'aesthetic_blueprints.json')
+_BLOB_CONTAINER = 'civitaidl'
+_BLOB_SUBFOLDER = 'data'
+_BLOB_FILENAME = 'aesthetic_blueprints.json'
 
-BLUEPRINTS_PATH = os.path.join(_BACKEND_DIR, 'cache', 'aesthetic_blueprints.json')
+
+def _azure_available() -> bool:
+    """检查 Azure Blob 是否可用"""
+    try:
+        from azure_blob.credentials import CONNECTION_STRING
+        return bool(CONNECTION_STRING)
+    except Exception:
+        return False
+
+
+def _get_blob():
+    from azure_blob import BlobStorage
+    return BlobStorage(container=_BLOB_CONTAINER)
 
 
 # ============================================================
@@ -391,8 +407,8 @@ def analyze(image_source, user_why_good: str = '',
         messages=messages,
         image=image_source,
         user_text=user_text,
-        max_tokens=4096,
-        temperature=0.5,
+        max_tokens=1500,
+        temperature=0.3,
     )
 
     # 5. 解析 JSON
@@ -408,6 +424,7 @@ def analyze(image_source, user_why_good: str = '',
             raise ValueError(f"LLM 返回内容无法解析为 JSON: {raw_reply[:200]}")
 
     # 6. 补全非 LLM 负责的字段
+    blueprint['image_source'] = image_source if isinstance(image_source, str) else ''
     blueprint['base_model'] = gen_params.get('checkpoint', '')
 
     lora_entries = []
@@ -430,38 +447,58 @@ def analyze(image_source, user_why_good: str = '',
 
 def save_blueprint(blueprint: dict) -> str:
     """
-    将蓝图追加到 aesthetic_blueprints.json。
-    返回保存路径。
+    保存蓝图（本地 + Azure 双写）。
+    返回本地路径。
     """
-    os.makedirs(os.path.dirname(BLUEPRINTS_PATH), exist_ok=True)
-
-    # 加载现有数据
-    existing = []
-    if os.path.exists(BLUEPRINTS_PATH):
-        try:
-            with open(BLUEPRINTS_PATH, 'r', encoding='utf-8') as f:
-                existing = json.load(f)
-            if not isinstance(existing, list):
-                existing = []
-        except (json.JSONDecodeError, IOError):
-            existing = []
-
+    existing = load_blueprints()
+    # 同一作品重复分析时，用最新结果覆盖旧的
+    img_src = blueprint.get('image_source', '')
+    if img_src:
+        existing = [b for b in existing if b.get('image_source') != img_src]
     existing.append(blueprint)
+    text = json.dumps(existing, ensure_ascii=False, indent=2)
 
-    with open(BLUEPRINTS_PATH, 'w', encoding='utf-8') as f:
-        json.dump(existing, f, ensure_ascii=False, indent=2)
+    # 1. 始终写本地
+    os.makedirs(os.path.dirname(_LOCAL_PATH), exist_ok=True)
+    with open(_LOCAL_PATH, 'w', encoding='utf-8') as f:
+        f.write(text)
 
-    print(f"[Aesthetic] 蓝图已保存，当前共 {len(existing)} 条 → {BLUEPRINTS_PATH}")
-    return BLUEPRINTS_PATH
+    # 2. 有 Azure 时同步
+    if _azure_available():
+        try:
+            blob = _get_blob()
+            blob.put_json(_BLOB_SUBFOLDER, _BLOB_FILENAME, existing, indent=2)
+        except Exception as e:
+            print(f"[Aesthetic] Azure 写入失败（本地已保存）: {e}")
+
+    print(f"[Aesthetic] 蓝图已保存，当前共 {len(existing)} 条")
+    return _LOCAL_PATH
 
 
 def load_blueprints() -> list:
-    """加载所有蓝图。"""
-    if not os.path.exists(BLUEPRINTS_PATH):
-        return []
-    try:
-        with open(BLUEPRINTS_PATH, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
-    except (json.JSONDecodeError, IOError):
-        return []
+    """加载所有蓝图（本地优先，Azure 回退迁移）。"""
+    # 1. 读本地
+    if os.path.exists(_LOCAL_PATH):
+        try:
+            with open(_LOCAL_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if isinstance(data, list) and data:
+                return data
+        except Exception:
+            pass
+
+    # 2. 本地为空，尝试从 Azure 迁移
+    if _azure_available():
+        try:
+            blob = _get_blob()
+            data = blob.get_json(_BLOB_SUBFOLDER, _BLOB_FILENAME)
+            if isinstance(data, list) and data:
+                os.makedirs(os.path.dirname(_LOCAL_PATH), exist_ok=True)
+                with open(_LOCAL_PATH, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                print(f"[Aesthetic] 从 Azure 迁移 {len(data)} 条蓝图到本地")
+                return data
+        except Exception as e:
+            print(f"[Aesthetic] Azure 读取失败: {e}")
+
+    return []

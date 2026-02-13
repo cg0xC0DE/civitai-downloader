@@ -25,6 +25,12 @@ echo "[Watchdog] Check interval: %CHECK_INTERVAL%s"
 echo.
 
 :loop
+REM Kill existing processes on port 8188 to avoid duplicates
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":8188 " ^| findstr "LISTENING"') do (
+  taskkill /PID %%a /F >nul 2>&1
+)
+timeout /t 1 /nobreak >nul
+
 echo "[Watchdog] [%date% %time%] Starting ComfyUI ..."
 pushd "%COMFYUI_DIR%"
 .\python_embeded\python.exe -s ComfyUI\main.py --windows-standalone-build --disable-auto-launch

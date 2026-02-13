@@ -10,7 +10,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Civitai Downloader</title>
+    <title>Civitai Aesthetic Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         input, select, textarea { font-size: 16px !important; -webkit-text-size-adjust: 100%; }
@@ -42,6 +42,18 @@
         .btn-download-model:hover { opacity: 0.85; }
         .btn-download-model:disabled { opacity: 0.5; cursor: not-allowed; }
         .prompt-preview { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 12px; color: var(--text-secondary); max-height: 80px; overflow-y: auto; word-break: break-all; }
+        /* 可编辑解析结果 */
+        .parse-edit { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; transition: border-color .2s; }
+        .parse-edit:focus { border-color: var(--accent); }
+        .parse-edit-num { width: 70px; text-align: center; }
+        .parse-edit-weight { width: 55px; text-align: center; }
+        .parse-edit-size { width: 60px; text-align: center; }
+        .parse-edit-text { width: 100%; text-align: left; }
+        .parse-edit-prompt { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 12px; color: var(--text-primary); font-family: inherit; width: 100%; min-height: 60px; max-height: 150px; resize: vertical; outline: none; box-sizing: border-box; }
+        .parse-edit-prompt:focus { border-color: var(--accent); }
+        .parse-size-group { display: inline-flex; align-items: center; gap: 4px; }
+        .parse-edited-marker { color: var(--accent); font-size: 10px; margin-left: 4px; opacity: 0; transition: opacity .2s; }
+        .parse-edited-marker.show { opacity: 1; }
 
         /* LoRA 区域 */
         .lora-section { background: var(--bg-primary); padding: 16px; border-radius: 8px; margin-top: 8px; }
@@ -126,6 +138,24 @@
         .btn-clear:hover { opacity: 1; background: var(--bg-hover); }
         .btn-clear:empty { display: none; }
 
+        /* 通用无边框图标按钮 */
+        .icon-btn {
+            padding: 2px 6px; border-radius: 8px; border: none;
+            background: transparent; color: var(--text-secondary); font-size: 20px;
+            cursor: pointer; transition: all .2s; line-height: 1; flex-shrink: 0;
+        }
+        .icon-btn:hover { background: #ffffff1a; color: var(--text-primary); transform: scale(1.15); }
+
+        /* ComfyUI 重启按钮（跟 status-badge 风格一致但可点击） */
+        .comfy-restart-btn {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 6px 14px; border-radius: 20px; border: none;
+            background: #f5f5f7; color: var(--text-secondary);
+            font-size: 12px; font-weight: 500; cursor: pointer;
+            transition: all .2s; white-space: nowrap; flex-shrink: 0;
+        }
+        .comfy-restart-btn:hover { background: #fed5d5; color: var(--error); }
+
         /* ============ Favorites Tab ============ */
         .fav-actions {
             display: flex;
@@ -141,42 +171,65 @@
         .fav-replicate-btn:hover { background: var(--accent-hover) !important; }
         .fav-delete-btn { color: #dc2626 !important; border-color: #dc2626 !important; }
         .fav-delete-btn:hover { background: #dc2626 !important; color: #fff !important; }
-        .fav-status-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 500;
-            margin-left: 8px;
-        }
         .fav-status-pending { background: #374151; color: #9ca3af; }
         .fav-status-processing { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
         .fav-status-done { background: #05966922; color: #34d399; border: 1px solid #05966944; }
+        .fav-status-fail { background: #dc262622; color: #f87171; border: 1px solid #dc262644; }
+
+        /* Favorites 控制栏：筛选 + 翻页同行 */
+        .fav-controls-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 8px; margin-bottom: 12px; flex-wrap: nowrap; min-width: 0;
+        }
+        .fav-controls-row .btn { width: auto; min-width: 0; padding: 6px 10px; }
+        .fav-nav-group {
+            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+        }
+        .fav-nav-group .gallery-counter { white-space: nowrap; margin: 0 2px; }
+        .fav-filter-select {
+            padding: 4px 10px; border-radius: 14px; border: none;
+            background: #ffffff0d; color: var(--text-secondary);
+            font-size: 12px; cursor: pointer; flex-shrink: 0;
+            outline: none; transition: all .2s;
+        }
+        .fav-filter-select:hover, .fav-filter-select:focus { background: #ffffff1a; color: var(--text-primary); }
+        .fav-random-btn {
+            padding: 2px 6px; border-radius: 8px; border: none;
+            background: transparent; color: #a78bfa; font-size: 20px; cursor: pointer;
+            transition: all .2s; white-space: nowrap; flex-shrink: 0; line-height: 1;
+        }
+        .fav-random-btn:hover { background: #7c3aed22; color: #c4b5fd; transform: scale(1.15); }
+
+        /* Tab 文字移动端隐藏 */
+        @media (max-width: 600px) {
+            .tab-btn .tab-label { display: none; }
+            .tab-btn { padding: 10px 8px; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🎨 Civitai Downloader</h1>
+            <h1>🎨 Civitai 美学探索工作台</h1>
             <!-- <p class="subtitle">模型下载 & ComfyUI 绘图</p> -->
         </header>
 
         <nav class="tabs">
             <button class="tab-btn active" data-tab="download">
                 <span class="icon">⬇️</span>
-                下载
+                <span class="tab-label">下载</span>
             </button>
             <button class="tab-btn" data-tab="draw">
                 <span class="icon">🎨</span>
-                绘图
+                <span class="tab-label">绘图</span>
             </button>
             <button class="tab-btn" data-tab="gallery">
                 <span class="icon">🖼️</span>
-                画廊
+                <span class="tab-label">作品</span>
             </button>
             <button class="tab-btn" data-tab="favorites">
                 <span class="icon">⭐</span>
-                收藏
+                <span class="tab-label">收藏</span>
             </button>
         </nav>
 
@@ -235,7 +288,7 @@
                     <span>●</span>
                     <span id="statusText">检查中...</span>
                 </div>
-                <button type="button" id="restartComfyBtn" class="btn btn-sm btn-outline" style="white-space:nowrap; padding:4px 8px;" title="重启 ComfyUI（刷新模型列表）">🔄</button>
+                <button type="button" id="restartComfyBtn" class="comfy-restart-btn" title="重启 ComfyUI（刷新模型列表）">⚡ 重启</button>
             </div>
 
             <!-- 模式切换 -->
@@ -260,6 +313,20 @@
                         <select id="autoWorkflowSelect" style="flex:1; margin-bottom:0;">
                             <option value="nolora">nolora</option>
                         </select>
+                    </div>
+                    <!-- 精绘参数（upscale 工作流时显示） -->
+                    <div id="upscaleParams" style="display:none; margin-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:12px; color:var(--text-secondary); white-space:nowrap; min-width:fit-content;">精绘 Denoise</span>
+                            <div style="display:flex; gap:8px; flex:1; align-items:center;">
+                                <input type="number" id="upscaleDenoise1" value="0.44" step="0.01" min="0.01" max="1"
+                                    style="flex:1; text-align:center; font-size:13px; padding:6px 4px; background:#ffffff0d; border:none; border-radius:6px; color:var(--text-primary); outline:none;">
+                                <input type="number" id="upscaleDenoise2" value="0.44" step="0.01" min="0.01" max="1"
+                                    style="flex:1; text-align:center; font-size:13px; padding:6px 4px; background:#ffffff0d; border:none; border-radius:6px; color:var(--text-primary); outline:none;">
+                                <input type="number" id="upscaleDenoise3" value="0.44" step="0.01" min="0.01" max="1"
+                                    style="flex:1; text-align:center; font-size:13px; padding:6px 4px; background:#ffffff0d; border:none; border-radius:6px; color:var(--text-primary); outline:none;">
+                            </div>
+                        </div>
                     </div>
                     <div style="display:flex; gap:10px;">
                         <button type="button" id="parseBtn" class="btn btn-primary" style="flex:1;">
@@ -373,16 +440,12 @@
         <section id="gallery" class="tab-content">
             <!-- 控制栏 -->
             <div class="gallery-controls">
-                <div class="gallery-nav">
-                    <button type="button" id="galleryRefreshBtn" class="btn btn-outline btn-sm" title="刷新">
-                        🔄
-                    </button>
-                </div>
-                <span class="gallery-counter" id="galleryCounter">0 / 0</span>
-                <div class="gallery-nav">
+                <button type="button" id="galleryRefreshBtn" class="icon-btn" title="刷新">🔄</button>
+                <div class="gallery-nav" style="align-items:center;">
                     <button type="button" id="galleryPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">
                         ◀
                     </button>
+                    <span class="gallery-counter" id="galleryCounter">0 / 0</span>
                     <button type="button" id="galleryNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">
                         ▶
                     </button>
@@ -415,15 +478,24 @@
 
         <!-- ==================== Favorites Tab ==================== -->
         <section id="favorites" class="tab-content">
-            <!-- 控制栏 -->
-            <div class="gallery-controls">
-                <div class="gallery-nav">
-                    <button type="button" id="favRefreshBtn" class="btn btn-outline btn-sm" title="刷新">🔄</button>
-                </div>
-                <span class="gallery-counter" id="favCounter">0 / 0</span>
-                <div class="gallery-nav">
-                    <button type="button" id="favPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">◀</button>
-                    <button type="button" id="favNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">▶</button>
+            <!-- 控制栏：筛选 + 翻页 同行 -->
+            <div class="fav-controls-row">
+                <button type="button" id="favRefreshBtn" class="icon-btn" title="刷新">🔄</button>
+
+                <select class="fav-filter-select" id="favFilterSelect">
+                    <option value="all">全部</option>
+                    <option value="pending">待处理</option>
+                    <option value="processing">处理中</option>
+                    <option value="done">已完成</option>
+                    <option value="fail">复刻失败</option>
+                </select>
+
+                <button type="button" id="favRandomBtn" class="fav-random-btn" title="猜你喜欢">🎲</button>
+
+                <div class="fav-nav-group">
+                    <button type="button" id="favPrevBtn" class="btn btn-outline btn-sm" title="上一张">◀</button>
+                    <span class="gallery-counter" id="favCounter">0 / 0</span>
+                    <button type="button" id="favNextBtn" class="btn btn-outline btn-sm" title="下一张">▶</button>
                 </div>
             </div>
 
@@ -456,6 +528,19 @@
         </footer>
     </div>
 
+    <div id="toastContainer" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+    <script>
+    function showToast(msg, type='success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        const bg = type === 'error' ? '#dc2626' : type === 'warn' ? '#f59e0b' : '#22c55e';
+        t.style.cssText = `padding:10px 18px;border-radius:8px;background:${bg};color:#fff;font-size:13px;font-weight:500;opacity:0;transform:translateX(40px);transition:all .3s;pointer-events:auto;box-shadow:0 4px 12px #0005;`;
+        t.textContent = msg;
+        c.appendChild(t);
+        requestAnimationFrame(() => { t.style.opacity='1'; t.style.transform='translateX(0)'; });
+        setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(40px)'; setTimeout(() => t.remove(), 300); }, 2000);
+    }
+    </script>
     <script src="js/app.js"></script>
     <script src="js/gallery.js"></script>
 </body>

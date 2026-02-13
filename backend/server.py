@@ -48,7 +48,7 @@ _gen_lock = threading.Lock()
 # ============== 美学分析任务跟踪 ==============
 _aesthetic_tasks = {}  # task_id -> {status, image_url, result, message, ...}
 _aesthetic_lock = threading.Lock()
-_AESTHETIC_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache', 'aesthetic')
+_AESTHETIC_CACHE_BLOB_PREFIX = 'data/aesthetic'  # Azure Blob 前缀
 
 def _aesthetic_cache_key(image_url: str) -> str:
     """从图片 URL 生成文件系统安全的缓存 key"""
@@ -60,18 +60,47 @@ def _aesthetic_cache_key(image_url: str) -> str:
     return f"{base}_{url_hash}"
 
 
-def _restart_comfyui():
-    """重启 ComfyUI：杀掉进程，watchdog 会自动重启"""
+def _restart_comfyui(wait_ready=True, ready_timeout=120):
+    """重启 ComfyUI：杀掉进程，watchdog 会自动重启。
+    wait_ready=True 时会阻塞直到 ComfyUI 重新就绪（模型加载完成）。
+    """
     import subprocess as _subprocess
     _comfy_port = COMFYUI_URL.rsplit(':', 1)[-1].split('/')[0]
+    _cmd = (f"Get-NetTCPConnection -LocalPort {_comfy_port} -ErrorAction SilentlyContinue | "
+            "Select-Object -ExpandProperty OwningProcess -Unique | "
+            "Where-Object { $_ -gt 0 } | "
+            "ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }")
     _subprocess.run(
-        ['powershell', '-Command',
-         f"Get-NetTCPConnection -LocalPort {_comfy_port} -ErrorAction SilentlyContinue | "
-         "Select-Object -ExpandProperty OwningProcess -Unique | "
-         "ForEach-Object {{ Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }}"],
+        ['powershell', '-Command', _cmd],
         capture_output=True, text=True, timeout=10
     )
     print(f"[ComfyUI] 已终止 ComfyUI 进程，等待 watchdog 重启...")
+
+    if not wait_ready:
+        return
+
+    # 等待 ComfyUI 完全就绪（能响应 /api/object_info 说明模型已加载）
+    _start = time.time()
+    _ready = False
+    time.sleep(5)  # 先等 watchdog 拉起进程
+    while time.time() - _start < ready_timeout:
+        try:
+            req = urllib.request.Request(f'http://{COMFYUI_URL}/api/object_info/CheckpointLoaderSimple')
+            with _local_opener.open(req, timeout=5) as r:
+                data = json.loads(r.read())
+                # 如果能获取到 CheckpointLoaderSimple 节点信息，说明模型列表已加载
+                if data and 'CheckpointLoaderSimple' in data:
+                    _ready = True
+                    break
+        except Exception:
+            pass
+        time.sleep(3)
+
+    elapsed = round(time.time() - _start)
+    if _ready:
+        print(f"[ComfyUI] 重启完成，模型已加载 ({elapsed}s)")
+    else:
+        print(f"[ComfyUI] ⚠️ 等待 {elapsed}s 后仍未就绪，继续执行...")
 
 
 def _download_worker():
@@ -158,9 +187,10 @@ def _resolve_model_version(sess, version_id, token):
             'version_name': data.get('name', ''),
             'file_name': data.get('files', [{}])[0].get('name', '') if data.get('files') else '',
             'modelId': data.get('modelId') or data.get('model', {}).get('id'),
+            'trainedWords': data.get('trainedWords', []),
         }
     except Exception:
-        return {'name': f'version_{version_id}', 'version_name': '', 'file_name': '', 'modelId': None}
+        return {'name': f'version_{version_id}', 'version_name': '', 'file_name': '', 'modelId': None, 'trainedWords': []}
 
 
 def _resolve_model_by_hash(sess, hash_str, token):
@@ -180,6 +210,7 @@ def _resolve_model_by_hash(sess, hash_str, token):
             'file_name': data.get('files', [{}])[0].get('name', '') if data.get('files') else '',
             'modelId': data.get('modelId') or data.get('model', {}).get('id'),
             'modelVersionId': data.get('id'),
+            'trainedWords': data.get('trainedWords', []),
         }
     except Exception:
         return None
@@ -228,12 +259,14 @@ def parse_civitai_image(image_url):
     except Exception as e:
         return {'status': 'error', 'message': f'Civitai API 请求失败: {e}'}
 
-    meta = gen_data.get('meta', {})
-    if not meta:
-        return {'status': 'error', 'message': '该图片没有生成参数信息'}
+    meta = gen_data.get('meta') or {}  # 可能返回 None，统一为空 dict
+    _is_partial = not meta  # meta 为空时标记为 partial 模式
 
     # -------- 基本参数（逐个追踪来源） --------
-    result = {'status': 'success'}
+    result = {'status': 'partial' if _is_partial else 'success'}
+    if _is_partial:
+        print(f'[Parse] 图片 {image_id} 无 meta，进入 partial 模式（仅提取 resources）')
+
     result['prompt'] = _src('prompt', meta.get('prompt', ''), meta.get('prompt'))
     result['negative_prompt'] = _src('negative_prompt',
                                      meta.get('negativePrompt', ''), meta.get('negativePrompt'))
@@ -279,6 +312,13 @@ def parse_civitai_image(image_url):
 
     # -------- 尺寸（多级 fallback + 来源追踪） --------
     has_upscaler = False  # 稍后检测
+
+    # 来源 A: meta 字段中的 Hires Fix 标记（SD WebUI / Forge 等常见格式）
+    _hires_upscaler = meta.get('Hires upscaler') or meta.get('hpiUpscaler') or ''
+    _hires_upscale = meta.get('Hires upscale') or meta.get('Hires resize') or ''
+    if _hires_upscaler or _hires_upscale:
+        has_upscaler = True
+        print(f'[Parse] meta Hires 检测: upscaler={_hires_upscaler}, scale={_hires_upscale}')
 
     # 优先级 1: meta.width / meta.height
     raw_w, raw_h = meta.get('width'), meta.get('height')
@@ -367,6 +407,7 @@ def parse_civitai_image(image_url):
     checkpoint_alt = []
     checkpoint_version_id = None
     checkpoint_model_id = None
+    _all_trigger_words = []  # 收集所有模型的 trainedWords，用于空提示词反推
 
     # --- 来源 1: meta.civitaiResources ---
     civitai_resources = meta.get('civitaiResources', [])
@@ -376,17 +417,23 @@ def parse_civitai_image(image_url):
         if not version_id:
             continue
         info = _resolve_model_version(sess, version_id, CIVITAI_API_TOKEN)
-        if rtype == 'checkpoint':
+        _all_trigger_words.extend(info.get('trainedWords', []))
+        if rtype == 'upscaler':
+            has_upscaler = True
+            continue
+        elif rtype == 'checkpoint':
             checkpoint = info.get('name', '')
             checkpoint_alt = [info.get('file_name', ''), info.get('version_name', '')]
             checkpoint_version_id = version_id
             checkpoint_model_id = info.get('modelId')
         elif rtype == 'lora':
+            _raw_w = res.get('weight')
             loras.append({
-                'name': info.get('name', ''), 'weight': res.get('weight', 1.0),
+                'name': info.get('name', ''), 'weight': _raw_w if _raw_w is not None else 1.0,
                 'alt_names': [info.get('file_name', ''), info.get('version_name', '')],
                 'modelVersionId': version_id,
-                'modelId': info.get('modelId')
+                'modelId': info.get('modelId'),
+                '_weight_known': _raw_w is not None,
             })
 
     # --- 来源 2: gen_data 顶层 resources ---
@@ -407,6 +454,7 @@ def parse_civitai_image(image_url):
                 continue
 
             info = _resolve_model_version(sess, version_id, CIVITAI_API_TOKEN)
+            _all_trigger_words.extend(info.get('trainedWords', []))
             file_name = info.get('file_name', '') if info else ''
 
             if model_type == 'checkpoint':
@@ -415,11 +463,13 @@ def parse_civitai_image(image_url):
                 checkpoint_version_id = version_id
                 checkpoint_model_id = model_id
             elif model_type == 'lora':
+                _raw_s = res.get('strength')
                 loras.append({
-                    'name': model_name, 'weight': res.get('strength') or 1.0,
+                    'name': model_name, 'weight': _raw_s if _raw_s is not None else 1.0,
                     'alt_names': [file_name, version_name],
                     'modelVersionId': version_id,
-                    'modelId': model_id
+                    'modelId': model_id,
+                    '_weight_known': _raw_s is not None,
                 })
 
     # --- 来源 3: 旧格式 meta.resources / Model / hashes ---
@@ -436,6 +486,7 @@ def parse_civitai_image(image_url):
         if model_hash:
             info = _resolve_model_by_hash(sess, model_hash, CIVITAI_API_TOKEN)
             if info:
+                _all_trigger_words.extend(info.get('trainedWords', []))
                 checkpoint = info.get('name', '') or model_name
                 checkpoint_alt = [info.get('file_name', ''), info.get('version_name', ''), model_name]
                 checkpoint_version_id = info.get('modelVersionId')
@@ -450,30 +501,40 @@ def parse_civitai_image(image_url):
             lora_filename = key[5:]
             lora_info = _resolve_model_by_hash(sess, h, CIVITAI_API_TOKEN)
             if lora_info:
+                _all_trigger_words.extend(lora_info.get('trainedWords', []))
                 loras.append({
                     'name': lora_info.get('name', '') or lora_filename,
-                    'weight': 1.0,
+                    'weight': 0.5,
                     'alt_names': [lora_info.get('file_name', ''), lora_info.get('version_name', ''), lora_filename],
                     'modelVersionId': lora_info.get('modelVersionId'),
-                    'modelId': lora_info.get('modelId')
+                    'modelId': lora_info.get('modelId'),
+                    '_weight_known': False,
                 })
             else:
                 loras.append({
-                    'name': lora_filename, 'weight': 1.0,
+                    'name': lora_filename, 'weight': 0.5,
                     'alt_names': [lora_filename],
-                    'modelVersionId': None, 'modelId': None
+                    'modelVersionId': None, 'modelId': None,
+                    '_weight_known': False,
                 })
 
     # 模型来源追踪
     ps['checkpoint'] = 'original' if checkpoint else 'missing'
     ps['loras'] = 'original' if loras else ('missing' if not loras and meta.get('hashes') else 'original')
 
-    # LoRA weight 来源追踪：来自 hashes fallback 的 weight 全是默认 1.0
+    # LoRA weight 来源追踪
     for lora in loras:
-        if lora.get('_weight_from_hash'):
-            lora['weight_source'] = 'default'
-        else:
+        if lora.get('_weight_known', True):
             lora['weight_source'] = 'original'
+        else:
+            lora['weight_source'] = 'default'
+
+    # 将 LoRA weights 纳入参数精确度计算
+    if loras:
+        _any_default = any(l.get('weight_source') == 'default' for l in loras)
+        ps['lora_weights'] = 'default' if _any_default else 'original'
+    else:
+        ps['lora_weights'] = 'original'  # 无 LoRA 时不扣分
 
     # Embedding 来源追踪
     ps['embeddings'] = 'original' if embeddings else 'original'  # prompt 中有引用就是 original
@@ -485,21 +546,39 @@ def parse_civitai_image(image_url):
         (1344, 768), (768, 1344), (1536, 640), (640, 1536),
     ]
 
-    if has_upscaler and ps['size'] != 'default':
-        # 用比例 + 面积找最接近的 XL 标准尺寸
+    # 来源 C: 启发式 —— 尺寸明显超过 base model 最大标准尺寸
+    if not has_upscaler and ps.get('size') != 'default':
         w, h = result['width'], result['height']
-        aspect = w / h if h else 1.0
-        best, best_dist = _XL_SIZES[0], float('inf')
-        for sw, sh in _XL_SIZES:
-            sa = sw / sh if sh else 1.0
-            dist = abs(aspect - sa)
-            if dist < best_dist:
-                best_dist = dist
-                best = (sw, sh)
-        result['width'], result['height'] = best
-        result['_original_image_size'] = (w, h)
-        ps['size'] = 'approximate'
-        result['_size_note'] = f'原图 {w}×{h} 使用了 Upscaler，已匹配最近 XL 标准尺寸 {best[0]}×{best[1]}'
+        _max_side = max(w, h)
+        # SDXL / Illustrious / Pony 系列最大边 1536；SD1.5 最大 768
+        _base_lower = _base_model.lower()
+        if any(b in _base_lower for b in ('xl', 'sdxl', 'illustrious', 'pony', 'animagine')):
+            _threshold = 1536
+        else:
+            _threshold = 768
+        if _max_side > _threshold * 1.15:  # 允许 15% 容差
+            has_upscaler = True
+            print(f'[Parse] 启发式 Upscaler 检测: {w}×{h} 超过 {_base_model} 阈值 {_threshold}')
+
+    if has_upscaler and ps['size'] != 'default':
+        w, h = result['width'], result['height']
+        # 如果当前尺寸已经是标准 XL 尺寸，无需回退
+        if (w, h) in _XL_SIZES:
+            print(f'[Parse] {w}×{h} 已是标准 XL 尺寸，跳过 Upscaler 回退')
+        else:
+            # 用比例找最接近的 XL 标准尺寸
+            aspect = w / h if h else 1.0
+            best, best_dist = _XL_SIZES[0], float('inf')
+            for sw, sh in _XL_SIZES:
+                sa = sw / sh if sh else 1.0
+                dist = abs(aspect - sa)
+                if dist < best_dist:
+                    best_dist = dist
+                    best = (sw, sh)
+            result['width'], result['height'] = best
+            result['_original_image_size'] = (w, h)
+            ps['size'] = 'approximate'
+            result['_size_note'] = f'原图 {w}×{h} 使用了 Upscaler，已匹配最近 XL 标准尺寸 {best[0]}×{best[1]}'
 
     result['checkpoint'] = checkpoint or ''
     result['loras'] = loras
@@ -514,6 +593,7 @@ def parse_civitai_image(image_url):
     for lora in loras:
         check = find_model_on_disk(lora['name'], 'lora', alt_names=lora.get('alt_names'), version_id=lora.get('modelVersionId'))
         check['weight'] = lora.get('weight', 1.0)
+        check['weight_source'] = lora.get('weight_source', 'original')
         check['requested_name'] = lora['name']
         check['modelVersionId'] = lora.get('modelVersionId')
         check['modelId'] = lora.get('modelId')
@@ -544,12 +624,58 @@ def parse_civitai_image(image_url):
     result['all_models_found'] = all_found
     result['missing_models'] = missing
 
+    # -------- 空提示词反推（Gemini + trigger words） --------
+    result['prompt_reverse_tagged'] = False
+    if not result.get('prompt', '').strip():
+        # 去重 trigger words
+        _tw_dedup = list(dict.fromkeys(w.strip() for w in _all_trigger_words if w.strip()))
+        try:
+            # 获取图片 URL 用于 Gemini
+            _img_params = {'input': _json.dumps({'json': {'id': image_id}})}
+            if CIVITAI_API_TOKEN:
+                _img_params['token'] = CIVITAI_API_TOKEN
+            _img_resp = sess.get(f'{CIVITAI_API_BASE}/trpc/image.get',
+                                 params=_img_params, timeout=15, headers=headers)
+            _img_data = _img_resp.json().get('result', {}).get('data', {}).get('json', {})
+            _raw_img_url = _img_data.get('url', '')
+            _CDN = 'https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA'
+            if _raw_img_url and not _raw_img_url.startswith('http'):
+                _img_url = f'{_CDN}/{_raw_img_url}/width=1024'
+            elif _raw_img_url:
+                _img_url = re.sub(r'/width=\d+', '/width=1024', _raw_img_url)
+            else:
+                _img_url = ''
+
+            if _img_url:
+                print(f'[Parse] 提示词为空，调用 AI 反推标签...')
+                from llm.gemini_client import reverse_tag_image
+                _tags, _provider = reverse_tag_image(_img_url)
+                # 组合：trigger words 在前，反推标签在后
+                if _tw_dedup:
+                    result['prompt'] = ', '.join(_tw_dedup) + ', ' + _tags
+                else:
+                    result['prompt'] = _tags
+                result['prompt_reverse_tagged'] = True
+                result['reverse_tag_provider'] = _provider
+                result['trigger_words'] = _tw_dedup
+                ps['prompt'] = 'ai_reverse'
+                print(f'[Parse] 反推完成 (via {_provider})，trigger words: {len(_tw_dedup)} 个')
+        except Exception as e:
+            print(f'[Parse] AI 反推失败: {e}')
+            # 至少把 trigger words 放进去
+            if _tw_dedup:
+                result['prompt'] = ', '.join(_tw_dedup)
+                result['prompt_reverse_tagged'] = True
+                result['trigger_words'] = _tw_dedup
+                ps['prompt'] = 'ai_reverse'
+
     # -------- 复刻完整度总结 --------
     _track_keys = [k for k in ps if not k.startswith('_')]
     ps['_summary'] = {
         'total': len(_track_keys),
         'original': sum(1 for k in _track_keys if ps[k] == 'original'),
         'approximate': sum(1 for k in _track_keys if ps[k] == 'approximate'),
+        'ai_reverse': sum(1 for k in _track_keys if ps[k] == 'ai_reverse'),
         'default': sum(1 for k in _track_keys if ps[k] == 'default'),
         'missing': sum(1 for k in _track_keys if ps[k] == 'missing'),
     }
@@ -878,11 +1004,12 @@ def _convert_ui_to_api(raw: Dict) -> Dict:
 
 
 def _find_nodes_by_type(workflow: Dict, class_type: str) -> list:
-    """按 class_type 查找所有匹配节点，返回 [(nid, node), ...]"""
+    """按 class_type 查找所有匹配节点，返回 [(nid, node), ...]，按节点 ID 升序排列"""
     results = []
     for nid, node in workflow.items():
         if isinstance(node, dict) and node.get('class_type') == class_type:
             results.append((nid, node))
+    results.sort(key=lambda x: int(x[0]) if x[0].isdigit() else float('inf'))
     return results
 
 
@@ -985,6 +1112,75 @@ def _set_lora_nodes(workflow: Dict, loras: list):
         return
 
 
+_TRACKING_LOCAL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache', 'gen_tracking.json')
+
+
+def _azure_available() -> bool:
+    try:
+        from azure_blob.credentials import CONNECTION_STRING
+        return bool(CONNECTION_STRING)
+    except Exception:
+        return False
+
+
+def _save_gen_tracking(batch_id, favorite_id, source_url=''):
+    """保存 batch_id → favorite_id 追踪记录（本地 + Azure 双写）"""
+    try:
+        existing = _load_gen_tracking()
+        existing[batch_id] = {
+            'favorite_id': favorite_id,
+            'source_url': source_url,
+            'created_at': time.strftime('%Y-%m-%dT%H:%M:%S')
+        }
+        text = json.dumps(existing, ensure_ascii=False, indent=2)
+
+        # 始终写本地
+        os.makedirs(os.path.dirname(_TRACKING_LOCAL_PATH), exist_ok=True)
+        with open(_TRACKING_LOCAL_PATH, 'w', encoding='utf-8') as f:
+            f.write(text)
+
+        # Azure 可用时同步
+        if _azure_available():
+            try:
+                blob = BlobStorage(container='civitaidl')
+                blob.put_json('data', 'gen_tracking.json', existing)
+            except Exception as e:
+                print(f"[Tracking] Azure 写入失败（本地已保存）: {e}")
+
+        print(f"[Tracking] 已保存: batch={batch_id} → fav={favorite_id}")
+    except Exception as e:
+        print(f"[Tracking] ⚠️ 保存失败: {e}")
+
+
+def _load_gen_tracking():
+    """加载追踪记录（本地优先，Azure 回退迁移）"""
+    # 1. 读本地
+    if os.path.exists(_TRACKING_LOCAL_PATH):
+        try:
+            with open(_TRACKING_LOCAL_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if isinstance(data, dict) and data:
+                return data
+        except Exception:
+            pass
+
+    # 2. 本地为空，尝试从 Azure 迁移
+    if _azure_available():
+        try:
+            blob = BlobStorage(container='civitaidl')
+            data = blob.get_json('data', 'gen_tracking.json') or {}
+            if data:
+                os.makedirs(os.path.dirname(_TRACKING_LOCAL_PATH), exist_ok=True)
+                with open(_TRACKING_LOCAL_PATH, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                print(f"[Tracking] 从 Azure 迁移 {len(data)} 条到本地")
+                return data
+        except Exception:
+            pass
+
+    return {}
+
+
 def run_comfyui_workflow(
     workflow_name: str,
     checkpoint: str,
@@ -1000,7 +1196,10 @@ def run_comfyui_workflow(
     loras: list = None,
     batch_size: int = 4,
     vary_sizes: bool = False,
-    variations: list = None
+    variations: list = None,
+    favorite_id: str = None,
+    source_url: str = None,
+    upscale_denoise: list = None
 ) -> Dict:
     """运行 ComfyUI 工作流（支持 UI 导出格式，自动转换为 API 格式）
     variations: 控制变量法参数列表，每个元素 {'label': ..., 'params': {sampler, scheduler, width, height}}
@@ -1043,6 +1242,32 @@ def run_comfyui_workflow(
             # 去掉子目录前缀，只保留文件名
             if '\\' in ckpt_name:
                 ckpt_name = ckpt_name.rsplit('\\', 1)[-1]
+
+            # 验证 checkpoint 在 ComfyUI 模型列表中（防止重启后模型尚未加载完）
+            _ckpt_found = False
+            for _attempt in range(12):  # 最多等 ~60s
+                try:
+                    _oi_req = urllib.request.Request(f'http://{COMFYUI_URL}/api/object_info/CheckpointLoaderSimple')
+                    with _local_opener.open(_oi_req, timeout=5) as _oi_r:
+                        _oi_data = json.loads(_oi_r.read())
+                        _avail = _oi_data.get('CheckpointLoaderSimple', {}).get('input', {}).get('required', {}).get('ckpt_name', [[]])[0]
+                        if ckpt_name in _avail:
+                            _ckpt_found = True
+                            break
+                        # 也尝试带子目录前缀匹配
+                        if any(n.endswith(ckpt_name) for n in _avail):
+                            ckpt_name = next(n for n in _avail if n.endswith(ckpt_name))
+                            _ckpt_found = True
+                            break
+                except Exception:
+                    pass
+                if _attempt == 0:
+                    print(f"[ComfyUI] Checkpoint '{ckpt_name}' 未在模型列表中找到，等待 ComfyUI 加载...")
+                time.sleep(5)
+
+            if not _ckpt_found:
+                print(f"[ComfyUI] ⚠️ Checkpoint '{ckpt_name}' 最终未找到，仍尝试提交")
+
             ckpt_nodes[0][1]['inputs']['ckpt_name'] = ckpt_name
 
         # KSampler → 同时通过连接关系定位 positive/negative 节点
@@ -1079,6 +1304,13 @@ def run_comfyui_workflow(
         if size_nodes:
             size_nodes[0][1]['inputs']['width'] = width
             size_nodes[0][1]['inputs']['height'] = height
+
+        # Upscale denoise: 将 denoise 值注入到非主 KSampler 节点（精绘 pass）
+        if upscale_denoise and len(sampler_nodes) > 1:
+            upscale_passes = sampler_nodes[1:]  # 跳过主 KSampler
+            for i, (nid, node) in enumerate(upscale_passes):
+                if i < len(upscale_denoise):
+                    node['inputs']['denoise'] = upscale_denoise[i]
 
         # 5. 确保有 SaveImage 节点（history API 需要它来输出图片）
         #    如果有 SaveImageWebsocket → 替换为 SaveImage
@@ -1210,7 +1442,9 @@ def run_comfyui_workflow(
                 'images_count': 0,
                 'saved_paths': [],
                 'message': f'已提交 {len(prompt_ids)} 个任务，生成中...',
-                '_start_time': time.time()
+                '_start_time': time.time(),
+                'favorite_id': favorite_id or '',
+                'source_url': source_url or ''
             }
 
         # 8. 后台线程等待全部完成并保存
@@ -1264,6 +1498,14 @@ def run_comfyui_workflow(
                         'azure_urls': azure_urls,
                         'message': f'批次完成，共 {total_count} 张图片已保存（本地{"✓" if azure_urls else "✗"}，Azure{"✓" if azure_urls else "✗"}）'
                     })
+
+                # 写入追踪记录（batch_id → favorite_id 映射）
+                if favorite_id:
+                    try:
+                        _save_gen_tracking(batch_id, favorite_id, source_url or '')
+                    except Exception as track_err:
+                        print(f"[Tracking] ⚠️ 写入追踪记录失败: {track_err}")
+                    # 注：不再在生图完成时标记 done，done 仅由美学分析完成后设置
             except Exception as ex:
                 try:
                     ws.close()
@@ -1401,16 +1643,23 @@ class APIHandler(BaseHTTPRequestHandler):
             if not image_url:
                 self.send_json({'status': 'error', 'message': 'missing image_url'}, 400)
                 return
-            cache_file = os.path.join(_AESTHETIC_CACHE_DIR, _aesthetic_cache_key(image_url) + '.json')
-            if os.path.exists(cache_file):
-                try:
-                    with open(cache_file, 'r', encoding='utf-8') as f:
-                        cached = json.load(f)
+            _cache_key = _aesthetic_cache_key(image_url)
+            try:
+                _rb = BlobStorage(container='civitaidl')
+                cached = _rb.get_json(_AESTHETIC_CACHE_BLOB_PREFIX, _cache_key + '.json')
+                if cached:
                     self.send_json({'status': 'success', 'blueprint': cached})
-                except Exception:
-                    self.send_json({'status': 'error', 'message': '缓存读取失败'}, 500)
-            else:
+                else:
+                    self.send_json({'status': 'not_found', 'message': '该图片暂无分析结果'})
+            except Exception:
                 self.send_json({'status': 'not_found', 'message': '该图片暂无分析结果'})
+
+        elif path == '/api/comfyui/checkpoints':
+            try:
+                ckpts = get_comfyui_checkpoints()
+                self.send_json({'status': 'ok', 'checkpoints': sorted(ckpts)})
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
 
         elif path == '/api/comfyui/queue':
             ready, data = wait_for_comfyui(timeout=10)
@@ -1420,7 +1669,7 @@ class APIHandler(BaseHTTPRequestHandler):
                 self.send_json({'status': 'error', 'message': 'ComfyUI not ready'})
         
         elif path == '/api/azure/list':
-            # 查询 Azure Blob 列表（按时间倒序，最近100个）
+            # 查询 Azure Blob 列表（按时间倒序，最近100个）+ 追踪数据
             query = parse_qs(parsed.query)
             prefix = query.get('prefix', ['generated/'])[0]
             limit = int(query.get('limit', ['100'])[0])
@@ -1429,9 +1678,12 @@ class APIHandler(BaseHTTPRequestHandler):
             try:
                 blob = BlobStorage(container='civitaidl')
                 urls = blob.list_recent_blobs(prefix=prefix, max_results=limit, return_urls=True)
+                # 加载追踪数据（batch_id → favorite_id 映射）
+                tracking = _load_gen_tracking()
                 self.send_json({
                     'success': True,
                     'blobs': urls,
+                    'tracking': tracking,
                     'total': len(urls)
                 })
             except Exception as e:
@@ -1440,29 +1692,28 @@ class APIHandler(BaseHTTPRequestHandler):
         elif path == '/api/azure/delete':
             self.send_json({'error': 'Use POST method'}, 405)
 
+        elif path == '/api/sync':
+            try:
+                from data_sync import sync_all
+                result = sync_all()
+                self.send_json({'status': 'ok', **result})
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
+
         elif path == '/api/favorite/list':
             # 读取收藏队列并返回列表（含 image_id）
-            from favorite_images import QUEUE_FILE
-            items = []
-            if os.path.exists(QUEUE_FILE):
-                try:
-                    with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            line = line.strip()
-                            if not line:
-                                continue
-                            entry = json.loads(line)
-                            # 从 URL 中提取 image_id
-                            m = re.search(r'/images/(\d+)', entry.get('url', ''))
-                            if m:
-                                entry['image_id'] = int(m.group(1))
-                            items.append(entry)
-                except Exception as e:
-                    self.send_json({'status': 'error', 'message': str(e)}, 500)
-                    return
-            # 按创建时间倒序（最新在前）
-            items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-            self.send_json({'status': 'ok', 'items': items, 'total': len(items)})
+            from favorite_images import list_all
+            try:
+                items = list_all()
+                for entry in items:
+                    m = re.search(r'/images/(\d+)', entry.get('url', ''))
+                    if m:
+                        entry['image_id'] = int(m.group(1))
+                # 按创建时间倒序（最新在前）
+                items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+                self.send_json({'status': 'ok', 'items': items, 'total': len(items)})
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
 
         elif path == '/api/image/thumb':
             # 获取 Civitai 图片缩略图 URL（带缓存）
@@ -1627,7 +1878,10 @@ class APIHandler(BaseHTTPRequestHandler):
                 loras=data.get('loras'),
                 batch_size=data.get('batch_size', 4),
                 vary_sizes=data.get('vary_sizes', False),
-                variations=data.get('variations')
+                variations=data.get('variations'),
+                favorite_id=data.get('favorite_id', ''),
+                source_url=data.get('source_url', ''),
+                upscale_denoise=data.get('upscale_denoise')
             )
             
             if result['status'] in ('success', 'submitted'):
@@ -1649,7 +1903,7 @@ class APIHandler(BaseHTTPRequestHandler):
         
         elif path == '/api/comfyui/restart':
             try:
-                _restart_comfyui()
+                _restart_comfyui(wait_ready=False)
                 self.send_json({
                     'status': 'success',
                     'message': '已终止 ComfyUI 进程，watchdog 将自动重启（约10-30秒）'
@@ -1669,13 +1923,13 @@ class APIHandler(BaseHTTPRequestHandler):
 
             # 检查缓存是否已有结果
             cache_key = _aesthetic_cache_key(image_url)
-            cache_file = os.path.join(_AESTHETIC_CACHE_DIR, cache_key + '.json')
-            if os.path.exists(cache_file) and not data.get('force', False):
+            _cache_blob = BlobStorage(container='civitaidl')
+            if not data.get('force', False):
                 try:
-                    with open(cache_file, 'r', encoding='utf-8') as f:
-                        cached = json.load(f)
-                    self.send_json({'status': 'cached', 'blueprint': cached, 'message': '已有缓存结果'})
-                    return
+                    cached = _cache_blob.get_json(_AESTHETIC_CACHE_BLOB_PREFIX, cache_key + '.json')
+                    if cached:
+                        self.send_json({'status': 'cached', 'blueprint': cached, 'message': '已有缓存结果'})
+                        return
                 except Exception:
                     pass
 
@@ -1696,10 +1950,12 @@ class APIHandler(BaseHTTPRequestHandler):
                     from llm.aesthetic import analyze, save_blueprint
                     blueprint = analyze(image_source=image_url, user_why_good=user_why_good)
                     save_blueprint(blueprint)
-                    # 按图片缓存结果
-                    os.makedirs(_AESTHETIC_CACHE_DIR, exist_ok=True)
-                    with open(cache_file, 'w', encoding='utf-8') as f:
-                        json.dump(blueprint, f, ensure_ascii=False, indent=2)
+                    # 按图片缓存结果到 Azure Blob
+                    try:
+                        _cb = BlobStorage(container='civitaidl')
+                        _cb.put_json(_AESTHETIC_CACHE_BLOB_PREFIX, cache_key + '.json', blueprint, indent=2)
+                    except Exception as _ce:
+                        print(f"[Aesthetic] 缓存写入 blob 失败: {_ce}")
                     with _aesthetic_lock:
                         _aesthetic_tasks[task_id].update({
                             'status': 'success',
@@ -1710,21 +1966,9 @@ class APIHandler(BaseHTTPRequestHandler):
                     # 如果关联了收藏条目，标记为 done
                     if _fav_id:
                         try:
-                            from favorite_images import QUEUE_FILE, _queue_lock
-                            with _queue_lock:
-                                if os.path.exists(QUEUE_FILE):
-                                    with open(QUEUE_FILE, 'r', encoding='utf-8') as ff:
-                                        fav_lines = ff.readlines()
-                                    for fi, fl in enumerate(fav_lines):
-                                        fe = json.loads(fl.strip())
-                                        if fe.get('id') == _fav_id:
-                                            fe['status'] = 'done'
-                                            fe['done_at'] = __import__('datetime').datetime.now().isoformat()
-                                            fav_lines[fi] = json.dumps(fe, ensure_ascii=False) + '\n'
-                                            with open(QUEUE_FILE, 'w', encoding='utf-8') as ff:
-                                                ff.writelines(fav_lines)
-                                            print(f"[Aesthetic] 收藏 {_fav_id} 已标记为 done")
-                                            break
+                            from favorite_images import mark_done
+                            mark_done(_fav_id)
+                            print(f"[Aesthetic] 收藏 {_fav_id} 已标记为 done")
                         except Exception as fav_err:
                             print(f"[Aesthetic] 更新收藏状态失败: {fav_err}")
                 except Exception as ex:
@@ -1745,7 +1989,9 @@ class APIHandler(BaseHTTPRequestHandler):
 
         elif path == '/api/cache/refresh':
             model_cache.refresh_all()
-            self.send_json({'status': 'success', 'message': 'Cache refreshed'})
+            from util import model_index
+            model_index.load()
+            self.send_json({'status': 'success', 'message': 'Cache refreshed (including model index)'})
         
         elif path == '/api/favorite/add':
             # 添加收藏图片 URL
@@ -1769,75 +2015,29 @@ class APIHandler(BaseHTTPRequestHandler):
 
         elif path == '/api/favorite/update-status':
             # 按 id 更新收藏条目状态
-            from favorite_images import QUEUE_FILE, _queue_lock
+            from favorite_images import update_status
             item_id = data.get('id', '')
             new_status = data.get('status', '')
             if not item_id or not new_status:
                 self.send_json({'status': 'error', 'message': '缺少 id 或 status 参数'}, 400)
                 return
-            if new_status not in ('pending', 'processing', 'done'):
+            if new_status not in ('pending', 'processing', 'done', 'fail'):
                 self.send_json({'status': 'error', 'message': '无效的 status 值'}, 400)
                 return
-            try:
-                with _queue_lock:
-                    if not os.path.exists(QUEUE_FILE):
-                        self.send_json({'status': 'error', 'message': '收藏文件不存在'}, 404)
-                        return
-                    with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-                        lines = f.readlines()
-                    updated = False
-                    for i, line in enumerate(lines):
-                        entry = json.loads(line.strip())
-                        if entry.get('id') == item_id:
-                            entry['status'] = new_status
-                            if new_status == 'processing':
-                                entry['processing_at'] = __import__('datetime').datetime.now().isoformat()
-                            elif new_status == 'done':
-                                entry['done_at'] = __import__('datetime').datetime.now().isoformat()
-                            lines[i] = json.dumps(entry, ensure_ascii=False) + '\n'
-                            updated = True
-                            break
-                    if not updated:
-                        self.send_json({'status': 'error', 'message': '未找到该条目'}, 404)
-                        return
-                    with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
-                        f.writelines(lines)
-                self.send_json({'status': 'ok', 'message': f'状态已更新为 {new_status}'})
-            except Exception as e:
-                self.send_json({'status': 'error', 'message': str(e)}, 500)
+            result = update_status(item_id, new_status)
+            status_code = 200 if result['status'] == 'ok' else 404
+            self.send_json(result, status_code)
 
         elif path == '/api/favorite/delete':
             # 按 id 删除收藏条目
-            from favorite_images import QUEUE_FILE
+            from favorite_images import delete_by_id
             item_id = data.get('id', '')
             if not item_id:
                 self.send_json({'status': 'error', 'message': '缺少 id 参数'}, 400)
                 return
-            if not os.path.exists(QUEUE_FILE):
-                self.send_json({'status': 'error', 'message': '收藏文件不存在'}, 404)
-                return
-            try:
-                with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-                remaining = []
-                found = False
-                for line in lines:
-                    line_s = line.strip()
-                    if not line_s:
-                        continue
-                    entry = json.loads(line_s)
-                    if entry.get('id') == item_id:
-                        found = True
-                    else:
-                        remaining.append(line_s + '\n')
-                if not found:
-                    self.send_json({'status': 'error', 'message': '未找到该条目'}, 404)
-                    return
-                with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
-                    f.writelines(remaining)
-                self.send_json({'status': 'ok', 'message': '已删除'})
-            except Exception as e:
-                self.send_json({'status': 'error', 'message': str(e)}, 500)
+            result = delete_by_id(item_id)
+            status_code = 200 if result['status'] == 'ok' else 404
+            self.send_json(result, status_code)
 
         elif path == '/api/favorite/cleanup':
             # 清理已完成的
@@ -1881,6 +2081,13 @@ class APIHandler(BaseHTTPRequestHandler):
 
 def run_server():
     """启动 API 服务器"""
+    # 启动时自动同步本地 ↔ Azure 数据
+    try:
+        from data_sync import sync_all
+        sync_all()
+    except Exception as e:
+        print(f"[Startup] 数据同步失败（不影响启动）: {e}")
+
     class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
         daemon_threads = True
 

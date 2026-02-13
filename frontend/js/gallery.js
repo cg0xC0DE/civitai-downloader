@@ -7,11 +7,14 @@ class Gallery {
     constructor(apiBase) {
         this.apiBase = apiBase;
         this.blobs = [];
+        this.tracking = {};  // batch_id -> { favorite_id, source_url }
         this.currentIndex = 0;
         this.pageSize = 20;
         this.isLoading = false;
         this.isDeleting = false;
         this.isAnalyzing = false;
+        this.compareMode = true;
+        this._compareCache = {}; // imageId -> { thumb_url, width, height }
         this.init();
     }
 
@@ -46,12 +49,15 @@ class Gallery {
         this.els.imageContainer.innerHTML = '';
 
         try {
-            const response = await fetch(`${this.apiBase}/api/azure/list`);
+            const response = await fetch(`${this.apiBase}/api/azure/list`, {
+                headers: { 'ngrok-skip-browser-warning': '1' }
+            });
             const data = await response.json();
 
             if (data.success && data.blobs) {
                 // 按时间倒序（最新的在前）
                 this.blobs = data.blobs;
+                this.tracking = data.tracking || {};
                 this.currentIndex = 0;
                 this.render();
             } else {
@@ -110,10 +116,39 @@ class Gallery {
         // 从 URL 提取信息
         const info = this.parseFilename(filename);
 
-        this.els.imageContainer.innerHTML = `
-            <img src="${url}" alt="${filename}" class="gallery-image" onload="gallery.onImageLoad()"
-                 onerror="gallery.onImageError()">
-        `;
+        // 追踪：从文件名提取 batch_id，查找关联的收藏
+        const batchId = filename.split('_')[0] || '';
+        const trackInfo = this.tracking[batchId] || null;
+        const favId = trackInfo ? trackInfo.favorite_id : '';
+        const favSourceUrl = trackInfo ? trackInfo.source_url : '';
+        // 比对模式（需要有来源 URL）或单图模式
+        if (this.compareMode && favSourceUrl) {
+            this._renderCompare(url, favSourceUrl, filename);
+        } else {
+            this.els.imageContainer.innerHTML = `
+                <img src="${url}" alt="${filename}" class="gallery-image" onload="gallery.onImageLoad()"
+                     onerror="gallery.onImageError()">
+            `;
+        }
+
+        // 追踪按钮行
+        const compareBtn = favSourceUrl ? `
+                <button class="btn btn-outline btn-sm" style="flex: 1; color: #06b6d4; border-color: #06b6d4; min-width: 0;"
+                        onclick="gallery.toggleCompare()">
+                    ${this.compareMode ? '🖼️ 单图模式' : '🔀 原图比对'}
+                </button>` : '';
+        const trackingRow = favId ? `
+            <div class="gallery-info-item" style="border: none; padding-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                ${compareBtn}
+                <button class="btn btn-outline btn-sm" style="flex: 1; color: #2563eb; border-color: #2563eb; min-width: 0;"
+                        onclick="gallery.goToFavorite('${favId}')">
+                    ⭐ 查看来源收藏
+                </button>
+                <button class="btn btn-outline btn-sm" style="flex: 1; color: #f59e0b; border-color: #f59e0b; min-width: 0;"
+                        onclick="gallery.markFavFail('${favId}')">
+                    ❌ 标记复刻失败
+                </button>
+            </div>` : '';
 
         this.els.imageInfo.innerHTML = `
             <div class="gallery-info-item">
@@ -126,10 +161,12 @@ class Gallery {
                     <span class="gallery-info-value">${info.date}</span>
                 </div>
             ` : ''}
-            <div class="gallery-info-item">
-                <span class="gallery-info-label">URL</span>
-                <span class="gallery-info-value gallery-url">${url}</span>
-            </div>
+            ${favSourceUrl ? `
+                <div class="gallery-info-item">
+                    <span class="gallery-info-label">来源</span>
+                    <span class="gallery-info-value"><a href="${favSourceUrl}" target="_blank" style="color:var(--accent);">${favSourceUrl.length > 50 ? favSourceUrl.slice(0, 50) + '...' : favSourceUrl}</a></span>
+                </div>
+            ` : ''}
             <div class="gallery-info-item" style="border: none; padding-top: 12px; display: flex; gap: 8px;">
                 <button class="btn btn-outline btn-sm" style="flex: 1; color: #dc2626; border-color: #dc2626;"
                         onclick="gallery.deleteBlob('${blobPath}')" ${this.isDeleting ? 'disabled' : ''}>
@@ -140,6 +177,7 @@ class Gallery {
                     ${this.isAnalyzing ? '⏳ 分析中...' : '🔍 美学分析'}
                 </button>
             </div>
+            ${trackingRow}
         `;
     }
 
@@ -188,13 +226,13 @@ class Gallery {
                     this.currentIndex = Math.max(0, this.blobs.length - 1);
                 }
                 this.render();
-                alert('已删除');
+                showToast('已删除');
             } else {
-                alert('删除失败: ' + result.error);
+                showToast('删除失败: ' + result.error, 'error');
             }
         } catch (error) {
             console.error('Delete error:', error);
-            alert('删除失败: ' + error.message);
+            showToast('删除失败: ' + error.message, 'error');
         } finally {
             this.isDeleting = false;
             if (this.blobs.length > 0) {
@@ -248,6 +286,64 @@ class Gallery {
         // 图片加载成功
     }
 
+    toggleCompare() {
+        this.compareMode = !this.compareMode;
+        this.renderCurrentImage();
+    }
+
+    async _renderCompare(myUrl, sourceUrl, filename) {
+        // 从 source_url 提取 image_id
+        const m = sourceUrl.match(/\/images\/(\d+)/);
+        if (!m) {
+            this.els.imageContainer.innerHTML = `<img src="${myUrl}" alt="${filename}" class="gallery-image">`;
+            return;
+        }
+        const imageId = m[1];
+
+        // 显示加载中
+        this.els.imageContainer.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);"><span class="loading-spinner"></span> 加载原图中...</div>`;
+
+        // 获取原图（带缓存）
+        let orig = this._compareCache[imageId];
+        if (!orig) {
+            try {
+                const res = await fetch(`${this.apiBase}/api/image/thumb?id=${imageId}`, {
+                    headers: { 'ngrok-skip-browser-warning': '1' }
+                });
+                orig = await res.json();
+                if (orig.status === 'ok') this._compareCache[imageId] = orig;
+            } catch (e) {
+                showToast('获取原图失败: ' + e.message, 'error');
+                this.els.imageContainer.innerHTML = `<img src="${myUrl}" alt="${filename}" class="gallery-image">`;
+                return;
+            }
+        }
+        if (!orig || !orig.thumb_url) {
+            showToast('无法获取原图', 'error');
+            this.els.imageContainer.innerHTML = `<img src="${myUrl}" alt="${filename}" class="gallery-image">`;
+            return;
+        }
+
+        // 用原图宽高比大的 URL
+        const origUrl = orig.thumb_url.replace(/\/width=\d+/, '/width=1024');
+        const isPortrait = (orig.height || 0) > (orig.width || 0);
+
+        // 竖版左右并列，横版上下并列
+        const dir = isPortrait ? 'row' : 'column';
+        this.els.imageContainer.innerHTML = `
+            <div style="display:flex; flex-direction:${dir}; gap:4px; width:100%; align-items:center;">
+                <div style="flex:1; min-width:0; text-align:center; position:relative;">
+                    <div style="position:absolute;top:6px;left:6px;background:#0008;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;z-index:1;">我的作品</div>
+                    <img src="${myUrl}" alt="我的作品" style="width:100%;border-radius:8px;display:block;">
+                </div>
+                <div style="flex:1; min-width:0; text-align:center; position:relative;">
+                    <div style="position:absolute;top:6px;left:6px;background:#0008;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;z-index:1;">原图</div>
+                    <img src="${origUrl}" alt="原图" style="width:100%;border-radius:8px;display:block;">
+                </div>
+            </div>
+        `;
+    }
+
     onImageError() {
         this.els.imageContainer.innerHTML = `
             <div class="gallery-error">
@@ -255,6 +351,65 @@ class Gallery {
                 <p class="gallery-error-url">${this.blobs[this.currentIndex]}</p>
             </div>
         `;
+    }
+
+    async markFavFail(favId) {
+        if (!favId) return;
+        if (!confirm('确定标记为"复刻失败"并删除当前图片？')) return;
+        try {
+            // 1. 标记收藏为 fail
+            const res = await fetch(`${this.apiBase}/api/favorite/update-status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+                body: JSON.stringify({ id: favId, status: 'fail' })
+            });
+            const data = await res.json();
+            if (data.status !== 'ok') {
+                showToast('标记失败: ' + (data.message || ''), 'error');
+                return;
+            }
+
+            // 2. 删除当前图片
+            const url = this.blobs[this.currentIndex];
+            if (url) {
+                const blobPath = this.extractBlobPath(url);
+                await fetch(`${this.apiBase}/api/azure/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+                    body: JSON.stringify({ path: blobPath })
+                });
+                this.blobs.splice(this.currentIndex, 1);
+                if (this.currentIndex >= this.blobs.length) {
+                    this.currentIndex = Math.max(0, this.blobs.length - 1);
+                }
+                this.render();
+            }
+            showToast('已标记失败并删除');
+        } catch (err) {
+            showToast('请求失败: ' + err.message, 'error');
+        }
+    }
+
+    goToFavorite(favId) {
+        if (!favId) return;
+        // 切换到收藏 tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('.tab-btn[data-tab="favorites"]').classList.add('active');
+        document.getElementById('favorites').classList.add('active');
+        // 通知 app 跳转到指定收藏
+        if (window.app && window.app._favAllItems) {
+            // 先切到「全部」筛选
+            window.app._setFavFilter('all');
+            const idx = window.app._favItems.findIndex(i => i.id === favId);
+            if (idx >= 0) {
+                window.app._favIndex = idx;
+                window.app.favRenderCurrent();
+            } else {
+                // 可能未加载，触发加载
+                window.app.loadFavorites();
+            }
+        }
     }
 
     showAnalyzeModal() {

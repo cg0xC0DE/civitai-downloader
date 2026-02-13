@@ -217,10 +217,37 @@ class CivitaiDownloader:
                         if progress_callback:
                             progress_callback(downloaded, total_size)
             
-            # 下载后校验：文件太小可能不对
-            if total_size > 0 and downloaded < total_size * 0.9:
+            # 下载后校验：精确字节匹配
+            if total_size > 0 and downloaded != total_size:
+                # 文件不完整，删除残留
+                try:
+                    os.remove(file_path)
+                except OSError:
+                    pass
                 return {"status": "error", "message": f"下载不完整：期望 {total_size} 字节，实际 {downloaded} 字节"}
-            
+
+            # safetensors 格式校验
+            if file_name.lower().endswith('.safetensors'):
+                try:
+                    with open(file_path, 'rb') as vf:
+                        header_size_bytes = vf.read(8)
+                        if len(header_size_bytes) < 8:
+                            raise ValueError("文件过小，无法读取 safetensors 头")
+                        header_size = int.from_bytes(header_size_bytes, 'little')
+                        if header_size <= 0 or header_size > 100_000_000:
+                            raise ValueError(f"safetensors 头长度异常: {header_size}")
+                        header_bytes = vf.read(header_size)
+                        if len(header_bytes) < header_size:
+                            raise ValueError(f"safetensors 头不完整: 期望 {header_size}，实际 {len(header_bytes)}")
+                        import json as _json
+                        _json.loads(header_bytes)  # 头部必须是有效 JSON
+                except Exception as ve:
+                    try:
+                        os.remove(file_path)
+                    except OSError:
+                        pass
+                    return {"status": "error", "message": f"文件损坏（safetensors 校验失败）: {ve}"}
+
             return {
                 "status": "ok",
                 "file_path": file_path,

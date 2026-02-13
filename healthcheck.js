@@ -31,6 +31,31 @@ const PORTS = {
   ngrok: 4040
 };
 
+const { execSync } = require('child_process');
+
+function killPortProcess(port) {
+  try {
+    const out = execSync(`netstat -ano -p TCP`, { encoding: 'utf-8', timeout: 10000 });
+    const pids = new Set();
+    for (const line of out.split('\n')) {
+      if (line.includes(`:${port} `) && line.includes('LISTENING')) {
+        const parts = line.trim().split(/\s+/);
+        const pid = parseInt(parts[parts.length - 1]);
+        if (pid > 0) pids.add(pid);
+      }
+    }
+    for (const pid of pids) {
+      try {
+        execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore', timeout: 10000 });
+        console.log(`  [guard] Killed PID ${pid} on port ${port}`);
+      } catch (e) { /* process may have already exited */ }
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function httpGet(url, timeout = 10000) {
   return new Promise((resolve) => {
     const isHttps = url.startsWith('https');
@@ -134,16 +159,26 @@ function validateContentWithKeywords(name, status, body, keywords) {
 
 async function startService(name) {
   const scripts = {
-    backend: { cmd: 'cmd /c "C:/workplace/civitai-downloader/start_backend.cmd"', cwd: 'C:/workplace/civitai-downloader' },
-    frontend: { cmd: 'cmd /c "C:/workplace/civitai-downloader/start_frontend.cmd"', cwd: 'C:/workplace/civitai-downloader' },
-    nginx: { cmd: 'C:/nginx-1.28.1/nginx.exe', args: ['-c', 'C:/nginx-1.28.1/conf/nginx.conf'], cwd: 'C:/nginx-1.28.1' },
-    ngrok: { cmd: 'cmd', args: ['/c', 'set', 'HTTP_PROXY=&', 'set', 'HTTPS_PROXY=&', 'ngrok.exe', 'http', '80'], cwd: 'C:/workplace' }
+    backend: { cmd: 'cmd /c "C:/workplace/civitai-downloader/start_backend.cmd"', cwd: 'C:/workplace/civitai-downloader', port: 53133 },
+    frontend: { cmd: 'cmd /c "C:/workplace/civitai-downloader/start_frontend.cmd"', cwd: 'C:/workplace/civitai-downloader', port: 53134 },
+    nginx: { cmd: 'C:/nginx-1.28.1/nginx.exe', args: ['-c', 'C:/nginx-1.28.1/conf/nginx.conf'], cwd: 'C:/nginx-1.28.1', port: 80 },
+    ngrok: { cmd: 'cmd', args: ['/c', 'set', 'HTTP_PROXY=&', 'set', 'HTTPS_PROXY=&', 'ngrok.exe', 'http', '80'], cwd: 'C:/workplace', port: 4040 }
   };
 
   const cfg = scripts[name];
   if (!cfg) {
     console.log(`[healthcheck] 未知服务: ${name}`);
     return false;
+  }
+
+  // Guard: kill zombie/orphan processes occupying the port
+  if (cfg.port) {
+    const portOpen = await isPortOpen(cfg.port);
+    if (portOpen) {
+      console.log(`[healthcheck] Port ${cfg.port} occupied, killing existing processes...`);
+      killPortProcess(cfg.port);
+      await wait(500);
+    }
   }
 
   console.log(`\n[healthcheck] 启动 ${name}...`);

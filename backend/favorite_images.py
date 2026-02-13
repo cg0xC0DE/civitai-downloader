@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-收藏图片 URL 接收接口
+收藏图片 URL 管理（local-first + Azure 双写）
 
-功能：
-- 接收 Civitai 图片 URL
-- 验证 URL 格式
-- 保存到缓存文件（支持多生产者）
+存储策略：
+- 本地：cache/favorite_images/queue.jsonl（始终读写）
+- Azure：data/favorite_images.jsonl（有配置时同步写入）
+- 首次启动若本地为空但 Azure 有数据，会自动迁移到本地
 
 Usage:
     POST /api/favorite-images
@@ -21,22 +21,102 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 
-# 配置
-CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache')
-MAX_QUEUE_SIZE = 10000  # 最大队列长度
-QUEUE_FILE = os.path.join(CACHE_DIR, 'favorite_images.jsonl')
+# ============== 存储配置 ==============
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+_LOCAL_PATH = os.path.join(_BACKEND_DIR, 'cache', 'favorite_images', 'queue.jsonl')
 
-# 线程安全队列
+_BLOB_CONTAINER = 'civitaidl'
+_BLOB_SUBFOLDER = 'data'
+_BLOB_FILENAME = 'favorite_images.jsonl'
+
+# 线程安全锁
 _queue_lock = threading.Lock()
-_url_queue = []
+
+
+def _azure_available() -> bool:
+    """检查 Azure Blob 是否可用"""
+    try:
+        from azure_blob.credentials import CONNECTION_STRING
+        return bool(CONNECTION_STRING)
+    except Exception:
+        return False
+
+
+def _get_blob():
+    """获取 BlobStorage 实例（仅 Azure 可用时调用）"""
+    from azure_blob import BlobStorage
+    return BlobStorage(container=_BLOB_CONTAINER)
+
+
+def _parse_jsonl(text: str) -> list:
+    """解析 JSONL 文本为列表"""
+    if not text:
+        return []
+    entries = []
+    for line in text.strip().split('\n'):
+        line = line.strip()
+        if line:
+            try:
+                entries.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return entries
+
+
+def _entries_to_jsonl(entries: list) -> str:
+    """列表转 JSONL 文本"""
+    lines = [json.dumps(e, ensure_ascii=False) for e in entries]
+    return '\n'.join(lines) + '\n' if lines else ''
+
+
+def _read_all_entries() -> list:
+    """读取所有条目（本地优先，Azure 回退迁移）"""
+    # 1. 尝试读本地
+    if os.path.exists(_LOCAL_PATH):
+        with open(_LOCAL_PATH, 'r', encoding='utf-8') as f:
+            entries = _parse_jsonl(f.read())
+        if entries:
+            return entries
+
+    # 2. 本地为空，尝试从 Azure 迁移
+    if _azure_available():
+        try:
+            blob = _get_blob()
+            text = blob.get_text(_BLOB_SUBFOLDER, _BLOB_FILENAME)
+            entries = _parse_jsonl(text)
+            if entries:
+                # 写入本地缓存
+                os.makedirs(os.path.dirname(_LOCAL_PATH), exist_ok=True)
+                with open(_LOCAL_PATH, 'w', encoding='utf-8') as f:
+                    f.write(_entries_to_jsonl(entries))
+                print(f"[Favorites] 从 Azure 迁移 {len(entries)} 条到本地")
+                return entries
+        except Exception as e:
+            print(f"[Favorites] Azure 读取失败: {e}")
+
+    return []
+
+
+def _write_all_entries(entries: list):
+    """写入所有条目（本地 + Azure 双写）"""
+    text = _entries_to_jsonl(entries)
+
+    # 1. 始终写本地
+    os.makedirs(os.path.dirname(_LOCAL_PATH), exist_ok=True)
+    with open(_LOCAL_PATH, 'w', encoding='utf-8') as f:
+        f.write(text)
+
+    # 2. 有 Azure 配置时同步写入
+    if _azure_available():
+        try:
+            blob = _get_blob()
+            blob.put_text(_BLOB_SUBFOLDER, _BLOB_FILENAME, text)
+        except Exception as e:
+            print(f"[Favorites] Azure 写入失败（本地已保存）: {e}")
 
 # URL 正则验证
 IMAGE_URL_PATTERN = re.compile(r'^https://civitai\.com/images/\d+$')
 
-
-def init_cache_dir():
-    """初始化缓存目录"""
-    os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 def validate_url(url: str) -> tuple:
@@ -77,7 +157,7 @@ def validate_url(url: str) -> tuple:
 
 def save_url_to_queue(url: str) -> dict:
     """
-    保存 URL 到队列文件
+    保存 URL 到队列（Azure Blob）
     返回: {"status": "ok"/"error", "id": "...", "message": "..."}
     """
     try:
@@ -89,16 +169,17 @@ def save_url_to_queue(url: str) -> dict:
         entry_id = str(uuid.uuid4())[:8]
         timestamp = __import__('datetime').datetime.now().isoformat()
         
-        # 写入队列文件 (JSONL 格式)
+        entry = {
+            "id": entry_id,
+            "url": url,
+            "status": "pending",
+            "created_at": timestamp,
+        }
+        
         with _queue_lock:
-            with open(QUEUE_FILE, 'a', encoding='utf-8') as f:
-                entry = {
-                    "id": entry_id,
-                    "url": url,
-                    "status": "pending",
-                    "created_at": timestamp,
-                }
-                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+            entries = _read_all_entries()
+            entries.append(entry)
+            _write_all_entries(entries)
         
         return {
             "status": "ok",
@@ -118,33 +199,16 @@ def consume_one() -> dict:
     """
     try:
         with _queue_lock:
-            # 读取所有行
-            if not os.path.exists(QUEUE_FILE):
+            entries = _read_all_entries()
+            if not entries:
                 return {"status": "empty", "message": "队列为空"}
             
-            with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-            
-            if not lines:
-                return {"status": "empty", "message": "队列为空"}
-            
-            # 找到第一条 pending 状态
-            for i, line in enumerate(lines):
-                entry = json.loads(line.strip())
+            for entry in entries:
                 if entry.get('status') == 'pending':
-                    # 更新状态为 processing
                     entry['status'] = 'processing'
                     entry['processing_at'] = __import__('datetime').datetime.now().isoformat()
-                    lines[i] = json.dumps(entry, ensure_ascii=False) + '\n'
-                    
-                    # 写回文件
-                    with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
-                        f.writelines(lines)
-                    
-                    return {
-                        "status": "ok",
-                        "consumed": entry
-                    }
+                    _write_all_entries(entries)
+                    return {"status": "ok", "consumed": entry}
             
             return {"status": "empty", "message": "没有待处理的 URL"}
     
@@ -158,28 +222,19 @@ def mark_done(entry_id: str) -> dict:
     """
     try:
         with _queue_lock:
-            if not os.path.exists(QUEUE_FILE):
-                return {"status": "error", "message": "队列文件不存在"}
-            
-            with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-            
+            entries = _read_all_entries()
             updated = False
-            for i, line in enumerate(lines):
-                entry = json.loads(line.strip())
+            for entry in entries:
                 if entry.get('id') == entry_id:
                     entry['status'] = 'done'
                     entry['done_at'] = __import__('datetime').datetime.now().isoformat()
-                    lines[i] = json.dumps(entry, ensure_ascii=False) + '\n'
                     updated = True
                     break
             
             if not updated:
                 return {"status": "error", "message": "未找到对应记录"}
             
-            with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
-                f.writelines(lines)
-            
+            _write_all_entries(entries)
             return {"status": "ok", "message": "已标记完成"}
     
     except Exception as e:
@@ -190,29 +245,10 @@ def cleanup_done():
     """清理已完成的记录"""
     try:
         with _queue_lock:
-            if not os.path.exists(QUEUE_FILE):
-                return {"status": "error", "message": "队列文件不存在"}
-            
-            with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-            
-            remaining = []
-            removed = 0
-            for line in lines:
-                entry = json.loads(line.strip())
-                if entry.get('status') != 'done':
-                    remaining.append(line)
-                else:
-                    removed += 1
-            
-            if remaining:
-                with open(QUEUE_FILE, 'w', encoding='utf-8') as f:
-                    f.writelines(remaining)
-            else:
-                # 清空文件
-                with open(QUEUE_FILE, 'w') as f:
-                    pass
-            
+            entries = _read_all_entries()
+            remaining = [e for e in entries if e.get('status') != 'done']
+            removed = len(entries) - len(remaining)
+            _write_all_entries(remaining)
             return {"status": "ok", "removed": removed, "remaining": len(remaining)}
     
     except Exception as e:
@@ -222,22 +258,74 @@ def cleanup_done():
 def get_queue_status() -> dict:
     """获取队列状态"""
     try:
-        if not os.path.exists(QUEUE_FILE):
-            return {"total": 0, "pending": 0, "processing": 0, "done": 0}
-        
-        with open(QUEUE_FILE, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-        
-        stats = {"total": len(lines), "pending": 0, "processing": 0, "done": 0}
-        for line in lines:
-            entry = json.loads(line.strip())
+        entries = _read_all_entries()
+        stats = {"total": len(entries), "pending": 0, "processing": 0, "done": 0, "fail": 0}
+        for entry in entries:
             status = entry.get('status', 'pending')
             stats[status] = stats.get(status, 0) + 1
-        
         return stats
     
-    except Exception:
-        return {"error": str(Exception)}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ============== 新增方法（供 server.py 统一调用） ==============
+
+def list_all() -> list:
+    """返回所有收藏条目"""
+    return _read_all_entries()
+
+
+def update_status(entry_id: str, new_status: str) -> dict:
+    """
+    按 id 更新收藏条目状态
+    返回: {"status": "ok"/"error", "message": "..."}
+    """
+    try:
+        with _queue_lock:
+            entries = _read_all_entries()
+            updated = False
+            for entry in entries:
+                if entry.get('id') == entry_id:
+                    entry['status'] = new_status
+                    if new_status == 'processing':
+                        entry['processing_at'] = __import__('datetime').datetime.now().isoformat()
+                    elif new_status == 'done':
+                        entry['done_at'] = __import__('datetime').datetime.now().isoformat()
+                    elif new_status == 'fail':
+                        entry['fail_at'] = __import__('datetime').datetime.now().isoformat()
+                    updated = True
+                    break
+            
+            if not updated:
+                return {"status": "error", "message": "未找到对应记录"}
+            
+            _write_all_entries(entries)
+            return {"status": "ok", "message": f"已更新为 {new_status}"}
+    
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+def delete_by_id(entry_id: str) -> dict:
+    """
+    按 id 删除收藏条目
+    返回: {"status": "ok"/"error", "message": "..."}
+    """
+    try:
+        with _queue_lock:
+            entries = _read_all_entries()
+            before = len(entries)
+            entries = [e for e in entries if e.get('id') != entry_id]
+            
+            if len(entries) == before:
+                return {"status": "error", "message": "未找到对应记录"}
+            
+            _write_all_entries(entries)
+            return {"status": "ok", "message": "已删除"}
+    
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 # ============== HTTP Handler ==============
@@ -302,12 +390,10 @@ class APIHandler(BaseHTTPRequestHandler):
 
 def run_server(port: int = None):
     """启动服务"""
-    init_cache_dir()
-    
     port = port or 53133
     server = HTTPServer(('0.0.0.0', port), APIHandler)
     print(f"[API] 收藏图片服务已启动: http://localhost:{port}")
-    print(f"[API] 队列文件: {QUEUE_FILE}")
+    print(f"[API] 数据源: Azure Blob {_BLOB_CONTAINER}/{_BLOB_SUBFOLDER}/{_BLOB_FILENAME}")
     server.serve_forever()
 
 

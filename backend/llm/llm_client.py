@@ -100,12 +100,16 @@ def _call_api(messages, model=None, temperature=0.7, max_tokens=4096,
     url = f"{api_base}/chat/completions"
     model = model or default_model
 
+    # gpt-5 / o 系列模型使用 max_completion_tokens 且不支持自定义 temperature
+    _new_param_models = ('gpt-5', 'o1', 'o3', 'o4')
+    use_new = any(model.startswith(p) for p in _new_param_models)
     body = {
         "model": model,
         "messages": messages,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
+        "max_completion_tokens" if use_new else "max_tokens": max_tokens,
     }
+    if not use_new:
+        body["temperature"] = temperature
     if response_format:
         body["response_format"] = response_format
 
