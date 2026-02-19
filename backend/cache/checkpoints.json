@@ -1,0 +1,636 @@
+{
+  "items": [
+    {
+      "name": "chroma_v10HD.safetensors",
+      "path": "D:/ckpt\\flux\\chroma_v10HD.safetensors",
+      "size": 17800038288,
+      "subdir": "flux"
+    },
+    {
+      "name": "Chroma1-HD-fp8_scaled_rev2.safetensors",
+      "path": "D:/ckpt\\flux\\Chroma1-HD-fp8_scaled_rev2.safetensors",
+      "size": 8906274022,
+      "subdir": "flux"
+    },
+    {
+      "name": "AnythingXL_xl.safetensors",
+      "path": "D:/ckpt\\xl\\AnythingXL_xl.safetensors",
+      "size": 6938041578,
+      "subdir": "xl"
+    },
+    {
+      "name": "autismmixSDXL_autismmixConfetti.safetensors",
+      "path": "D:/ckpt\\xl\\autismmixSDXL_autismmixConfetti.safetensors",
+      "size": 6938041154,
+      "subdir": "xl"
+    },
+    {
+      "name": "hassakuXLHentai_v13.safetensors",
+      "path": "D:/ckpt\\xl\\hassakuXLHentai_v13.safetensors",
+      "size": 6938042770,
+      "subdir": "xl"
+    },
+    {
+      "name": "realcartoonXL_v6.safetensors",
+      "path": "D:/ckpt\\xl\\realcartoonXL_v6.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "astraaliKarvapillu_v2.safetensors",
+      "path": "D:/ckpt\\xl\\astraaliKarvapillu_v2.safetensors",
+      "size": 6938041970,
+      "subdir": "xl"
+    },
+    {
+      "name": "cashmoneyAnime_v10.safetensors",
+      "path": "D:/ckpt\\xl\\cashmoneyAnime_v10.safetensors",
+      "size": 6938041578,
+      "subdir": "xl"
+    },
+    {
+      "name": "counterfeitxl_v10.safetensors",
+      "path": "D:/ckpt\\xl\\counterfeitxl_v10.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "breakdomainxl_V05g.safetensors",
+      "path": "D:/ckpt\\xl\\breakdomainxl_V05g.safetensors",
+      "size": 6938042252,
+      "subdir": "xl"
+    },
+    {
+      "name": "meichidarkmixReload_meichidarkanimv2Lust.safetensors",
+      "path": "D:/ckpt\\xl\\meichidarkmixReload_meichidarkanimv2Lust.safetensors",
+      "size": 6938044778,
+      "subdir": "xl"
+    },
+    {
+      "name": "duchaitenPonyReal_ponyRealV11Fix.safetensors",
+      "path": "D:/ckpt\\xl\\duchaitenPonyReal_ponyRealV11Fix.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "plantMilkModelSuite_almond.safetensors",
+      "path": "D:/ckpt\\xl\\plantMilkModelSuite_almond.safetensors",
+      "size": 7105357712,
+      "subdir": "xl"
+    },
+    {
+      "name": "prefectIllustriousXL_v10.safetensors",
+      "path": "D:/ckpt\\xl\\prefectIllustriousXL_v10.safetensors",
+      "size": 6938041160,
+      "subdir": "xl"
+    },
+    {
+      "name": "waiNSFWIllustrious_v130.safetensors",
+      "path": "D:/ckpt\\xl\\waiNSFWIllustrious_v130.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "asianRealismByStable_v10FP16PONY.safetensors",
+      "path": "D:/ckpt\\xl\\asianRealismByStable_v10FP16PONY.safetensors",
+      "size": 6938040864,
+      "subdir": "xl"
+    },
+    {
+      "name": "plantMilkModelSuite_hempII.safetensors",
+      "path": "D:/ckpt\\xl\\plantMilkModelSuite_hempII.safetensors",
+      "size": 7105349432,
+      "subdir": "xl"
+    },
+    {
+      "name": "Autismmix Sdxl_AutismMix_pony_autismmixSDXL_autismmixPony.safetensors",
+      "path": "D:/ckpt\\xl\\Autismmix Sdxl_AutismMix_pony_autismmixSDXL_autismmixPony.safetensors",
+      "size": 6938041146,
+      "subdir": "xl"
+    },
+    {
+      "name": "The Deep Dark_v6.0 Hybrid_theDeepDark_v60Hybrid.safetensors",
+      "path": "D:/ckpt\\xl\\The Deep Dark_v6.0 Hybrid_theDeepDark_v60Hybrid.safetensors",
+      "size": 6938043608,
+      "subdir": "xl"
+    },
+    {
+      "name": "Everclear PNY by Zovya_V3_everclearPNYByZovya_v3.safetensors",
+      "path": "D:/ckpt\\xl\\Everclear PNY by Zovya_V3_everclearPNYByZovya_v3.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "Explicit Freedom - NSFW Waifu_Alpha_explicitFreedomNSFW_alpha.safetensors",
+      "path": "D:/ckpt\\xl\\Explicit Freedom - NSFW Waifu_Alpha_explicitFreedomNSFW_alpha.safetensors",
+      "size": 6938048732,
+      "subdir": "xl"
+    },
+    {
+      "name": "Five Stars Illustrious ⭐⭐⭐⭐⭐_1.0_fiveStarsIllustrious_10.safetensors",
+      "path": "D:/ckpt\\xl\\Five Stars Illustrious ⭐⭐⭐⭐⭐_1.0_fiveStarsIllustrious_10.safetensors",
+      "size": 6938040866,
+      "subdir": "xl"
+    },
+    {
+      "name": "Illustrij_v6_illustrij_v6.safetensors",
+      "path": "D:/ckpt\\xl\\Illustrij_v6_illustrij_v6.safetensors",
+      "size": 7359696764,
+      "subdir": "xl"
+    },
+    {
+      "name": "iLustMix_v3.0_ilustmix_v30.safetensors",
+      "path": "D:/ckpt\\xl\\iLustMix_v3.0_ilustmix_v30.safetensors",
+      "size": 6938042556,
+      "subdir": "xl"
+    },
+    {
+      "name": "Nova Orange XL_v9.0_novaOrangeXL_v90.safetensors",
+      "path": "D:/ckpt\\xl\\Nova Orange XL_v9.0_novaOrangeXL_v90.safetensors",
+      "size": 6938392948,
+      "subdir": "xl"
+    },
+    {
+      "name": "Realism By Stable Yogi (Pony)_Pony_V3_VAE_realismByStableYogi_ponyV3VAE.safetensors",
+      "path": "D:/ckpt\\xl\\Realism By Stable Yogi (Pony)_Pony_V3_VAE_realismByStableYogi_ponyV3VAE.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "Realism Illustrious By Stable Yogi_v5.0_FP16_realismIllustriousBy_v50FP16.safetensors",
+      "path": "D:/ckpt\\xl\\Realism Illustrious By Stable Yogi_v5.0_FP16_realismIllustriousBy_v50FP16.safetensors",
+      "size": 6938040880,
+      "subdir": "xl"
+    },
+    {
+      "name": "WAI-illustrious-SDXL_v14.0_waiIllustriousSDXL_v140.safetensors",
+      "path": "D:/ckpt\\xl\\WAI-illustrious-SDXL_v14.0_waiIllustriousSDXL_v140.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "WAI-REALMIX_v7.0_waiREALMIX_v70.safetensors",
+      "path": "D:/ckpt\\xl\\WAI-REALMIX_v7.0_waiREALMIX_v70.safetensors",
+      "size": 6938040706,
+      "subdir": "xl"
+    },
+    {
+      "name": "国风4 GuoFeng4 XL_v1.2_4Guofeng4XL_v12.safetensors",
+      "path": "D:/ckpt\\xl\\国风4 GuoFeng4 XL_v1.2_4Guofeng4XL_v12.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "Asian Realism By Stable Yogi (ILLUS)_V2.0_FP16_asianRealismByStable_v20FP16.safetensors",
+      "path": "D:/ckpt\\xl\\Asian Realism By Stable Yogi (ILLUS)_V2.0_FP16_asianRealismByStable_v20FP16.safetensors",
+      "size": 6938040880,
+      "subdir": "xl"
+    },
+    {
+      "name": "DucHaiten-Pony-XL (no-score)_v7.0_duchaitenPonyXLNo_v70.safetensors",
+      "path": "D:/ckpt\\xl\\DucHaiten-Pony-XL (no-score)_v7.0_duchaitenPonyXLNo_v70.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hassaku XL (Illustrious)_beta V0.6_hassakuXLIllustrious_betaV06.safetensors",
+      "path": "D:/ckpt\\xl\\Hassaku XL (Illustrious)_beta V0.6_hassakuXLIllustrious_betaV06.safetensors",
+      "size": 6938068456,
+      "subdir": "xl"
+    },
+    {
+      "name": "KonbiniMix - Illustrious_Illustrious_konbinimix_illustrious.safetensors",
+      "path": "D:/ckpt\\xl\\KonbiniMix - Illustrious_Illustrious_konbinimix_illustrious.safetensors",
+      "size": 6938047282,
+      "subdir": "xl"
+    },
+    {
+      "name": "Plant Milk 🌿 - Model Suite_Walnut_plantMilkModelSuite_walnut.safetensors",
+      "path": "D:/ckpt\\xl\\Plant Milk 🌿 - Model Suite_Walnut_plantMilkModelSuite_walnut.safetensors",
+      "size": 6938040714,
+      "subdir": "xl"
+    },
+    {
+      "name": "🥂🎆SDXL FaeTastic🎆🥂_v24_SDXLFaetastic_v24.safetensors",
+      "path": "D:/ckpt\\xl\\🥂🎆SDXL FaeTastic🎆🥂_v24_SDXLFaetastic_v24.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "SilvermoonMix03-Illustrious_v3.0 V-pred_silvermoonmix03_v30VPred.safetensors",
+      "path": "D:/ckpt\\xl\\SilvermoonMix03-Illustrious_v3.0 V-pred_silvermoonmix03_v30VPred.safetensors",
+      "size": 6938040528,
+      "subdir": "xl"
+    },
+    {
+      "name": "T-ponynai3_v5.1(weight optimized)_tPonynai3_v51WeightOptimized.safetensors",
+      "path": "D:/ckpt\\xl\\T-ponynai3_v5.1(weight optimized)_tPonynai3_v51WeightOptimized.safetensors",
+      "size": 6938041618,
+      "subdir": "xl"
+    },
+    {
+      "name": "WAI-illustrious-SDXL_v11.0_waiIllustriousSDXL_v110.safetensors",
+      "path": "D:/ckpt\\xl\\WAI-illustrious-SDXL_v11.0_waiIllustriousSDXL_v110.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "Animagine XL V3.1_v3.1_animagineXLV31_v31.safetensors",
+      "path": "D:/ckpt\\xl\\Animagine XL V3.1_v3.1_animagineXLV31_v31.safetensors",
+      "size": 6938325776,
+      "subdir": "xl"
+    },
+    {
+      "name": "Anime Illust Diffusion XL_v0.8_animeIllustDiffusion_v08.safetensors",
+      "path": "D:/ckpt\\xl\\Anime Illust Diffusion XL_v0.8_animeIllustDiffusion_v08.safetensors",
+      "size": 302710784,
+      "subdir": "xl"
+    },
+    {
+      "name": "AutismMix + 2.5D Style_v1.1 (2.5CartoonV2)_autismmix25DStyle_v1125cartoonv2.safetensors",
+      "path": "D:/ckpt\\xl\\AutismMix + 2.5D Style_v1.1 (2.5CartoonV2)_autismmix25DStyle_v1125cartoonv2.safetensors",
+      "size": 6938040706,
+      "subdir": "xl"
+    },
+    {
+      "name": "Diving-Illustrious Semi-Real_v1.0_divingIllustriousSemi_v10.safetensors",
+      "path": "D:/ckpt\\xl\\Diving-Illustrious Semi-Real_v1.0_divingIllustriousSemi_v10.safetensors",
+      "size": 6938046114,
+      "subdir": "xl"
+    },
+    {
+      "name": "glances_v1_glances_v1.safetensors",
+      "path": "D:/ckpt\\xl\\glances_v1_glances_v1.safetensors",
+      "size": 6938042798,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors",
+      "path": "D:/ckpt\\xl\\Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors",
+      "size": 6938045946,
+      "subdir": "xl"
+    },
+    {
+      "name": "Js2Prony_v1.0_js2prony_v10.safetensors",
+      "path": "D:/ckpt\\xl\\Js2Prony_v1.0_js2prony_v10.safetensors",
+      "size": 6938040706,
+      "subdir": "xl"
+    },
+    {
+      "name": "Koki'o Illu_v2.0_kokioIllu_v20.safetensors",
+      "path": "D:/ckpt\\xl\\Koki'o Illu_v2.0_kokioIllu_v20.safetensors",
+      "size": 6938042798,
+      "subdir": "xl"
+    },
+    {
+      "name": "NAIXL_MMMMix_v5.0_naixlMmmmix_v50.safetensors",
+      "path": "D:/ckpt\\xl\\NAIXL_MMMMix_v5.0_naixlMmmmix_v50.safetensors",
+      "size": 6938047642,
+      "subdir": "xl"
+    },
+    {
+      "name": "NoobAI-XL (NAI-XL)_V-Pred-1.0-Version_noobaiXLNAIXL_vPred10Version.safetensors",
+      "path": "D:/ckpt\\xl\\NoobAI-XL (NAI-XL)_V-Pred-1.0-Version_noobaiXLNAIXL_vPred10Version.safetensors",
+      "size": 7105350110,
+      "subdir": "xl"
+    },
+    {
+      "name": "Plant Milk 🌿 - Model Suite_Flax_plantMilkModelSuite_flax.safetensors",
+      "path": "D:/ckpt\\xl\\Plant Milk 🌿 - Model Suite_Flax_plantMilkModelSuite_flax.safetensors",
+      "size": 7359696796,
+      "subdir": "xl"
+    },
+    {
+      "name": "Pony Diffusion V6 XL_V6 (start with this one)_ponyDiffusionV6XL_v6StartWithThisOne.safetensors",
+      "path": "D:/ckpt\\xl\\Pony Diffusion V6 XL_V6 (start with this one)_ponyDiffusionV6XL_v6StartWithThisOne.safetensors",
+      "size": 6938041050,
+      "subdir": "xl"
+    },
+    {
+      "name": "Prefectious XL NSFW_v1.0_prefectiousXLNSFW_v10.safetensors",
+      "path": "D:/ckpt\\xl\\Prefectious XL NSFW_v1.0_prefectiousXLNSFW_v10.safetensors",
+      "size": 6938041160,
+      "subdir": "xl"
+    },
+    {
+      "name": "SDXL 1.0 ArienMixXL Asian portrait 亚洲人像_v4.5-pruned_sdxl10ArienmixxlAsian_v45Pruned.safetensors",
+      "path": "D:/ckpt\\xl\\SDXL 1.0 ArienMixXL Asian portrait 亚洲人像_v4.5-pruned_sdxl10ArienmixxlAsian_v45Pruned.safetensors",
+      "size": 7105377448,
+      "subdir": "xl"
+    },
+    {
+      "name": "SDXL-Anime-Deephentai-mix_v1.32_sdxlAnimeDeephentai_v132.safetensors",
+      "path": "D:/ckpt\\xl\\SDXL-Anime-Deephentai-mix_v1.32_sdxlAnimeDeephentai_v132.safetensors",
+      "size": 6938040706,
+      "subdir": "xl"
+    },
+    {
+      "name": "Silene _ Illustrious XL 1.0_v1.0_sileneIllustriousXL1_v10.safetensors",
+      "path": "D:/ckpt\\xl\\Silene _ Illustrious XL 1.0_v1.0_sileneIllustriousXL1_v10.safetensors",
+      "size": 6938042798,
+      "subdir": "xl"
+    },
+    {
+      "name": "WAI-illustrious-SDXL_v16.0_waiIllustriousSDXL_v160.safetensors",
+      "path": "D:/ckpt\\xl\\WAI-illustrious-SDXL_v16.0_waiIllustriousSDXL_v160.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "White_foot_Pony狱卒盛宴_footpony狱卒盛宴V10_whiteFootPony_footponyV10.safetensors",
+      "path": "D:/ckpt\\xl\\White_foot_Pony狱卒盛宴_footpony狱卒盛宴V10_whiteFootPony_footponyV10.safetensors",
+      "size": 6938040286,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors",
+      "path": "D:/ckpt\\xl\\Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors",
+      "size": 6938040448,
+      "subdir": "xl"
+    },
+    {
+      "name": "✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors",
+      "path": "D:/ckpt\\xl\\✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors",
+      "size": 6938040674,
+      "subdir": "xl"
+    },
+    {
+      "name": "✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.0_JANKUTrainedNoobaiRouwei_v60.safetensors",
+      "path": "D:/ckpt\\xl\\✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.0_JANKUTrainedNoobaiRouwei_v60.safetensors",
+      "size": 6938040674,
+      "subdir": "xl"
+    },
+    {
+      "name": "✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors",
+      "path": "D:/ckpt\\xl\\✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors",
+      "size": 6938040674,
+      "subdir": "xl"
+    },
+    {
+      "name": "AniMayhem - Pale Rider_v1.0_animayhemPaleRider_v10.safetensors",
+      "path": "D:/ckpt\\xl\\AniMayhem - Pale Rider_v1.0_animayhemPaleRider_v10.safetensors",
+      "size": 6938061210,
+      "subdir": "xl"
+    },
+    {
+      "name": "CelestReal - Anime _ semi-reality fusion_v1.0_celestrealAnimeSemi_v10.safetensors",
+      "path": "D:/ckpt\\xl\\CelestReal - Anime _ semi-reality fusion_v1.0_celestrealAnimeSemi_v10.safetensors",
+      "size": 6938053890,
+      "subdir": "xl"
+    },
+    {
+      "name": "CelestReal - Anime _ semi-reality fusion_v2.0_celestrealAnimeSemi_v20.safetensors",
+      "path": "D:/ckpt\\xl\\CelestReal - Anime _ semi-reality fusion_v2.0_celestrealAnimeSemi_v20.safetensors",
+      "size": 6938059962,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hardcore Asian Cosplay Porn_IL v1.1_hardcoreAsianCosplay_ilV11.safetensors",
+      "path": "D:/ckpt\\xl\\Hardcore Asian Cosplay Porn_IL v1.1_hardcoreAsianCosplay_ilV11.safetensors",
+      "size": 6938042256,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hassaku XL (Illustrious)_v2.2_hassakuXLIllustrious_v22.safetensors",
+      "path": "D:/ckpt\\xl\\Hassaku XL (Illustrious)_v2.2_hassakuXLIllustrious_v22.safetensors",
+      "size": 6938040456,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hassaku XL (Illustrious)_v3.1_hassakuXLIllustrious_v31.safetensors",
+      "path": "D:/ckpt\\xl\\Hassaku XL (Illustrious)_v3.1_hassakuXLIllustrious_v31.safetensors",
+      "size": 6938042720,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hassaku XL (Illustrious)_v3.4_hassakuXLIllustrious_v34.safetensors",
+      "path": "D:/ckpt\\xl\\Hassaku XL (Illustrious)_v3.4_hassakuXLIllustrious_v34.safetensors",
+      "size": 6938065408,
+      "subdir": "xl"
+    },
+    {
+      "name": "Hoseki - LustrousMix [IllustriousXL_NoobAI EPS1.1]_Illust_NoobAI EPS1.1 - v2_hosekiLustrousmix_illustNoobaiEPS11V2.safetensors",
+      "path": "D:/ckpt\\xl\\Hoseki - LustrousMix [IllustriousXL_NoobAI EPS1.1]_Illust_NoobAI EPS1.1 - v2_hosekiLustrousmix_illustNoobaiEPS11V2.safetensors",
+      "size": 7105350148,
+      "subdir": "xl"
+    },
+    {
+      "name": "Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors",
+      "path": "D:/ckpt\\xl\\Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors",
+      "size": 7419803912,
+      "subdir": "xl"
+    },
+    {
+      "name": "Nevolution XL_IL_IL-v1_nevolutionXLIL_ilV1.safetensors",
+      "path": "D:/ckpt\\xl\\Nevolution XL_IL_IL-v1_nevolutionXLIL_ilV1.safetensors",
+      "size": 7307723950,
+      "subdir": "xl"
+    },
+    {
+      "name": "Nova Flat XL_v5.0_novaFlatXL_v50.safetensors",
+      "path": "D:/ckpt\\xl\\Nova Flat XL_v5.0_novaFlatXL_v50.safetensors",
+      "size": 6938445524,
+      "subdir": "xl"
+    },
+    {
+      "name": "Unholy Desire Mix - Sinister Aesthetic (Illustrious)_v5.0_unholyDesireMixSinister_v50.safetensors",
+      "path": "D:/ckpt\\xl\\Unholy Desire Mix - Sinister Aesthetic (Illustrious)_v5.0_unholyDesireMixSinister_v50.safetensors",
+      "size": 7105658998,
+      "subdir": "xl"
+    },
+    {
+      "name": "WAI-illustrious-SDXL_v10.0_waiIllustriousSDXL_v100.safetensors",
+      "path": "D:/ckpt\\xl\\WAI-illustrious-SDXL_v10.0_waiIllustriousSDXL_v100.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "illusoria_v10.safetensors",
+      "path": "D:/ckpt\\xl\\illusoria_v10.safetensors",
+      "size": 2517041152,
+      "subdir": "xl"
+    },
+    {
+      "name": "illustrijQuill_v1.safetensors",
+      "path": "D:/ckpt\\xl\\illustrijQuill_v1.safetensors",
+      "size": 7419803912,
+      "subdir": "xl"
+    },
+    {
+      "name": "lunarcherrymix_v23.safetensors",
+      "path": "D:/ckpt\\xl\\lunarcherrymix_v23.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "unfazed3d_ilV10.safetensors",
+      "path": "D:/ckpt\\xl\\unfazed3d_ilV10.safetensors",
+      "size": 4089970688,
+      "subdir": "xl"
+    },
+    {
+      "name": "novaAnimeXL_ilV90.safetensors",
+      "path": "D:/ckpt\\xl\\novaAnimeXL_ilV90.safetensors",
+      "size": 6938419836,
+      "subdir": "xl"
+    },
+    {
+      "name": "ichigomilk_v10.safetensors",
+      "path": "D:/ckpt\\xl\\ichigomilk_v10.safetensors",
+      "size": 6938042570,
+      "subdir": "xl"
+    },
+    {
+      "name": "illustriousnxtXLBy_v10.safetensors",
+      "path": "D:/ckpt\\xl\\illustriousnxtXLBy_v10.safetensors",
+      "size": 6938062218,
+      "subdir": "xl"
+    },
+    {
+      "name": "hyphoriaIlluNAI_v001.safetensors",
+      "path": "D:/ckpt\\xl\\hyphoriaIlluNAI_v001.safetensors",
+      "size": 6938040286,
+      "subdir": "xl"
+    },
+    {
+      "name": "novaAsianXL_illustriousV60.safetensors",
+      "path": "D:/ckpt\\xl\\novaAsianXL_illustriousV60.safetensors",
+      "size": 1641807872,
+      "subdir": "xl"
+    },
+    {
+      "name": "haiti5sArtcheeky_artcheekyalchemixcine.safetensors",
+      "path": "D:/ckpt\\xl\\haiti5sArtcheeky_artcheekyalchemixcine.safetensors",
+      "size": 6938100786,
+      "subdir": "xl"
+    },
+    {
+      "name": "hakushiMix_v141.safetensors",
+      "path": "D:/ckpt\\xl\\hakushiMix_v141.safetensors",
+      "size": 6938042300,
+      "subdir": "xl"
+    },
+    {
+      "name": "cyberrealisticPony_v141.safetensors",
+      "path": "D:/ckpt\\xl\\cyberrealisticPony_v141.safetensors",
+      "size": 13875718476,
+      "subdir": "xl"
+    },
+    {
+      "name": "noctivus_v10.safetensors",
+      "path": "D:/ckpt\\xl\\noctivus_v10.safetensors",
+      "size": 6938043264,
+      "subdir": "xl"
+    },
+    {
+      "name": "fabricatedXL_v60.safetensors",
+      "path": "D:/ckpt\\xl\\fabricatedXL_v60.safetensors",
+      "size": 6938080658,
+      "subdir": "xl"
+    },
+    {
+      "name": "blasphemousMix_v11.safetensors",
+      "path": "D:/ckpt\\xl\\blasphemousMix_v11.safetensors",
+      "size": 6938058474,
+      "subdir": "xl"
+    },
+    {
+      "name": "waijfu_alpha.safetensors",
+      "path": "D:/ckpt\\xl\\waijfu_alpha.safetensors",
+      "size": 7105347638,
+      "subdir": "xl"
+    },
+    {
+      "name": "oneObsession_v19Atypical.safetensors",
+      "path": "D:/ckpt\\xl\\oneObsession_v19Atypical.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "kyaaFlatanime_v10.safetensors",
+      "path": "D:/ckpt\\xl\\kyaaFlatanime_v10.safetensors",
+      "size": 6938190745,
+      "subdir": "xl"
+    },
+    {
+      "name": "illustrijGEN_1.safetensors",
+      "path": "D:/ckpt\\xl\\illustrijGEN_1.safetensors",
+      "size": 7419803912,
+      "subdir": "xl"
+    },
+    {
+      "name": "animemix_v75.safetensors",
+      "path": "D:/ckpt\\xl\\animemix_v75.safetensors",
+      "size": 364511232,
+      "subdir": "xl"
+    },
+    {
+      "name": "PVCStyleModelMovable_epsNBXL131.safetensors",
+      "path": "D:/ckpt\\xl\\PVCStyleModelMovable_epsNBXL131.safetensors",
+      "size": 6938040682,
+      "subdir": "xl"
+    },
+    {
+      "name": "novaKemonoXL_v30.safetensors",
+      "path": "D:/ckpt\\xl\\novaKemonoXL_v30.safetensors",
+      "size": 6938441052,
+      "subdir": "xl"
+    },
+    {
+      "name": "redLilyIllu_v10.safetensors",
+      "path": "D:/ckpt\\xl\\redLilyIllu_v10.safetensors",
+      "size": 6938042184,
+      "subdir": "xl"
+    },
+    {
+      "name": "novaFurryXL_ilV130.safetensors",
+      "path": "D:/ckpt\\xl\\novaFurryXL_ilV130.safetensors",
+      "size": 7140874388,
+      "subdir": "xl"
+    },
+    {
+      "name": "aethermixSHOTXPULP_v40Dreamland.safetensors",
+      "path": "D:/ckpt\\xl\\aethermixSHOTXPULP_v40Dreamland.safetensors",
+      "size": 6938040366,
+      "subdir": "xl"
+    },
+    {
+      "name": "xavier_v10.safetensors",
+      "path": "D:/ckpt\\xl\\xavier_v10.safetensors",
+      "size": 6938052298,
+      "subdir": "xl"
+    },
+    {
+      "name": "bismuthIllustrious_v20.safetensors",
+      "path": "D:/ckpt\\xl\\bismuthIllustrious_v20.safetensors",
+      "size": 6938041706,
+      "subdir": "xl"
+    },
+    {
+      "name": "icedcoffeeil_V30.safetensors",
+      "path": "D:/ckpt\\xl\\icedcoffeeil_V30.safetensors",
+      "size": 6938101356,
+      "subdir": "xl"
+    },
+    {
+      "name": "mistoonSapphire_v30.safetensors",
+      "path": "D:/ckpt\\xl\\mistoonSapphire_v30.safetensors",
+      "size": 6938043754,
+      "subdir": "xl"
+    },
+    {
+      "name": "yiffInHell_yihV10.safetensors",
+      "path": "D:/ckpt\\xl\\yiffInHell_yihV10.safetensors",
+      "size": 6938042770,
+      "subdir": "xl"
+    },
+    {
+      "name": "kageillustrious_v60NLXLVersion.safetensors",
+      "path": "D:/ckpt\\xl\\kageillustrious_v60NLXLVersion.safetensors",
+      "size": 6938041576,
+      "subdir": "xl"
+    }
+  ],
+  "count": 105,
+  "updated": 1771508519.498316
+}

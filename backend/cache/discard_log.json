@@ -1,0 +1,537 @@
+{
+  "1eb910be": [
+    {
+      "fingerprint": "34101daa7ce8c8ba7bc89070cede7784",
+      "params_summary": "ckpt=xl/Koki'o Illu_v2.0_kokioIllu_v20.safetensors, loras=[xl-style/Ka Marukogedago _ Style LoRa_v1.0_ka_marukogedago.safetensors@1.0], 512x512, steps=40, cfg=7, sampler=euler_ancestral_sgm_uniform, seed=0",
+      "deleted_at": "2026-02-18T20:12:55"
+    }
+  ],
+  "70403702": [
+    {
+      "fingerprint": "50358ce926cac54c199d78ee80c9f1b4",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v3.4_hassakuXLIllustrious_v34.safetensors, loras=[xl-character/MGE Monster Girls_V6.1 - Illustrious_MGE_V6.1_IL_Final_R1.safetensors@0.75, xl-slider/Lighting _ darkness slider_v1.0_lightingSlider.safetensors@-0.85, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@0.5, xl-style/ma1ma1helmes _ Shiiro's Styles _ Niji_Style_B_ma1ma1helmes_b-000014.safetensors@0.45], 832x1216, steps=28, cfg=6, sampler=Euler a, seed=944724815",
+      "deleted_at": "2026-02-18T20:13:19"
+    }
+  ],
+  "424ee605": [
+    {
+      "fingerprint": "a1c572b2d542b96d84cb17a0b9d600fc",
+      "params_summary": "ckpt=xl/Koki'o Illu_v2.0_kokioIllu_v20.safetensors, loras=[xl-style/0__11Xx _ Shiiro's Styles _ Niji_A_0__11Xx.safetensors@1.0], 512x512, steps=40, cfg=7, sampler=euler_ancestral_sgm_uniform, seed=0",
+      "deleted_at": "2026-02-18T20:13:22"
+    }
+  ],
+  "90cc8551": [
+    {
+      "fingerprint": "eced5574272d60ff2507d035b1e09ac2",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors, loras=[xl-character/MGE Monster Girls_V6.1 - Illustrious_MGE_V6.1_IL_Final_R1.safetensors@0.85, xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-style/People's Works +_v8_Illusv2.0Stable_ppw_v8_Illuv2stable_128.safetensors@0.4, xl-style/ma1ma1helmes _ Shiiro's Styles _ Niji_Style_B_ma1ma1helmes_b-000014.safetensors@0.45], 832x1216, steps=28, cfg=6, sampler=DPM++ 2M Karras, seed=1947288171",
+      "deleted_at": "2026-02-18T20:34:54"
+    }
+  ],
+  "8fe9ae9f": [
+    {
+      "fingerprint": "aaf07704faea40c7d4ab74af2d7e7a4f",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@1.0, xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/Stabilizer IL_NAI_CK_illus01 v1.23_illustriousXL_stabilizer_v1.23.safetensors@1.0, xl-slider/lowres_concept_Illustrious_v1.safetensors@1.0, xl-style/detaILeReij_v2.0_rdtdrp.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T20:55:38"
+    }
+  ],
+  "adbb3572": [
+    {
+      "fingerprint": "7509a99fadb5261afb004a714a8f8ab1",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@1.0], 832x1216, steps=30, cfg=5, sampler=Euler a, seed=3103848197",
+      "deleted_at": "2026-02-18T20:55:58"
+    }
+  ],
+  "8b8f32ef": [
+    {
+      "fingerprint": "d2993e0431da1bff24a2c16f3767a947",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=30, cfg=5, sampler=Euler a, seed=1929089351",
+      "deleted_at": "2026-02-18T20:56:50"
+    }
+  ],
+  "e2759a15": [
+    {
+      "fingerprint": "e4ffb76c1077c5e8881d66f88c98d902",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors, loras=[xl-character/MGE Monster Girls_V6.1 - Illustrious_MGE_V6.1_IL_Final_R1.safetensors@0.85, xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-slider/Lighting _ darkness slider_v1.0_lightingSlider.safetensors@-0.85, xl-style/People's Works +_v8_Illusv2.0Stable_ppw_v8_Illuv2stable_128.safetensors@0.4, xl-style/ma1ma1helmes _ Shiiro's Styles _ Niji_Style_B_ma1ma1helmes_b-000014.safetensors@0.45], 832x1216, steps=28, cfg=6, sampler=DPM++ 2M Karras, seed=1879860941",
+      "deleted_at": "2026-02-18T20:57:27"
+    }
+  ],
+  "ac191ea4": [
+    {
+      "fingerprint": "c5d556d9f8a0ff2a42043aeee39831eb",
+      "params_summary": "ckpt=xl/Koki'o Illu_v2.0_kokioIllu_v20.safetensors, loras=[xl-style/Th4llo Jost4r _ Shiiro's Styles_v1.0_Th4llo_Jost4r_style.safetensors@1.0], 896x1152, steps=30, cfg=5, sampler=DPM++ 2M SDE, seed=3641925491",
+      "deleted_at": "2026-02-18T20:58:24"
+    }
+  ],
+  "4f0011e8": [
+    {
+      "fingerprint": "6f7ae0cd78e4241cb953bc422c00f0a4",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v2.2_hassakuXLIllustrious_v22.safetensors, loras=[xl-enhance/Detail Tweaker XL_v1.0_add-detail-xl.safetensors@2.0, xl-style/Aosiai123 _ Shiiro's Styles_v1.0_aosiai123_style.safetensors@0.65, xl-style/Petravoice_v1.0_PetraStyle.safetensors@0.6, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.45, xl-style/rakugakingu_v1.0_rakugakingu.safetensors@0.55, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@1.0], 768x1344, steps=30, cfg=5, sampler=DPM++ 2M, seed=958345863",
+      "deleted_at": "2026-02-18T20:58:43"
+    }
+  ],
+  "29457e57": [
+    {
+      "fingerprint": "2e15e27ce53a06f45fc6f86168521b6f",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@0.3, xl-enhance/Stabilizer IL_NAI_CK_illus01 v1.23_illustriousXL_stabilizer_v1.23.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v6_noobEv1.1_ponyv6_noobE11_2_adamW-000017.safetensors@0.3, xl-style/ma1ma1helmes _ Shiiro's Styles _ Niji_Style_A_XXX667.safetensors@0.4, xl-style/mon (monmon2133) style _ Illustrious [Commission]_v1.0_mon_monmon2133.safetensors@0.5, xl-style/𝔗𝔔𝔍ÅⱼG𝔍͓̽4͓̽¨͓̽J͓̽̽J͓̽̽9͓̽̽Q͓̽̽𝔔9W͓̽0𝔗ⱼÅ𝔔𝔍IGoE͓̽̽I͓̽Ø͓̽ℜℑ𝔊_𝔗_114558v4df2fsdf5.safetensors@0.6], 832x1536, steps=20, cfg=6, sampler=DPM++ 2M, seed=4971662117",
+      "deleted_at": "2026-02-18T21:19:26"
+    }
+  ],
+  "8a832605": [
+    {
+      "fingerprint": "b27d68b94105848a9b97e4abb6b82e4c",
+      "params_summary": "ckpt=xl/Plant Milk 🌿 - Model Suite_Flax_plantMilkModelSuite_flax.safetensors, loras=[xl-enhance/Detail Tweaker XL_v1.0_add-detail-xl.safetensors@1.0, xl-style/KonYa666 _ Style LoRa_konYa666_KonYa666.safetensors@1.0], 768x1344, steps=40, cfg=5, sampler=Euler a, seed=2002515527",
+      "deleted_at": "2026-02-18T21:19:36"
+    }
+  ],
+  "2aec1ab5": [
+    {
+      "fingerprint": "d0dae8fa026e09d1c654962bcae59467",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T21:26:32"
+    },
+    {
+      "fingerprint": "0717588fc8ad7084c8382a89014866fb",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:30:20"
+    }
+  ],
+  "ad79c68b": [
+    {
+      "fingerprint": "e9b20ae171abd4b9cb850a3dd2778217",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/sometyome_style.safetensors@0.9, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T21:34:47"
+    },
+    {
+      "fingerprint": "ef2d4e9ddc418d9ffe566f50004d5d57",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/sometyome_style.safetensors@0.9, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:12:32"
+    }
+  ],
+  "61557f8b": [
+    {
+      "fingerprint": "31f0c58643c819266aef30f01ce71de2",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T22:17:20"
+    },
+    {
+      "fingerprint": "a3c38bff1a1817dfe290a72b8845f6e5",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:12:04"
+    }
+  ],
+  "e9f7dcfd": [
+    {
+      "fingerprint": "59231e1943d4b0a6b1a988701e29a983",
+      "params_summary": "ckpt=xl/novaAnimeXL_ilV90.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T22:55:21"
+    },
+    {
+      "fingerprint": "f93ab8afb21ffd31b85fee079791147f",
+      "params_summary": "ckpt=xl/novaAnimeXL_ilV90.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:46:34"
+    }
+  ],
+  "65f1b7e8": [
+    {
+      "fingerprint": "205bd53218c2062ec1a477856e533cba",
+      "params_summary": "ckpt=xl/hyphoriaIlluNAI_v001.safetensors, loras=[xl-style/Aura Phantasy _ Shiiro's Styles _ Ai_v1.0_Aura_Phantasy_illu.safetensors@1.0, xl-style/Code__Digital_World_Morph_v2_PONY_XL_by_UOC.safetensors@1.0, xl-style/Ri-mix - Style LORA [PONY + Illustrious + FLUX]_Ri-mix Ω_rimixO.safetensors@0.6, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.4], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T22:56:14"
+    }
+  ],
+  "53f35b19": [
+    {
+      "fingerprint": "3d7c2d56aa5a216a398b25d5f72a3cc7",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T23:41:03"
+    },
+    {
+      "fingerprint": "4f288fa320320b61f0caade31c7d47c1",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:45:52"
+    }
+  ],
+  "493cd874": [
+    {
+      "fingerprint": "3eef0d519ad5684c49cb1eca70e530e2",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T23:41:18"
+    },
+    {
+      "fingerprint": "3cef000c287b5bb6cfc04317bde51df2",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:46:00"
+    }
+  ],
+  "a55c3629": [
+    {
+      "fingerprint": "6a0035bec9d19c2bbb25c78780cfc578",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T23:41:42"
+    },
+    {
+      "fingerprint": "11e0d289f9bb2928f3a48da4e44406e8",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:46:06"
+    }
+  ],
+  "a5285a94": [
+    {
+      "fingerprint": "02acfca1cfc0e84cd59ee281af6287fe",
+      "params_summary": "ckpt=xl/AniMayhem - Pale Rider_v1.0_animayhemPaleRider_v10.safetensors, loras=[xl-slider/Dramatic Lighting Slider.safetensors@3.7, xl-style/MYRHA-Ψ00.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.5], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-18T23:42:13"
+    },
+    {
+      "fingerprint": "8891d7ac7e2d1c62354182c13007a584",
+      "params_summary": "ckpt=xl/AniMayhem - Pale Rider_v1.0_animayhemPaleRider_v10.safetensors, loras=[xl-slider/Dramatic Lighting Slider.safetensors@3.7, xl-style/MYRHA-Ψ00.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.5], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:46:20"
+    }
+  ],
+  "11e952bf": [
+    {
+      "fingerprint": "2ce11ea16e4278ac6052fb5437f7df6f",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@0.6], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T00:14:14"
+    },
+    {
+      "fingerprint": "7d7dc7923d177282f365164788bb8cec",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@0.6], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:45:44"
+    }
+  ],
+  "8eb240a6": [
+    {
+      "fingerprint": "98a3f65d1ffb6cad70e2b4b8192f8a8f",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-character/TifaLockhartFF7R_Illu_Dwnsty-000004.safetensors@1.0, xl-face/AsianWoman_Face_illustrious_Leaf4_E.safetensors@0.3, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T00:47:48"
+    }
+  ],
+  "bfde9b53": [
+    {
+      "fingerprint": "d7bbfc7907790f809d07f891846db00b",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T00:47:58"
+    }
+  ],
+  "af59353c": [
+    {
+      "fingerprint": "d0331485eec2a51c77625d5caa9d5b85",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T00:48:38"
+    },
+    {
+      "fingerprint": "11cc32459cd840facbeeb0c32a144a60",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:44:22"
+    }
+  ],
+  "0a668c96": [
+    {
+      "fingerprint": "7cfb5047f9acb4f1a459329c667a1702",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/Stabilizer IL_NAI_CK_illus01 v1.23_illustriousXL_stabilizer_v1.23.safetensors@1.0, xl-nsfw/ILv10_NP21.safetensors@1.0, xl-style/detaILeReij_v2.0_rdtdrp.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:30:17"
+    }
+  ],
+  "2c2d8714": [
+    {
+      "fingerprint": "02571e6a26262067d7f9fd44291965af",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:30:26"
+    },
+    {
+      "fingerprint": "aa67197aa51ff904ad35f35660f39be5",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@0.4], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:43:17"
+    }
+  ],
+  "61ecbf1e": [
+    {
+      "fingerprint": "2f0e4b7e010a84d5295ec62283d16d75",
+      "params_summary": "ckpt=xl/Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors, loras=[xl-enhance/Detailer IL_v2_DetailerILv2-000008.safetensors@1.0, xl-slider/Dramatic Lighting Slider - Illustrious_v1.0_Dramatic Lighting Slider.safetensors@3.5, xl-slider/Illustrious Realism Slider_v1.0_ILXL_Realism_Slider_V.1.safetensors@2.6], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:34:47"
+    }
+  ],
+  "060dba43": [
+    {
+      "fingerprint": "7b8c179f48257b3f16238088db66535a",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-character/TifaLockhartFF7R_Illu_Dwnsty-000004.safetensors@1.0, xl-face/AsianWoman_Face_illustrious_Leaf4_E.safetensors@0.3, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:34:52"
+    },
+    {
+      "fingerprint": "117c45ad49d9d8764b7029dc28b901eb",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-character/TifaLockhartFF7R_Illu_Dwnsty-000004.safetensors@1.0, xl-face/AsianWoman_Face_illustrious_Leaf4_E.safetensors@0.3, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:43:55"
+    }
+  ],
+  "a95b22a0": [
+    {
+      "fingerprint": "ed49d41c3ca4a8f1ceabfbeea6e29091",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:34:59"
+    },
+    {
+      "fingerprint": "8074c8c375a49da932459e63c6537875",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:44:06"
+    }
+  ],
+  "91e59236": [
+    {
+      "fingerprint": "b3715e8ecb8c47fb1f3af100369fb898",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/748cm _ Style for Illustrious_NoobAI 0.75_v1.0_748cmSDXL.safetensors@1.0, xl-style/96YOTTEA style _ Illustrious_v1.1 - WAI_96YOTTEA-WAI.safetensors@1.0, xl-style/厚塗り _ ATNR STYLE_ATNR_STYLE_ILL_V1.1_ATNR_V1.1_Lokr_f4_warmup_stable_decay.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:35:27"
+    },
+    {
+      "fingerprint": "abdcd9ede2b8415e4f5151dcf1b8dcca",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/748cm _ Style for Illustrious_NoobAI 0.75_v1.0_748cmSDXL.safetensors@1.0, xl-style/96YOTTEA style _ Illustrious_v1.1 - WAI_96YOTTEA-WAI.safetensors@1.0, xl-style/厚塗り _ ATNR STYLE_ATNR_STYLE_ILL_V1.1_ATNR_V1.1_Lokr_f4_warmup_stable_decay.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:43:03"
+    }
+  ],
+  "96766598": [
+    {
+      "fingerprint": "999a5af36542cc5c619a7cde0468f697",
+      "params_summary": "ckpt=xl/Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors, loras=[xl-enhance/Detailer IL_v2_DetailerILv2-000008.safetensors@1.0, xl-slider/Dramatic Lighting Slider - Illustrious_v1.0_Dramatic Lighting Slider.safetensors@3.5, xl-slider/Illustrious Realism Slider_v1.0_ILXL_Realism_Slider_V.1.safetensors@2.6], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T02:35:39"
+    }
+  ],
+  "abef31c1": [
+    {
+      "fingerprint": "3ee1a0dff49246e0e60d867836b152e6",
+      "params_summary": "ckpt=xl/Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors, loras=[xl-enhance/Detailer IL_v2_DetailerILv2-000008.safetensors@1.0, xl-slider/Dramatic Lighting Slider - Illustrious_v1.0_Dramatic Lighting Slider.safetensors@3.5, xl-slider/Illustrious Realism Slider_v1.0_ILXL_Realism_Slider_V.1.safetensors@2.6], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T03:33:41"
+    }
+  ],
+  "bd5a68fe": [
+    {
+      "fingerprint": "eae41e977a71ed0d764d871183fbeedd",
+      "params_summary": "ckpt=xl/hyphoriaIlluNAI_v001.safetensors, loras=[xl-enhance/Detail Tweaker XL_v1.0_add-detail-xl.safetensors@1.0, xl-nsfw/Tentacles_Riders_style_V1.safetensors@1.0, xl-style/MoriiMee Gothic Niji _ LoRA Style_V1 Ilustrious_MoriiMee_Gothic_Niji_Style_Illustrious_r1.safetensors@1.0, xl-style/Takayanagi Katsuya style _ Illustrious_v1.0_takayanagi_katsuya.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T03:34:35"
+    }
+  ],
+  "e1f2521f": [
+    {
+      "fingerprint": "6f1db740eb1002cf5a1ec87fd114a9a4",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/748cm _ Style for Illustrious_NoobAI 0.75_v1.0_748cmSDXL.safetensors@1.0, xl-style/96YOTTEA style _ Illustrious_v1.1 - WAI_96YOTTEA-WAI.safetensors@1.0, xl-style/厚塗り _ ATNR STYLE_ATNR_STYLE_ILL_V1.1_ATNR_V1.1_Lokr_f4_warmup_stable_decay.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T03:35:12"
+    },
+    {
+      "fingerprint": "9cc24a80d50b9ee525ac3cff7c996025",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/748cm _ Style for Illustrious_NoobAI 0.75_v1.0_748cmSDXL.safetensors@1.0, xl-style/96YOTTEA style _ Illustrious_v1.1 - WAI_96YOTTEA-WAI.safetensors@1.0, xl-style/厚塗り _ ATNR STYLE_ATNR_STYLE_ILL_V1.1_ATNR_V1.1_Lokr_f4_warmup_stable_decay.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:49:30"
+    }
+  ],
+  "89e6cb52": [
+    {
+      "fingerprint": "8ff3976df56cca5471f93e01d13972a6",
+      "params_summary": "ckpt=xl/novaAnimeXL_ilV90.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T09:57:13"
+    },
+    {
+      "fingerprint": "b9c675479ec09226052de18e5ed18526",
+      "params_summary": "ckpt=xl/novaAnimeXL_ilV90.safetensors, loras=[xl-character/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.3I Illustrious 4_15_TrendCraft_The_Peoples_Style_Detailer-v2.3I-4_16_2025-Illustrious.safetensors@1.0, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:54:42"
+    }
+  ],
+  "515d531a": [
+    {
+      "fingerprint": "267b1707cc238269f253ea533e736ef1",
+      "params_summary": "ckpt=xl/Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors, loras=[xl-enhance/Detailer IL_v2_DetailerILv2-000008.safetensors@1.0, xl-slider/Dramatic Lighting Slider - Illustrious_v1.0_Dramatic Lighting Slider.safetensors@3.5, xl-slider/Illustrious Realism Slider_v1.0_ILXL_Realism_Slider_V.1.safetensors@2.6], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T09:57:33"
+    },
+    {
+      "fingerprint": "f93e3ad7a04e07000aebe79773119e95",
+      "params_summary": "ckpt=xl/Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors, loras=[xl-enhance/Detailer IL_v2_DetailerILv2-000008.safetensors@1.0, xl-slider/Dramatic Lighting Slider - Illustrious_v1.0_Dramatic Lighting Slider.safetensors@3.5, xl-slider/Illustrious Realism Slider_v1.0_ILXL_Realism_Slider_V.1.safetensors@2.6], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:54:07"
+    }
+  ],
+  "ebe63c8a": [
+    {
+      "fingerprint": "99f02053eaf34186b99adf20a6ad6049",
+      "params_summary": "ckpt=xl/Plant Milk 🌿 - Model Suite_Walnut_plantMilkModelSuite_walnut.safetensors, loras=[xl-style/Elegance Niji_V1_Elegence_Niji.safetensors@1.0], 832x1216, steps=30, cfg=5, sampler=Euler a, seed=567024693944340",
+      "deleted_at": "2026-02-19T11:23:18"
+    }
+  ],
+  "4d3db238": [
+    {
+      "fingerprint": "bdf8879ab140dc5e4379b164053945a4",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T11:24:12"
+    },
+    {
+      "fingerprint": "0ffdc23437b30e88614657e06e7fd1a5",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v1.3 - Style A_hassakuXLIllustrious_v13StyleA.safetensors, loras=[xl-background/S1 Dramatic Lighting_Illustrious V2_S1 Dramatic Lighting Illustrious_V2.safetensors@0.4, xl-face/DetailedEyes_XL_v3.0_DetailedEyes_V3.safetensors@0.3, xl-style/Pony_ People's Works v1-v6_v4_noobEv1.0_ponyv4_noob1_2_adamW-000017.safetensors@0.3, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.3], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:14:55"
+    }
+  ],
+  "4a575614": [
+    {
+      "fingerprint": "a33cbe8888154bef7cddacb16ab018b6",
+      "params_summary": "ckpt=xl/hyphoriaIlluNAI_v001.safetensors, loras=[xl-character/maelle_illustrious_byJaneB.safetensors@1.0, xl-enhance/Detailer _ Tool _ Concept LoRA IllustriousXL_v1.0_Detailer_NoobAI_Incrs_v1.safetensors@1.0, xl-style/AvariceV1.1.safetensors@1.0, xl-style/konya666画风激活词SenSen.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T11:24:33"
+    },
+    {
+      "fingerprint": "23b84626b727de918780e6d2419cef10",
+      "params_summary": "ckpt=xl/hyphoriaIlluNAI_v001.safetensors, loras=[xl-character/maelle_illustrious_byJaneB.safetensors@1.0, xl-enhance/Detailer _ Tool _ Concept LoRA IllustriousXL_v1.0_Detailer_NoobAI_Incrs_v1.safetensors@1.0, xl-style/AvariceV1.1.safetensors@1.0, xl-style/konya666画风激活词SenSen.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:15:00"
+    }
+  ],
+  "34fbfddc": [
+    {
+      "fingerprint": "4096f0b09b2a78257d769f64eaeb3c9d",
+      "params_summary": "ckpt=xl/oneObsession_v19Atypical.safetensors, loras=[1.5/Matte_Skin_Illustrious_v4.safetensors@1.0, xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/Stabilizer IL_NAI_CK_illus01 v1.23_illustriousXL_stabilizer_v1.23.safetensors@1.0, xl-nsfw/ILv10_NP21.safetensors@1.0, xl-slider/lowres_concept_Illustrious_v1.safetensors@1.0, xl-style/Aura Phantasy _ Shiiro's Styles _ Ai_v1.0_Aura_Phantasy_illu.safetensors@1.0, xl-style/detaILeReij_v2.0_rdtdrp.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T11:25:04"
+    },
+    {
+      "fingerprint": "b90ecf9badfd49fb9dcc3f4a56e4e9b8",
+      "params_summary": "ckpt=xl/oneObsession_v19Atypical.safetensors, loras=[1.5/Matte_Skin_Illustrious_v4.safetensors@1.0, xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/Stabilizer IL_NAI_CK_illus01 v1.23_illustriousXL_stabilizer_v1.23.safetensors@1.0, xl-nsfw/ILv10_NP21.safetensors@1.0, xl-slider/lowres_concept_Illustrious_v1.safetensors@1.0, xl-style/Aura Phantasy _ Shiiro's Styles _ Ai_v1.0_Aura_Phantasy_illu.safetensors@1.0, xl-style/detaILeReij_v2.0_rdtdrp.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:15:19"
+    }
+  ],
+  "f318fcf8": [
+    {
+      "fingerprint": "6744cd17c80f20f937214f5f1b9ee897",
+      "params_summary": "ckpt=xl/redLilyIllu_v10.safetensors, loras=[xl-character/Hannah (Mahjong Soul, NoobAI_Illustrious)_v3n_hannah_v3n.safetensors@1.0, xl-style/graceart0518-illustriousXL_v01_V8-CAME.safetensors@0.65], 896x1152, steps=20, cfg=5, sampler=DPM++ 2M SDE, seed=2707505034",
+      "deleted_at": "2026-02-19T14:20:06"
+    }
+  ],
+  "2e97e2cb": [
+    {
+      "fingerprint": "b954112ace1b4215a296812233ae5b8d",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 1608x1248, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T14:20:43"
+    },
+    {
+      "fingerprint": "69d7452dd9fcf96e9856ea19e37cb0ca",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 1608x1248, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:23:35"
+    }
+  ],
+  "542f034b": [
+    {
+      "fingerprint": "8c1b5342aabb5b5441da798af4d52958",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 1616x1224, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T14:20:49"
+    }
+  ],
+  "c3946694": [
+    {
+      "fingerprint": "d1bb21fcc264dbc4f49b4ed5a987e4f8",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 1448x1712, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T14:21:48"
+    },
+    {
+      "fingerprint": "6507105f7ae4866bc7f199cf5ebd68e1",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 1448x1712, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:23:42"
+    }
+  ],
+  "c17939a8": [
+    {
+      "fingerprint": "2304ecadbfdf6168253c3ee7a7a57279",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T14:21:55"
+    },
+    {
+      "fingerprint": "2a72c806205e711ce67894d94af2b385",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v6.9 🆕🔥_JANKUTrainedNoobaiRouwei_v69.safetensors, loras=[xl-enhance/NoobAI-XL Detailer_V-Pred1_V1_NOOB_vp1_detailer_by_volnovik_v1.safetensors@1.0, xl-enhance/illustrious_noobai_epsilon_pred_1_best_quality_v1.safetensors@1.0, xl-face/PerfectEyesXL.safetensors@1.0, xl-style/People's Works +_v9_Illusv1.0_People'sWorks_v9_Illusv1.0_128dim.safetensors@1.0], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:23:47"
+    }
+  ],
+  "ae0ce862": [
+    {
+      "fingerprint": "fcb69cb9621f635bc46cf4c357e254a3",
+      "params_summary": "ckpt=xl/Plant Milk 🌿 - Model Suite_Walnut_plantMilkModelSuite_walnut.safetensors, loras=[xl-style/748cm _ Shiiro's Styles _ Niji_v1.0_748cm_illu.safetensors@0.6, xl-style/Celestial S##t _ Shiiro's Styles_v1.0_c3lesti4l_shit.safetensors@0.5, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:04:51"
+    }
+  ],
+  "7a1783e1": [
+    {
+      "fingerprint": "de3f29b6f973de11aa15a24055bfeaa1",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:05:01"
+    }
+  ],
+  "fde0998f": [
+    {
+      "fingerprint": "6be75bb830d584136213c9e1d5d05020",
+      "params_summary": "ckpt=xl/✨ JANKU Trained + NoobAI + RouWei Illustrious XL ✨_v5.0 🥇🔥_JANKUTrainedNoobaiRouwei_v50_trainingData.safetensors, loras=[xl-style/MoriiMee Gothic Niji _ LoRA Style_V1 Ilustrious_MoriiMee_Gothic_Niji_Style_Illustrious_r1.safetensors@0.75, xl-style/Nijijourney_2025.safetensors@0.5, xl-style/Yoneyama_Mai_illu.safetensors@0.6, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:30:39"
+    }
+  ],
+  "8c12f234": [
+    {
+      "fingerprint": "86c5edcbc46266dc955dbfeb26a2ff13",
+      "params_summary": "ckpt=xl/Illustrij EVO_LVL3_illustrijEVO_lvl3.safetensors, loras=[xl-enhance/Detailer IL_v2_DetailerILv2-000008.safetensors@1.0, xl-slider/Dramatic Lighting Slider - Illustrious_v1.0_Dramatic Lighting Slider.safetensors@3.5, xl-slider/Illustrious Realism Slider_v1.0_ILXL_Realism_Slider_V.1.safetensors@2.6], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T17:49:45"
+    }
+  ],
+  "1a733d64": [
+    {
+      "fingerprint": "a1702cd650a64a1b9e45c8e9d21e7f37",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors, loras=[xl-enhance/Rapscallion style Illustrious, PDXL, ZIT_Rapscallion Illustrious_Rapscallion_Illustrious.safetensors@1.0, xl-enhance/skindentation_v2.safetensors@1.0, xl-pose/tsuki_ni_kawatte_oshioki_yo.safetensors@1.0, xl-style/Fidelenrich_2.safetensors@1.0, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@1.0, xl-style/Neurocore Anime Shadow Circuit by ChronoKnight - [FLUX, IL, ZIT]_ILLUSTRIOUS_ck-shadow-circuit-IL-000012.safetensors@1.0, xl-style/R754496 _ Shiiro's Styles _ Niji_v1.0_r17329_illuu.safetensors@1.0, xl-style/incoth.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:53:07"
+    }
+  ],
+  "64d76492": [
+    {
+      "fingerprint": "cff3382a0d91c734ba4a8582284dfddd",
+      "params_summary": "ckpt=xl/Plant Milk 🌿 - Model Suite_Walnut_plantMilkModelSuite_walnut.safetensors, loras=[xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@0.6, xl-style/👑✨ TrendCraft_ The People’s Style Detailer 🚀⭐Noob_Illustrious Base 🎨_v2.4I Illustrious 5_18_TrendCraft_The_Peoples_Style_Detailer-v2.4I-5_18_2025-Illustrious.safetensors@0.2], 768x1344, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:53:15"
+    }
+  ],
+  "0dbe021b": [
+    {
+      "fingerprint": "7e58ca6625b28f44dc6baca21c447a67",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v2.2_hassakuXLIllustrious_v22.safetensors, loras=[xl-enhance/Rapscallion style Illustrious, PDXL, ZIT_Rapscallion Illustrious_Rapscallion_Illustrious.safetensors@0.35, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@1.0, xl-style/Neurocore Anime Shadow Circuit by ChronoKnight - [FLUX, IL, ZIT]_ILLUSTRIOUS_ck-shadow-circuit-IL-000012.safetensors@0.4, xl-style/R754496 _ Shiiro's Styles _ Niji_v1.0_r17329_illuu.safetensors@0.35, xl-style/incoth.safetensors@0.25], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:53:39"
+    }
+  ],
+  "e8fdd569": [
+    {
+      "fingerprint": "8d6fe06005159acc32163f68c9afb086",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v3 WIP_hassakuXLIllustrious_v3WIP.safetensors, loras=[xl-enhance/Rapscallion style Illustrious, PDXL, ZIT_Rapscallion Illustrious_Rapscallion_Illustrious.safetensors@1.0, xl-style/Fidelenrich_2.safetensors@1.0, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@1.0, xl-style/Neurocore Anime Shadow Circuit by ChronoKnight - [FLUX, IL, ZIT]_ILLUSTRIOUS_ck-shadow-circuit-IL-000012.safetensors@1.0, xl-style/R754496 _ Shiiro's Styles _ Niji_v1.0_r17329_illuu.safetensors@1.0, xl-style/incoth.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:53:58"
+    }
+  ],
+  "0b652a9d": [
+    {
+      "fingerprint": "f906aa7f5279fbf1a0c203600586132d",
+      "params_summary": "ckpt=xl/hyphoriaIlluNAI_v001.safetensors, loras=[xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@0.5, xl-style/Neurocore Anime Shadow Circuit by ChronoKnight - [FLUX, IL, ZIT]_ILLUSTRIOUS_ck-shadow-circuit-IL-000012.safetensors@0.5, xl-style/薄塗り _ USNR STYLE_SDXL_Illustrious-XL_USNR STYLE_XL_lokr.safetensors@0.6], 896x1152, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T18:54:35"
+    }
+  ],
+  "587686cd": [
+    {
+      "fingerprint": "29ecd5679f2693a8c1e806845faf8429",
+      "params_summary": "ckpt=xl/Hassaku XL (Illustrious)_v2.2_hassakuXLIllustrious_v22.safetensors, loras=[xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@1.0, xl-style/illustrious_flat_color_v2.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T19:28:59"
+    }
+  ],
+  "346b813e": [
+    {
+      "fingerprint": "53858c398e5ff5cc7da51956cafd0c2d",
+      "params_summary": "ckpt=xl/WAI-illustrious-SDXL_v14.0_waiIllustriousSDXL_v140.safetensors, loras=[xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@1.0], 1216x832, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T19:29:20"
+    }
+  ],
+  "09e8056e": [
+    {
+      "fingerprint": "9416f9ffbb6717cf576fa041d277a742",
+      "params_summary": "ckpt=xl/WAI-illustrious-SDXL_v14.0_waiIllustriousSDXL_v140.safetensors, loras=[xl-style/96YOTTEA style _ Illustrious_v1.1 - WAI_96YOTTEA-WAI.safetensors@0.4, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@0.15, xl-style/Lhata4564_illu.safetensors@0.35, xl-style/New Incase Style (2024) _ NoobAI _ Illustrious _ PonyXL _ Flux.1 D_ILLUSTRIOUS NOOBAI_incase_new_style_red_ill.safetensors@0.25, xl-style/Niji semi realism_v3.5 - illustrious_Semi-realism_illustrious.safetensors@0.25, xl-style/People's Works +_v8_Illusv2.0Stable_ppw_v8_Illuv2stable_128.safetensors@0.65, xl-style/Takayanagi Katsuya style _ Illustrious_v1.0_takayanagi_katsuya.safetensors@0.4], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T19:38:38"
+    }
+  ],
+  "470ad362": [
+    {
+      "fingerprint": "f89adeff117aa07ef0b4561f05b574ef",
+      "params_summary": "ckpt=xl/WAI-illustrious-SDXL_v14.0_waiIllustriousSDXL_v140.safetensors, loras=[xl-style/96YOTTEA style _ Illustrious_v1.1 - WAI_96YOTTEA-WAI.safetensors@0.4, xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@0.1, xl-style/Lhata4564_illu.safetensors@0.85, xl-style/New Incase Style (2024) _ NoobAI _ Illustrious _ PonyXL _ Flux.1 D_ILLUSTRIOUS NOOBAI_incase_new_style_red_ill.safetensors@0.25, xl-style/Niji semi realism_v3.5 - illustrious_Semi-realism_illustrious.safetensors@0.25, xl-style/People's Works +_v8_Illusv2.0Stable_ppw_v8_Illuv2stable_128.safetensors@0.5, xl-style/aleriia_vIL.safetensors@0.35, xl-style/jdseal.safetensors@0.45, xl-suit/checkpoint-e100_s900.safetensors@0.8], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T19:58:01"
+    }
+  ],
+  "cce826b7": [
+    {
+      "fingerprint": "b8612ed7c4d50f05358663900c1532ce",
+      "params_summary": "ckpt=xl/hyphoriaIlluNAI_v001.safetensors, loras=[xl-style/Flatline - Illus x Niji [BETA]_v2.0 Remix_flatline_v2_-_Illus_x_Niji.safetensors@1.75, xl-style/IL_Serpieri_t2-340.safetensors@1.0], 832x1216, steps=20, cfg=7, sampler=dpmpp_2m, seed=None",
+      "deleted_at": "2026-02-19T20:23:42"
+    }
+  ]
+}

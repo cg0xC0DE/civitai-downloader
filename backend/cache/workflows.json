@@ -1,0 +1,53 @@
+{
+  "items": [
+    {
+      "name": "xl.text2img.basic",
+      "filename": "xl.text2img.basic.json",
+      "path": "C:\\workplace\\civitai-downloader\\backend\\workflows\\xl.text2img.basic.json",
+      "source": "local",
+      "description": "工作流: xl.text2img.basic",
+      "nodes": {
+        "positive": {
+          "type": "CLIPTextEncode",
+          "method": "widgets_values",
+          "index": 0
+        },
+        "negative": {
+          "type": "CLIPTextEncode",
+          "method": "widgets_values",
+          "index": 1
+        },
+        "checkpoint": {
+          "type": "CheckpointLoaderSimple",
+          "method": "widgets_values",
+          "index": 0
+        },
+        "size": {
+          "type": "EmptyLatentImage",
+          "method": "widgets_values",
+          "index": 0
+        },
+        "lora_stack": {
+          "type": "Lora Loader Stack (rgthree)",
+          "method": "widgets_values"
+        },
+        "lora": {
+          "type": "Lora Loader Stack (rgthree)",
+          "method": "widgets_values"
+        }
+      },
+      "ckpt_loader": {
+        "type": "CheckpointLoaderSimple",
+        "method": "widgets_values",
+        "index": 0
+      },
+      "lora_loader": {
+        "type": "Lora Loader Stack (rgthree)",
+        "method": "widgets_values"
+      },
+      "updated": 1771161172.2447402
+    }
+  ],
+  "count": 1,
+  "updated": 1771508519.5921426
+}
