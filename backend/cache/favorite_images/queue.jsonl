@@ -1,466 +1,787 @@
-{"id": "31f49c4c", "url": "https://civitai.com/images/81080164", "status": "pending", "created_at": "2026-02-10T15:01:25.568686"}
-{"id": "78a218f1", "url": "https://civitai.com/images/78553499", "status": "pending", "created_at": "2026-02-10T19:45:14.028323", "processing_at": "2026-02-13T00:23:32.746510", "done_at": "2026-02-13T00:25:41.864140"}
-{"id": "3f6bb461", "url": "https://civitai.com/images/56179929", "status": "processing", "created_at": "2026-02-10T20:22:34.734638"}
+{"id": "31f49c4c", "url": "https://civitai.com/images/81080164", "status": "processing", "created_at": "2026-02-10T15:01:25.568686", "processing_at": "2026-02-18T19:51:12.276219", "fail_at": "2026-02-18T13:43:24.879627"}
+{"id": "78a218f1", "url": "https://civitai.com/images/78553499", "status": "processing", "created_at": "2026-02-10T19:45:14.028323", "processing_at": "2026-02-18T19:52:22.551101", "done_at": "2026-02-13T00:25:41.864140", "fail_at": "2026-02-18T13:43:41.376305"}
+{"id": "3f6bb461", "url": "https://civitai.com/images/56179929", "status": "processing", "created_at": "2026-02-10T20:22:34.734638", "processing_at": "2026-02-18T16:11:10.192829"}
 {"id": "74dabda4", "url": "https://civitai.com/images/75174625", "status": "processing", "created_at": "2026-02-10T20:23:34.436514", "processing_at": "2026-02-14T00:29:14.595911"}
-{"id": "40a33b47", "url": "https://civitai.com/images/74376926", "status": "processing", "created_at": "2026-02-10T20:23:37.040408", "processing_at": "2026-02-12T10:10:38.959892"}
-{"id": "f40bb7ce", "url": "https://civitai.com/images/74199273", "status": "processing", "created_at": "2026-02-10T20:23:42.248887", "processing_at": "2026-02-12T10:11:03.988723"}
-{"id": "03298e6f", "url": "https://civitai.com/images/73319854", "status": "processing", "created_at": "2026-02-10T20:23:43.208597", "processing_at": "2026-02-12T10:11:27.311972"}
-{"id": "8a832605", "url": "https://civitai.com/images/57166213", "status": "pending", "created_at": "2026-02-10T20:23:46.607868", "processing_at": "2026-02-13T00:24:58.752451", "done_at": "2026-02-13T00:28:26.644053"}
+{"id": "40a33b47", "url": "https://civitai.com/images/74376926", "status": "processing", "created_at": "2026-02-10T20:23:37.040408", "processing_at": "2026-02-18T16:11:22.807548"}
+{"id": "f40bb7ce", "url": "https://civitai.com/images/74199273", "status": "pending", "created_at": "2026-02-10T20:23:42.248887", "processing_at": "2026-02-12T10:11:03.988723", "fail_at": "2026-02-18T20:35:33.009823", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "03298e6f", "url": "https://civitai.com/images/73319854", "status": "pending", "created_at": "2026-02-10T20:23:43.208597", "processing_at": "2026-02-16T01:24:25.989595", "fail_at": "2026-02-18T20:35:40.163099", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "8a832605", "url": "https://civitai.com/images/57166213", "status": "done", "created_at": "2026-02-10T20:23:46.607868", "processing_at": "2026-02-18T19:52:47.110703", "done_at": "2026-02-19T16:52:15.823253", "fail_at": "2026-02-18T13:43:51.625820"}
 {"id": "275c55fe", "url": "https://civitai.com/images/59613206", "status": "processing", "created_at": "2026-02-10T20:23:48.428843", "processing_at": "2026-02-13T23:57:16.825461", "done_at": "2026-02-13T00:33:09.137551"}
 {"id": "837826ab", "url": "https://civitai.com/images/75189888", "status": "processing", "created_at": "2026-02-10T20:23:53.995710", "processing_at": "2026-02-14T00:29:04.782097"}
-{"id": "94cb617e", "url": "https://civitai.com/images/77492994", "status": "processing", "created_at": "2026-02-10T20:23:55.629262", "processing_at": "2026-02-12T10:12:46.797394"}
-{"id": "781cb200", "url": "https://civitai.com/images/96659235", "status": "processing", "created_at": "2026-02-10T23:59:43.347992", "processing_at": "2026-02-12T10:13:10.390244"}
-{"id": "a770229c", "url": "https://civitai.com/images/80778068", "status": "processing", "created_at": "2026-02-11T01:01:35.347740"}
+{"id": "94cb617e", "url": "https://civitai.com/images/77492994", "status": "processing", "created_at": "2026-02-10T20:23:55.629262", "processing_at": "2026-02-18T16:11:48.819159"}
+{"id": "781cb200", "url": "https://civitai.com/images/96659235", "status": "pending", "created_at": "2026-02-10T23:59:43.347992", "processing_at": "2026-02-19T16:52:29.739125", "retry_reason": "参数需调整，重新生成"}
+{"id": "a770229c", "url": "https://civitai.com/images/80778068", "status": "pending", "created_at": "2026-02-11T01:01:35.347740", "fail_at": "2026-02-18T20:36:13.116422", "retry_reason": "下载后仍缺模型:   lora: Anime X Reality | Shiiro's Styles (model_id=1163407, version_id=1308731)"}
 {"id": "167d7644", "url": "https://civitai.com/images/119323039", "status": "processing", "created_at": "2026-02-11T01:38:22.370174", "processing_at": "2026-02-14T00:29:23.030957"}
-{"id": "a40d19d1", "url": "https://civitai.com/images/119201238", "status": "processing", "created_at": "2026-02-11T01:38:37.126585", "processing_at": "2026-02-12T10:14:37.134679"}
-{"id": "f94e3429", "url": "https://civitai.com/images/119201138", "status": "processing", "created_at": "2026-02-11T01:38:55.380906", "processing_at": "2026-02-12T18:48:58.403782"}
-{"id": "e09ca304", "url": "https://civitai.com/images/119069386", "status": "processing", "created_at": "2026-02-11T01:39:01.162108", "processing_at": "2026-02-12T10:18:41.285824"}
-{"id": "b744b794", "url": "https://civitai.com/images/57787798", "status": "pending", "created_at": "2026-02-11T01:40:11.432204", "processing_at": "2026-02-13T00:10:59.978694", "done_at": "2026-02-13T00:12:11.760115"}
-{"id": "c7741fa5", "url": "https://civitai.com/images/57784973", "status": "processing", "created_at": "2026-02-11T01:40:31.703967", "processing_at": "2026-02-12T10:19:16.941090"}
-{"id": "afc5061e", "url": "https://civitai.com/images/57288016", "status": "processing", "created_at": "2026-02-11T01:41:00.819520", "processing_at": "2026-02-12T10:20:01.656582"}
-{"id": "6563c1d0", "url": "https://civitai.com/images/57288455", "status": "processing", "created_at": "2026-02-11T01:41:13.157432", "processing_at": "2026-02-12T10:20:54.331969"}
-{"id": "d3803966", "url": "https://civitai.com/images/57187119", "status": "processing", "created_at": "2026-02-11T01:41:38.381383", "processing_at": "2026-02-12T19:41:02.639408"}
-{"id": "ea564873", "url": "https://civitai.com/images/57085479", "status": "processing", "created_at": "2026-02-11T01:41:57.635247", "processing_at": "2026-02-12T10:21:57.397096"}
-{"id": "cddc90d9", "url": "https://civitai.com/images/56967475", "status": "processing", "created_at": "2026-02-11T01:42:14.910100", "processing_at": "2026-02-12T10:22:19.621155"}
-{"id": "266bf084", "url": "https://civitai.com/images/56302137", "status": "processing", "created_at": "2026-02-11T01:42:35.631935", "processing_at": "2026-02-12T10:22:37.479403"}
-{"id": "eb8f15ab", "url": "https://civitai.com/images/56141671", "status": "processing", "created_at": "2026-02-11T01:42:48.869336", "processing_at": "2026-02-12T10:22:53.652447"}
-{"id": "f48c94f9", "url": "https://civitai.com/images/34877374", "status": "processing", "created_at": "2026-02-11T01:44:07.555137", "processing_at": "2026-02-12T10:23:06.427884"}
-{"id": "9c6ea8c8", "url": "https://civitai.com/images/60421296", "status": "processing", "created_at": "2026-02-11T01:45:16.542210", "processing_at": "2026-02-12T10:23:27.311859"}
-{"id": "cb8fb225", "url": "https://civitai.com/images/60346012", "status": "processing", "created_at": "2026-02-11T01:45:30.471091", "processing_at": "2026-02-12T10:23:51.945249"}
+{"id": "a40d19d1", "url": "https://civitai.com/images/119201238", "status": "processing", "created_at": "2026-02-11T01:38:37.126585", "processing_at": "2026-02-18T16:12:47.396347"}
+{"id": "f94e3429", "url": "https://civitai.com/images/119201138", "status": "processing", "created_at": "2026-02-11T01:38:55.380906", "processing_at": "2026-02-18T16:12:59.432143"}
+{"id": "e09ca304", "url": "https://civitai.com/images/119069386", "status": "processing", "created_at": "2026-02-11T01:39:01.162108", "processing_at": "2026-02-18T16:13:12.313439"}
+{"id": "b744b794", "url": "https://civitai.com/images/57787798", "status": "processing", "created_at": "2026-02-11T01:40:11.432204", "processing_at": "2026-02-18T19:53:40.467380", "done_at": "2026-02-13T00:12:11.760115", "fail_at": "2026-02-18T13:44:02.938777"}
+{"id": "c7741fa5", "url": "https://civitai.com/images/57784973", "status": "processing", "created_at": "2026-02-11T01:40:31.703967", "processing_at": "2026-02-18T16:13:24.479387"}
+{"id": "afc5061e", "url": "https://civitai.com/images/57288016", "status": "processing", "created_at": "2026-02-11T01:41:00.819520", "processing_at": "2026-02-18T21:24:59.643014"}
+{"id": "6563c1d0", "url": "https://civitai.com/images/57288455", "status": "processing", "created_at": "2026-02-11T01:41:13.157432", "processing_at": "2026-02-18T16:13:35.798657"}
+{"id": "d3803966", "url": "https://civitai.com/images/57187119", "status": "processing", "created_at": "2026-02-11T01:41:38.381383", "processing_at": "2026-02-18T16:13:47.064329"}
+{"id": "ea564873", "url": "https://civitai.com/images/57085479", "status": "pending", "created_at": "2026-02-11T01:41:57.635247", "processing_at": "2026-02-12T10:21:57.397096", "fail_at": "2026-02-18T20:36:20.130702", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "cddc90d9", "url": "https://civitai.com/images/56967475", "status": "processing", "created_at": "2026-02-11T01:42:14.910100", "processing_at": "2026-02-18T16:14:06.456576"}
+{"id": "266bf084", "url": "https://civitai.com/images/56302137", "status": "processing", "created_at": "2026-02-11T01:42:35.631935", "processing_at": "2026-02-18T16:14:17.332869"}
+{"id": "eb8f15ab", "url": "https://civitai.com/images/56141671", "status": "processing", "created_at": "2026-02-11T01:42:48.869336", "processing_at": "2026-02-18T16:15:48.390790"}
+{"id": "f48c94f9", "url": "https://civitai.com/images/34877374", "status": "pending", "created_at": "2026-02-11T01:44:07.555137", "processing_at": "2026-02-12T10:23:06.427884", "fail_at": "2026-02-18T20:36:30.170749", "retry_reason": "下载后仍缺模型:   checkpoint: real pony (model_id=365041, version_id=962060)"}
+{"id": "9c6ea8c8", "url": "https://civitai.com/images/60421296", "status": "pending", "created_at": "2026-02-11T01:45:16.542210", "processing_at": "2026-02-19T16:53:40.821987", "retry_reason": "参数需调整，重新生成"}
+{"id": "cb8fb225", "url": "https://civitai.com/images/60346012", "status": "pending", "created_at": "2026-02-11T01:45:30.471091", "processing_at": "2026-02-19T16:53:53.395138", "retry_reason": "参数需调整，重新生成"}
 {"id": "4978621d", "url": "https://civitai.com/images/60338641", "status": "processing", "created_at": "2026-02-11T01:46:49.604911", "processing_at": "2026-02-14T00:29:31.248207"}
-{"id": "bd727da3", "url": "https://civitai.com/images/60063355", "status": "processing", "created_at": "2026-02-11T01:47:16.591135", "processing_at": "2026-02-12T19:41:13.380350"}
-{"id": "56e64cd4", "url": "https://civitai.com/images/59835119", "status": "processing", "created_at": "2026-02-11T01:48:10.563177", "processing_at": "2026-02-12T10:25:04.048011"}
-{"id": "c9c7d38f", "url": "https://civitai.com/images/59504588", "status": "processing", "created_at": "2026-02-11T01:49:02.663194", "processing_at": "2026-02-12T10:25:20.252801"}
-{"id": "29457e57", "url": "https://civitai.com/images/59032576", "status": "pending", "created_at": "2026-02-11T01:51:40.371896", "processing_at": "2026-02-13T00:24:43.033150", "done_at": "2026-02-13T00:27:23.321350"}
-{"id": "d4596303", "url": "https://civitai.com/images/78907178", "status": "processing", "created_at": "2026-02-11T01:53:17.619986", "processing_at": "2026-02-12T10:47:24.976024"}
-{"id": "1eb910be", "url": "https://civitai.com/images/76880528", "status": "processing", "created_at": "2026-02-11T01:54:25.578152", "processing_at": "2026-02-12T10:47:47.651059"}
+{"id": "bd727da3", "url": "https://civitai.com/images/60063355", "status": "processing", "created_at": "2026-02-11T01:47:16.591135", "processing_at": "2026-02-18T16:16:37.991619"}
+{"id": "56e64cd4", "url": "https://civitai.com/images/59835119", "status": "processing", "created_at": "2026-02-11T01:48:10.563177", "processing_at": "2026-02-18T16:16:50.629069"}
+{"id": "c9c7d38f", "url": "https://civitai.com/images/59504588", "status": "processing", "created_at": "2026-02-11T01:49:02.663194", "processing_at": "2026-02-18T16:17:09.564694"}
+{"id": "29457e57", "url": "https://civitai.com/images/59032576", "status": "done", "created_at": "2026-02-11T01:51:40.371896", "processing_at": "2026-02-18T19:54:11.424656", "done_at": "2026-02-19T16:54:03.753565", "fail_at": "2026-02-18T13:44:15.062936"}
+{"id": "d4596303", "url": "https://civitai.com/images/78907178", "status": "pending", "created_at": "2026-02-11T01:53:17.619986", "processing_at": "2026-02-12T10:47:24.976024", "fail_at": "2026-02-18T20:36:37.909326", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "1eb910be", "url": "https://civitai.com/images/76880528", "status": "pending", "created_at": "2026-02-11T01:54:25.578152", "processing_at": "2026-02-19T16:54:24.362598", "fail_at": "2026-02-18T16:17:24.912057", "retry_reason": "参数需调整，重新生成"}
 {"id": "69b818f2", "url": "https://civitai.com/images/76579457", "status": "processing", "created_at": "2026-02-11T01:54:52.512312", "processing_at": "2026-02-11T12:56:44.544926"}
-{"id": "424ee605", "url": "https://civitai.com/images/85884641", "status": "processing", "created_at": "2026-02-11T01:56:36.144243", "processing_at": "2026-02-12T10:48:41.217730"}
-{"id": "7d337ca6", "url": "https://civitai.com/images/82941381", "status": "processing", "created_at": "2026-02-11T01:56:59.117522", "processing_at": "2026-02-12T10:48:57.532156"}
-{"id": "70403702", "url": "https://civitai.com/images/118810961", "status": "processing", "created_at": "2026-02-11T02:31:15.808103", "processing_at": "2026-02-12T10:49:38.222821"}
-{"id": "4f0011e8", "url": "https://civitai.com/images/110253100", "status": "processing", "created_at": "2026-02-11T02:31:36.267506", "processing_at": "2026-02-12T10:49:57.319002"}
-{"id": "25309a63", "url": "https://civitai.com/images/110251445", "status": "processing", "created_at": "2026-02-11T02:31:47.416104", "processing_at": "2026-02-12T10:50:24.811794"}
-{"id": "f1fdc87a", "url": "https://civitai.com/images/103733788", "status": "processing", "created_at": "2026-02-11T02:32:05.678325", "processing_at": "2026-02-12T10:50:49.102849"}
-{"id": "224fae2f", "url": "https://civitai.com/images/103685549", "status": "processing", "created_at": "2026-02-11T02:32:14.254054", "processing_at": "2026-02-14T00:33:18.741434"}
-{"id": "7970c265", "url": "https://civitai.com/images/103563651", "status": "processing", "created_at": "2026-02-11T02:32:23.618154", "processing_at": "2026-02-12T18:48:44.114170"}
-{"id": "ac191ea4", "url": "https://civitai.com/images/107105977", "status": "pending", "created_at": "2026-02-11T22:19:24.807603", "processing_at": "2026-02-13T00:25:19.075492", "done_at": "2026-02-13T00:29:43.076423"}
-{"id": "4ce937db", "url": "https://civitai.com/images/104548921", "status": "processing", "created_at": "2026-02-11T22:19:47.376487", "processing_at": "2026-02-12T10:55:57.038596"}
-{"id": "542d6a03", "url": "https://civitai.com/images/104279394", "status": "processing", "created_at": "2026-02-11T22:19:59.184542", "processing_at": "2026-02-12T11:00:05.193342"}
-{"id": "7e9bc257", "url": "https://civitai.com/images/104114389", "status": "processing", "created_at": "2026-02-11T22:20:08.154832", "processing_at": "2026-02-12T21:10:49.635877"}
-{"id": "2756291b", "url": "https://civitai.com/images/104084870", "status": "processing", "created_at": "2026-02-11T22:20:17.302353", "processing_at": "2026-02-12T11:00:30.443085"}
+{"id": "424ee605", "url": "https://civitai.com/images/85884641", "status": "pending", "created_at": "2026-02-11T01:56:36.144243", "processing_at": "2026-02-19T16:54:36.010673", "fail_at": "2026-02-18T16:17:32.068037", "retry_reason": "参数需调整，重新生成"}
+{"id": "7d337ca6", "url": "https://civitai.com/images/82941381", "status": "pending", "created_at": "2026-02-11T01:56:59.117522", "processing_at": "2026-02-12T10:48:57.532156", "fail_at": "2026-02-18T20:36:53.236104", "retry_reason": "模型下载失败: lora 'version_1899496'"}
+{"id": "70403702", "url": "https://civitai.com/images/118810961", "status": "done", "created_at": "2026-02-11T02:31:15.808103", "processing_at": "2026-02-18T19:55:07.113818", "done_at": "2026-02-19T16:55:00.660924"}
+{"id": "4f0011e8", "url": "https://civitai.com/images/110253100", "status": "done", "created_at": "2026-02-11T02:31:36.267506", "processing_at": "2026-02-18T19:55:19.994623", "done_at": "2026-02-19T16:55:10.478588"}
+{"id": "25309a63", "url": "https://civitai.com/images/110251445", "status": "processing", "created_at": "2026-02-11T02:31:47.416104", "processing_at": "2026-02-18T16:18:22.660137"}
+{"id": "f1fdc87a", "url": "https://civitai.com/images/103733788", "status": "processing", "created_at": "2026-02-11T02:32:05.678325", "processing_at": "2026-02-16T15:43:36.049676"}
+{"id": "224fae2f", "url": "https://civitai.com/images/103685549", "status": "pending", "created_at": "2026-02-11T02:32:14.254054", "processing_at": "2026-02-19T16:55:22.691431", "retry_reason": "参数需调整，重新生成"}
+{"id": "7970c265", "url": "https://civitai.com/images/103563651", "status": "processing", "created_at": "2026-02-11T02:32:23.618154", "processing_at": "2026-02-18T16:18:34.277407"}
+{"id": "ac191ea4", "url": "https://civitai.com/images/107105977", "status": "processing", "created_at": "2026-02-11T22:19:24.807603", "processing_at": "2026-02-18T19:55:30.298223", "done_at": "2026-02-13T00:29:43.076423", "fail_at": "2026-02-18T13:44:25.015348"}
+{"id": "4ce937db", "url": "https://civitai.com/images/104548921", "status": "pending", "created_at": "2026-02-11T22:19:47.376487", "processing_at": "2026-02-19T16:55:35.362097", "retry_reason": "参数需调整，重新生成"}
+{"id": "542d6a03", "url": "https://civitai.com/images/104279394", "status": "pending", "created_at": "2026-02-11T22:19:59.184542", "processing_at": "2026-02-12T11:00:05.193342", "fail_at": "2026-02-18T20:37:24.020618", "retry_reason": "下载后仍缺模型:   lora: Rain (model_id=521990, version_id=1229466)"}
+{"id": "7e9bc257", "url": "https://civitai.com/images/104114389", "status": "processing", "created_at": "2026-02-11T22:20:08.154832", "processing_at": "2026-02-18T16:19:18.887213"}
+{"id": "2756291b", "url": "https://civitai.com/images/104084870", "status": "processing", "created_at": "2026-02-11T22:20:17.302353", "processing_at": "2026-02-18T16:19:30.232967"}
 {"id": "fbe7d7f3", "url": "https://civitai.com/images/103878361", "status": "processing", "created_at": "2026-02-11T22:20:30.615708", "processing_at": "2026-02-13T23:41:17.151994"}
-{"id": "73885425", "url": "https://civitai.com/images/103735005", "status": "processing", "created_at": "2026-02-11T22:20:49.324636", "processing_at": "2026-02-12T11:04:40.357420"}
-{"id": "e2759a15", "url": "https://civitai.com/images/103742058", "status": "processing", "created_at": "2026-02-11T22:20:57.022226", "processing_at": "2026-02-12T11:09:59.347211"}
-{"id": "a8164a25", "url": "https://civitai.com/images/103734670", "status": "processing", "created_at": "2026-02-11T22:21:06.590527", "processing_at": "2026-02-12T11:10:09.844490"}
-{"id": "d72607e9", "url": "https://civitai.com/images/103685427", "status": "processing", "created_at": "2026-02-11T22:21:15.489440", "processing_at": "2026-02-12T11:10:26.976919"}
+{"id": "73885425", "url": "https://civitai.com/images/103735005", "status": "processing", "created_at": "2026-02-11T22:20:49.324636", "processing_at": "2026-02-18T16:19:42.145186"}
+{"id": "e2759a15", "url": "https://civitai.com/images/103742058", "status": "done", "created_at": "2026-02-11T22:20:57.022226", "processing_at": "2026-02-18T19:56:01.899085", "fail_at": "2026-02-15T23:37:13.492958", "done_at": "2026-02-19T16:56:03.593716"}
+{"id": "a8164a25", "url": "https://civitai.com/images/103734670", "status": "processing", "created_at": "2026-02-11T22:21:06.590527", "processing_at": "2026-02-18T16:19:54.182650"}
+{"id": "d72607e9", "url": "https://civitai.com/images/103685427", "status": "processing", "created_at": "2026-02-11T22:21:15.489440", "processing_at": "2026-02-18T16:20:05.898622"}
 {"id": "5ed95c12", "url": "https://civitai.com/images/103478086", "status": "processing", "created_at": "2026-02-11T22:27:32.020332", "processing_at": "2026-02-13T23:52:57.269026"}
-{"id": "625edce5", "url": "https://civitai.com/images/103555875", "status": "processing", "created_at": "2026-02-11T22:27:39.540148", "processing_at": "2026-02-12T11:11:00.691796"}
-{"id": "025c8736", "url": "https://civitai.com/images/103477817", "status": "processing", "created_at": "2026-02-11T22:27:47.006189", "processing_at": "2026-02-12T11:11:17.159539"}
-{"id": "57fec6ec", "url": "https://civitai.com/images/103476378", "status": "processing", "created_at": "2026-02-11T22:27:54.270757", "processing_at": "2026-02-12T11:12:43.856243"}
+{"id": "625edce5", "url": "https://civitai.com/images/103555875", "status": "pending", "created_at": "2026-02-11T22:27:39.540148", "processing_at": "2026-02-19T16:56:16.920729", "retry_reason": "参数需调整，重新生成"}
+{"id": "025c8736", "url": "https://civitai.com/images/103477817", "status": "pending", "created_at": "2026-02-11T22:27:47.006189", "processing_at": "2026-02-19T16:56:30.151059", "retry_reason": "参数需调整，重新生成"}
+{"id": "57fec6ec", "url": "https://civitai.com/images/103476378", "status": "processing", "created_at": "2026-02-11T22:27:54.270757", "processing_at": "2026-02-18T19:56:39.800260"}
 {"id": "1953301b", "url": "https://civitai.com/images/103384710", "status": "processing", "created_at": "2026-02-11T22:28:02.663352", "processing_at": "2026-02-13T23:45:53.543115"}
-{"id": "7e23f022", "url": "https://civitai.com/images/103391276", "status": "processing", "created_at": "2026-02-11T22:28:11.462542", "processing_at": "2026-02-12T11:14:09.248856"}
-{"id": "ef64f5fa", "url": "https://civitai.com/images/103274314", "status": "pending", "created_at": "2026-02-11T22:28:18.877006", "processing_at": "2026-02-13T00:28:51.198572", "done_at": "2026-02-13T00:30:27.461706"}
-{"id": "6ce80129", "url": "https://civitai.com/images/103356480", "status": "processing", "created_at": "2026-02-11T22:28:25.140780", "processing_at": "2026-02-12T11:14:44.766224"}
-{"id": "9e06b8ec", "url": "https://civitai.com/images/103245389", "status": "processing", "created_at": "2026-02-11T23:01:31.599953", "processing_at": "2026-02-12T19:02:04.968458"}
-{"id": "d758b3c3", "url": "https://civitai.com/images/103191701", "status": "processing", "created_at": "2026-02-11T23:01:42.460524", "processing_at": "2026-02-12T18:51:02.147258"}
-{"id": "819f60b5", "url": "https://civitai.com/images/103117497", "status": "processing", "created_at": "2026-02-11T23:01:50.836967", "processing_at": "2026-02-12T11:17:24.538108"}
+{"id": "7e23f022", "url": "https://civitai.com/images/103391276", "status": "pending", "created_at": "2026-02-11T22:28:11.462542", "processing_at": "2026-02-19T16:56:43.843532", "retry_reason": "参数需调整，重新生成"}
+{"id": "ef64f5fa", "url": "https://civitai.com/images/103274314", "status": "processing", "created_at": "2026-02-11T22:28:18.877006", "processing_at": "2026-02-18T19:56:51.987060", "done_at": "2026-02-13T00:30:27.461706", "fail_at": "2026-02-18T13:44:36.673156"}
+{"id": "6ce80129", "url": "https://civitai.com/images/103356480", "status": "pending", "created_at": "2026-02-11T22:28:25.140780", "processing_at": "2026-02-19T16:56:56.496557", "retry_reason": "参数需调整，重新生成"}
+{"id": "9e06b8ec", "url": "https://civitai.com/images/103245389", "status": "processing", "created_at": "2026-02-11T23:01:31.599953", "processing_at": "2026-02-18T16:21:04.719066"}
+{"id": "d758b3c3", "url": "https://civitai.com/images/103191701", "status": "processing", "created_at": "2026-02-11T23:01:42.460524", "processing_at": "2026-02-18T16:21:16.030825"}
+{"id": "819f60b5", "url": "https://civitai.com/images/103117497", "status": "processing", "created_at": "2026-02-11T23:01:50.836967", "processing_at": "2026-02-18T16:21:25.509465"}
 {"id": "4121f5bd", "url": "https://civitai.com/images/103134233", "status": "processing", "created_at": "2026-02-11T23:01:58.664390", "processing_at": "2026-02-14T01:17:22.468914"}
-{"id": "c0b02f5b", "url": "https://civitai.com/images/102949319", "status": "processing", "created_at": "2026-02-11T23:02:06.799966", "processing_at": "2026-02-12T19:02:23.185060"}
-{"id": "2de37f44", "url": "https://civitai.com/images/102921256", "status": "processing", "created_at": "2026-02-11T23:02:14.262815", "processing_at": "2026-02-13T23:53:57.814368"}
-{"id": "fa23e562", "url": "https://civitai.com/images/102840718", "status": "processing", "created_at": "2026-02-11T23:06:25.118557", "processing_at": "2026-02-12T11:26:42.953770"}
-{"id": "49a8f71e", "url": "https://civitai.com/images/102696876", "status": "processing", "created_at": "2026-02-11T23:06:32.976246", "processing_at": "2026-02-12T11:27:03.081923"}
-{"id": "f809fb29", "url": "https://civitai.com/images/102696587", "status": "processing", "created_at": "2026-02-11T23:06:40.993702", "processing_at": "2026-02-12T19:04:18.437087"}
-{"id": "1ef82bfd", "url": "https://civitai.com/images/102646213", "status": "pending", "created_at": "2026-02-11T23:06:47.051927"}
-{"id": "90cc8551", "url": "https://civitai.com/images/102330350", "status": "fail", "created_at": "2026-02-11T23:08:24.467961", "processing_at": "2026-02-13T00:30:13.700613", "done_at": "2026-02-13T00:32:24.956482", "fail_at": "2026-02-13T10:40:11.619323"}
-{"id": "679db544", "url": "https://civitai.com/images/101951443", "status": "processing", "created_at": "2026-02-11T23:08:35.650049", "processing_at": "2026-02-11T23:23:37.566645"}
-{"id": "bd3a6ad6", "url": "https://civitai.com/images/101631659", "status": "pending", "created_at": "2026-02-11T23:08:43.676557"}
-{"id": "d4c7f1ec", "url": "https://civitai.com/images/101316832", "status": "processing", "created_at": "2026-02-11T23:08:56.229354", "processing_at": "2026-02-12T18:48:22.828570"}
-{"id": "336b7146", "url": "https://civitai.com/images/101255931", "status": "processing", "created_at": "2026-02-11T23:09:06.192943", "processing_at": "2026-02-12T18:40:23.053642"}
-{"id": "26437f60", "url": "https://civitai.com/images/101191309", "status": "processing", "created_at": "2026-02-11T23:09:14.794570", "processing_at": "2026-02-12T13:44:23.188226"}
-{"id": "fd904ece", "url": "https://civitai.com/images/100821490", "status": "processing", "created_at": "2026-02-11T23:09:23.626170", "processing_at": "2026-02-12T18:42:56.166835"}
-{"id": "60b6c933", "url": "https://civitai.com/images/100796993", "status": "pending", "created_at": "2026-02-11T23:09:30.899043"}
-{"id": "968498fe", "url": "https://civitai.com/images/100794077", "status": "pending", "created_at": "2026-02-11T23:09:39.052153", "processing_at": "2026-02-13T00:24:14.850975", "done_at": "2026-02-13T00:26:22.190640"}
-{"id": "ac16695a", "url": "https://civitai.com/images/100692611", "status": "processing", "created_at": "2026-02-11T23:09:45.798516", "processing_at": "2026-02-12T19:41:34.696037"}
-{"id": "6b95db1d", "url": "https://civitai.com/images/89779435", "status": "pending", "created_at": "2026-02-11T23:29:14.854750"}
-{"id": "b7e757e2", "url": "https://civitai.com/images/88065186", "status": "processing", "created_at": "2026-02-11T23:29:20.709588", "processing_at": "2026-02-12T16:16:38.723384"}
-{"id": "9f7f7fba", "url": "https://civitai.com/images/85911710", "status": "pending", "created_at": "2026-02-11T23:29:26.115894"}
+{"id": "c0b02f5b", "url": "https://civitai.com/images/102949319", "status": "processing", "created_at": "2026-02-11T23:02:06.799966", "processing_at": "2026-02-18T16:21:37.377140"}
+{"id": "2de37f44", "url": "https://civitai.com/images/102921256", "status": "pending", "created_at": "2026-02-11T23:02:14.262815", "processing_at": "2026-02-19T16:57:10.822812", "retry_reason": "参数需调整，重新生成"}
+{"id": "fa23e562", "url": "https://civitai.com/images/102840718", "status": "processing", "created_at": "2026-02-11T23:06:25.118557", "processing_at": "2026-02-18T16:21:48.666682"}
+{"id": "49a8f71e", "url": "https://civitai.com/images/102696876", "status": "processing", "created_at": "2026-02-11T23:06:32.976246", "processing_at": "2026-02-18T16:22:00.063915"}
+{"id": "f809fb29", "url": "https://civitai.com/images/102696587", "status": "processing", "created_at": "2026-02-11T23:06:40.993702", "processing_at": "2026-02-18T16:22:11.597184"}
+{"id": "1ef82bfd", "url": "https://civitai.com/images/102646213", "status": "pending", "created_at": "2026-02-11T23:06:47.051927", "processing_at": "2026-02-19T16:57:25.182191", "fail_at": "2026-02-18T13:46:25.147905", "retry_reason": "参数需调整，重新生成"}
+{"id": "90cc8551", "url": "https://civitai.com/images/102330350", "status": "done", "created_at": "2026-02-11T23:08:24.467961", "processing_at": "2026-02-18T19:57:16.060517", "fail_at": "2026-02-13T10:40:11.619323", "done_at": "2026-02-19T16:57:34.109037"}
+{"id": "679db544", "url": "https://civitai.com/images/101951443", "status": "processing", "created_at": "2026-02-11T23:08:35.650049", "processing_at": "2026-02-18T16:22:23.116124"}
+{"id": "bd3a6ad6", "url": "https://civitai.com/images/101631659", "status": "processing", "created_at": "2026-02-11T23:08:43.676557", "processing_at": "2026-02-18T19:57:28.242477", "fail_at": "2026-02-18T13:46:36.587620"}
+{"id": "d4c7f1ec", "url": "https://civitai.com/images/101316832", "status": "processing", "created_at": "2026-02-11T23:08:56.229354", "processing_at": "2026-02-18T16:22:33.585483"}
+{"id": "336b7146", "url": "https://civitai.com/images/101255931", "status": "processing", "created_at": "2026-02-11T23:09:06.192943", "processing_at": "2026-02-18T16:22:44.267017"}
+{"id": "26437f60", "url": "https://civitai.com/images/101191309", "status": "processing", "created_at": "2026-02-11T23:09:14.794570", "processing_at": "2026-02-18T16:22:56.976083"}
+{"id": "fd904ece", "url": "https://civitai.com/images/100821490", "status": "processing", "created_at": "2026-02-11T23:09:23.626170", "processing_at": "2026-02-18T16:23:07.768004"}
+{"id": "60b6c933", "url": "https://civitai.com/images/100796993", "status": "processing", "created_at": "2026-02-11T23:09:30.899043", "processing_at": "2026-02-18T19:57:41.485546", "fail_at": "2026-02-18T13:46:48.810752"}
+{"id": "968498fe", "url": "https://civitai.com/images/100794077", "status": "processing", "created_at": "2026-02-11T23:09:39.052153", "processing_at": "2026-02-18T15:20:19.301926", "done_at": "2026-02-18T13:53:21.536015"}
+{"id": "ac16695a", "url": "https://civitai.com/images/100692611", "status": "processing", "created_at": "2026-02-11T23:09:45.798516", "processing_at": "2026-02-18T16:23:18.042609"}
+{"id": "6b95db1d", "url": "https://civitai.com/images/89779435", "status": "processing", "created_at": "2026-02-11T23:29:14.854750", "processing_at": "2026-02-18T15:20:19.326034", "done_at": "2026-02-18T13:54:21.255583"}
+{"id": "b7e757e2", "url": "https://civitai.com/images/88065186", "status": "processing", "created_at": "2026-02-11T23:29:20.709588", "processing_at": "2026-02-18T16:23:29.667141"}
+{"id": "9f7f7fba", "url": "https://civitai.com/images/85911710", "status": "processing", "created_at": "2026-02-11T23:29:26.115894", "processing_at": "2026-02-18T15:20:19.338299", "done_at": "2026-02-18T13:55:20.167719"}
 {"id": "f7070f1a", "url": "https://civitai.com/images/84324843", "status": "processing", "created_at": "2026-02-11T23:29:41.551659", "processing_at": "2026-02-13T23:47:10.170505"}
-{"id": "0eacedf9", "url": "https://civitai.com/images/94463479", "status": "pending", "created_at": "2026-02-11T23:29:47.931043"}
-{"id": "fbd76f58", "url": "https://civitai.com/images/85911710", "status": "processing", "created_at": "2026-02-11T23:29:57.438980", "processing_at": "2026-02-12T18:45:22.211008"}
-{"id": "7a1783e1", "url": "https://civitai.com/images/81167867", "status": "pending", "created_at": "2026-02-11T23:30:06.680783"}
-{"id": "b3c01f41", "url": "https://civitai.com/images/89452007", "status": "pending", "created_at": "2026-02-11T23:30:17.040684"}
-{"id": "ae0ce862", "url": "https://civitai.com/images/84923369", "status": "pending", "created_at": "2026-02-11T23:30:21.934202"}
-{"id": "cb908da6", "url": "https://civitai.com/images/89238905", "status": "pending", "created_at": "2026-02-11T23:30:43.801993"}
-{"id": "ed5ba827", "url": "https://civitai.com/images/85125724", "status": "pending", "created_at": "2026-02-11T23:30:50.642683"}
-{"id": "e3394230", "url": "https://civitai.com/images/92776609", "status": "pending", "created_at": "2026-02-11T23:31:03.153196"}
-{"id": "fde0998f", "url": "https://civitai.com/images/81952135", "status": "pending", "created_at": "2026-02-11T23:31:16.298856"}
-{"id": "45f02114", "url": "https://civitai.com/images/78067670", "status": "pending", "created_at": "2026-02-11T23:31:25.598436"}
-{"id": "a3ca690e", "url": "https://civitai.com/images/79014349", "status": "pending", "created_at": "2026-02-11T23:31:35.381197"}
-{"id": "98ac6d67", "url": "https://civitai.com/images/84626388", "status": "pending", "created_at": "2026-02-11T23:31:44.640261"}
-{"id": "e6467fb4", "url": "https://civitai.com/images/82147321", "status": "pending", "created_at": "2026-02-11T23:31:56.974728"}
-{"id": "ec2e16c9", "url": "https://civitai.com/images/88475689", "status": "pending", "created_at": "2026-02-11T23:31:59.842186"}
-{"id": "425f3e3e", "url": "https://civitai.com/images/87283890", "status": "pending", "created_at": "2026-02-11T23:32:11.527553"}
-{"id": "2aec1ab5", "url": "https://civitai.com/images/81167498", "status": "processing", "created_at": "2026-02-11T23:32:18.358942", "processing_at": "2026-02-12T16:15:43.007334"}
-{"id": "8b8f32ef", "url": "https://civitai.com/images/78429193", "status": "pending", "created_at": "2026-02-11T23:32:29.604762"}
-{"id": "6ca275e3", "url": "https://civitai.com/images/79211303", "status": "pending", "created_at": "2026-02-11T23:32:37.204821"}
-{"id": "da2cc5cf", "url": "https://civitai.com/images/90459724", "status": "pending", "created_at": "2026-02-11T23:32:49.471370"}
-{"id": "da4555c0", "url": "https://civitai.com/images/78067696", "status": "pending", "created_at": "2026-02-11T23:33:02.666399"}
-{"id": "89ce21bb", "url": "https://civitai.com/images/90671779", "status": "processing", "created_at": "2026-02-11T23:33:14.119297", "processing_at": "2026-02-12T13:57:38.771187"}
-{"id": "4410f8f5", "url": "https://civitai.com/images/89455402", "status": "pending", "created_at": "2026-02-11T23:33:17.783822"}
-{"id": "c93abb1d", "url": "https://civitai.com/images/87676953", "status": "pending", "created_at": "2026-02-11T23:33:34.467591"}
-{"id": "b2d11075", "url": "https://civitai.com/images/78429249", "status": "pending", "created_at": "2026-02-11T23:33:40.028664"}
-{"id": "389d9f25", "url": "https://civitai.com/images/79016360", "status": "pending", "created_at": "2026-02-11T23:33:48.831091"}
-{"id": "fa97e4be", "url": "https://civitai.com/images/91083311", "status": "pending", "created_at": "2026-02-11T23:34:13.712759"}
-{"id": "aa43ca69", "url": "https://civitai.com/images/84492556", "status": "pending", "created_at": "2026-02-11T23:34:20.131459"}
-{"id": "adbb3572", "url": "https://civitai.com/images/79511200", "status": "processing", "created_at": "2026-02-11T23:34:37.069938", "processing_at": "2026-02-12T13:45:27.044860"}
-{"id": "a1f6ca02", "url": "https://civitai.com/images/83008528", "status": "pending", "created_at": "2026-02-11T23:34:46.983196"}
-{"id": "7f175086", "url": "https://civitai.com/images/79621949", "status": "pending", "created_at": "2026-02-11T23:34:56.776917"}
-{"id": "60ed3847", "url": "https://civitai.com/images/112145048", "status": "pending", "created_at": "2026-02-11T23:35:11.469445"}
-{"id": "0f021a2c", "url": "https://civitai.com/images/97153624", "status": "pending", "created_at": "2026-02-11T23:35:34.021401"}
-{"id": "cb902304", "url": "https://civitai.com/images/82514654", "status": "pending", "created_at": "2026-02-11T23:35:49.438544"}
-{"id": "f8f6df14", "url": "https://civitai.com/images/81565714", "status": "processing", "created_at": "2026-02-11T23:36:05.395471", "processing_at": "2026-02-11T23:36:40.436094"}
-{"id": "c1aef0d1", "url": "https://civitai.com/images/110693447", "status": "processing", "created_at": "2026-02-11T23:37:17.484627", "processing_at": "2026-02-12T16:15:16.820957"}
-{"id": "e77b80a1", "url": "https://civitai.com/images/90869120", "status": "processing", "created_at": "2026-02-11T23:37:37.690586", "processing_at": "2026-02-13T23:51:40.151721"}
-{"id": "0b36ae12", "url": "https://civitai.com/images/83321075", "status": "pending", "created_at": "2026-02-11T23:40:32.803911"}
-{"id": "6832a329", "url": "https://civitai.com/images/83949752", "status": "pending", "created_at": "2026-02-11T23:40:48.415157"}
-{"id": "8fe9ae9f", "url": "https://civitai.com/images/91851884", "status": "pending", "created_at": "2026-02-11T23:41:00.034415"}
-{"id": "21297ba2", "url": "https://civitai.com/images/79621260", "status": "pending", "created_at": "2026-02-11T23:41:13.017532"}
-{"id": "9fdd8b23", "url": "https://civitai.com/images/103515401", "status": "pending", "created_at": "2026-02-11T23:41:22.300092"}
-{"id": "13e02091", "url": "https://civitai.com/images/102868210", "status": "pending", "created_at": "2026-02-11T23:41:30.867335"}
-{"id": "f2c1e634", "url": "https://civitai.com/images/96636816", "status": "pending", "created_at": "2026-02-11T23:41:59.495653"}
-{"id": "9c6c84aa", "url": "https://civitai.com/images/99677546", "status": "pending", "created_at": "2026-02-11T23:42:12.487347"}
-{"id": "29a42cea", "url": "https://civitai.com/images/103710339", "status": "pending", "created_at": "2026-02-11T23:42:31.145654"}
-{"id": "c15876a9", "url": "https://civitai.com/images/86825144", "status": "pending", "created_at": "2026-02-11T23:42:50.208416"}
-{"id": "85d5a2d4", "url": "https://civitai.com/images/85316825", "status": "pending", "created_at": "2026-02-11T23:43:06.665958"}
-{"id": "fa02c456", "url": "https://civitai.com/images/98672260", "status": "processing", "created_at": "2026-02-11T23:43:56.966615", "processing_at": "2026-02-11T23:45:09.254649"}
-{"id": "ad79c68b", "url": "https://civitai.com/images/83524744", "status": "pending", "created_at": "2026-02-11T23:45:54.772382"}
-{"id": "7852dd99", "url": "https://civitai.com/images/82920804", "status": "pending", "created_at": "2026-02-11T23:46:01.446425"}
-{"id": "608668e1", "url": "https://civitai.com/images/94519874", "status": "pending", "created_at": "2026-02-11T23:46:09.445288"}
-{"id": "af4afb82", "url": "https://civitai.com/images/85516801", "status": "pending", "created_at": "2026-02-11T23:46:20.135507"}
-{"id": "0233e8c8", "url": "https://civitai.com/images/90640190", "status": "pending", "created_at": "2026-02-11T23:46:37.929121"}
-{"id": "6663e413", "url": "https://civitai.com/images/92776612", "status": "pending", "created_at": "2026-02-11T23:46:44.497399"}
-{"id": "85bbe4a3", "url": "https://civitai.com/images/94704049", "status": "pending", "created_at": "2026-02-11T23:46:56.111273"}
-{"id": "77ec33af", "url": "https://civitai.com/images/101276785", "status": "pending", "created_at": "2026-02-11T23:47:04.504698"}
-{"id": "7a2cc8ca", "url": "https://civitai.com/images/102559291", "status": "pending", "created_at": "2026-02-11T23:47:17.248901"}
+{"id": "0eacedf9", "url": "https://civitai.com/images/94463479", "status": "pending", "created_at": "2026-02-11T23:29:47.931043", "processing_at": "2026-02-18T13:55:24.924835", "fail_at": "2026-02-18T20:37:57.892286", "retry_reason": "下载后仍缺模型:   lora: Prinz Eugen (Azur Lane: Slow Ahead!) (model_id=1559883, version_id=1765166)"}
+{"id": "fbd76f58", "url": "https://civitai.com/images/85911710", "status": "processing", "created_at": "2026-02-11T23:29:57.438980", "processing_at": "2026-02-18T16:23:46.494715"}
+{"id": "7a1783e1", "url": "https://civitai.com/images/81167867", "status": "pending", "created_at": "2026-02-11T23:30:06.680783", "processing_at": "2026-02-19T16:58:27.414947", "done_at": "2026-02-18T13:56:34.970542", "retry_reason": "参数需调整，重新生成"}
+{"id": "b3c01f41", "url": "https://civitai.com/images/89452007", "status": "pending", "created_at": "2026-02-11T23:30:17.040684", "processing_at": "2026-02-19T16:58:39.489532", "done_at": "2026-02-18T13:57:10.847878", "retry_reason": "参数需调整，重新生成"}
+{"id": "ae0ce862", "url": "https://civitai.com/images/84923369", "status": "pending", "created_at": "2026-02-11T23:30:21.934202", "processing_at": "2026-02-19T16:59:04.792936", "done_at": "2026-02-18T13:58:23.721273", "retry_reason": "参数需调整，重新生成"}
+{"id": "cb908da6", "url": "https://civitai.com/images/89238905", "status": "pending", "created_at": "2026-02-11T23:30:43.801993", "processing_at": "2026-02-19T16:59:19.375020", "done_at": "2026-02-18T14:12:01.618938", "retry_reason": "参数需调整，重新生成"}
+{"id": "ed5ba827", "url": "https://civitai.com/images/85125724", "status": "pending", "created_at": "2026-02-11T23:30:50.642683", "processing_at": "2026-02-18T14:12:06.423881", "fail_at": "2026-02-18T20:38:10.127586", "retry_reason": "下载后仍缺模型:   checkpoint: Illusoria (model_id=1653552, version_id=1871657)"}
+{"id": "e3394230", "url": "https://civitai.com/images/92776609", "status": "processing", "created_at": "2026-02-11T23:31:03.153196", "processing_at": "2026-02-18T15:20:19.401261", "done_at": "2026-02-18T14:14:25.786406"}
+{"id": "fde0998f", "url": "https://civitai.com/images/81952135", "status": "pending", "created_at": "2026-02-11T23:31:16.298856", "processing_at": "2026-02-19T17:00:01.080687", "done_at": "2026-02-18T14:17:54.706077", "retry_reason": "参数需调整，重新生成"}
+{"id": "45f02114", "url": "https://civitai.com/images/78067670", "status": "pending", "created_at": "2026-02-11T23:31:25.598436", "processing_at": "2026-02-19T17:00:15.551593", "fail_at": "2026-02-18T14:18:07.059642", "retry_reason": "参数需调整，重新生成"}
+{"id": "a3ca690e", "url": "https://civitai.com/images/79014349", "status": "processing", "created_at": "2026-02-11T23:31:35.381197", "processing_at": "2026-02-18T15:20:19.428305", "done_at": "2026-02-18T14:18:38.299007"}
+{"id": "98ac6d67", "url": "https://civitai.com/images/84626388", "status": "processing", "created_at": "2026-02-11T23:31:44.640261", "processing_at": "2026-02-18T20:38:35.845471", "fail_at": "2026-02-18T14:18:55.308051"}
+{"id": "e6467fb4", "url": "https://civitai.com/images/82147321", "status": "pending", "created_at": "2026-02-11T23:31:56.974728", "processing_at": "2026-02-19T17:00:36.272656", "done_at": "2026-02-18T14:19:38.246123", "retry_reason": "参数需调整，重新生成"}
+{"id": "ec2e16c9", "url": "https://civitai.com/images/88475689", "status": "processing", "created_at": "2026-02-11T23:31:59.842186", "processing_at": "2026-02-18T16:23:57.923820", "done_at": "2026-02-18T14:20:13.533852"}
+{"id": "425f3e3e", "url": "https://civitai.com/images/87283890", "status": "pending", "created_at": "2026-02-11T23:32:11.527553", "processing_at": "2026-02-18T14:20:18.323628", "fail_at": "2026-02-18T20:39:09.034343", "retry_reason": "下载后仍缺模型:   checkpoint: Unfazed3D (model_id=1717586, version_id=1943723)"}
+{"id": "2aec1ab5", "url": "https://civitai.com/images/81167498", "status": "pending", "created_at": "2026-02-11T23:32:18.358942", "processing_at": "2026-02-19T17:01:34.179963", "fail_at": "2026-02-16T00:47:43.401396", "retry_reason": "参数需调整，重新生成"}
+{"id": "8b8f32ef", "url": "https://civitai.com/images/78429193", "status": "done", "created_at": "2026-02-11T23:32:29.604762", "fail_at": "2026-02-18T14:41:02.840981", "processing_at": "2026-02-18T20:39:22.733156", "done_at": "2026-02-19T17:01:43.938003"}
+{"id": "6ca275e3", "url": "https://civitai.com/images/79211303", "status": "processing", "created_at": "2026-02-11T23:32:37.204821", "processing_at": "2026-02-18T14:41:14.123803"}
+{"id": "da2cc5cf", "url": "https://civitai.com/images/90459724", "status": "pending", "created_at": "2026-02-11T23:32:49.471370", "processing_at": "2026-02-19T17:01:56.428552", "retry_reason": "参数需调整，重新生成"}
+{"id": "da4555c0", "url": "https://civitai.com/images/78067696", "status": "processing", "created_at": "2026-02-11T23:33:02.666399", "fail_at": "2026-02-18T14:41:32.748926", "processing_at": "2026-02-18T20:39:36.742873"}
+{"id": "89ce21bb", "url": "https://civitai.com/images/90671779", "status": "processing", "created_at": "2026-02-11T23:33:14.119297", "processing_at": "2026-02-18T16:25:55.503524"}
+{"id": "4410f8f5", "url": "https://civitai.com/images/89455402", "status": "fail", "created_at": "2026-02-11T23:33:17.783822", "processing_at": "2026-02-18T16:27:03.385409", "fail_at": "2026-02-18T17:21:37.029840", "fail_reason": "权重穷举步进无满意结果"}
+{"id": "c93abb1d", "url": "https://civitai.com/images/87676953", "status": "pending", "created_at": "2026-02-11T23:33:34.467591", "processing_at": "2026-02-19T17:02:14.535870", "fail_at": "2026-02-18T15:36:30.261453", "retry_reason": "参数需调整，重新生成"}
+{"id": "b2d11075", "url": "https://civitai.com/images/78429249", "status": "processing", "created_at": "2026-02-11T23:33:40.028664", "fail_at": "2026-02-18T14:41:57.242941", "processing_at": "2026-02-18T20:39:50.939989"}
+{"id": "389d9f25", "url": "https://civitai.com/images/79016360", "status": "processing", "created_at": "2026-02-11T23:33:48.831091", "processing_at": "2026-02-18T14:42:08.087817"}
+{"id": "fa97e4be", "url": "https://civitai.com/images/91083311", "status": "processing", "created_at": "2026-02-11T23:34:13.712759", "processing_at": "2026-02-18T14:42:16.820217"}
+{"id": "aa43ca69", "url": "https://civitai.com/images/84492556", "status": "processing", "created_at": "2026-02-11T23:34:20.131459", "processing_at": "2026-02-16T01:28:17.508905"}
+{"id": "adbb3572", "url": "https://civitai.com/images/79511200", "status": "processing", "created_at": "2026-02-11T23:34:37.069938", "processing_at": "2026-02-18T20:40:04.656615"}
+{"id": "a1f6ca02", "url": "https://civitai.com/images/83008528", "status": "processing", "created_at": "2026-02-11T23:34:46.983196", "processing_at": "2026-02-18T20:40:19.050612"}
+{"id": "7f175086", "url": "https://civitai.com/images/79621949", "status": "processing", "created_at": "2026-02-11T23:34:56.776917", "processing_at": "2026-02-18T20:40:35.545302"}
+{"id": "60ed3847", "url": "https://civitai.com/images/112145048", "status": "processing", "created_at": "2026-02-11T23:35:11.469445", "processing_at": "2026-02-18T20:40:47.939331"}
+{"id": "0f021a2c", "url": "https://civitai.com/images/97153624", "status": "processing", "created_at": "2026-02-11T23:35:34.021401", "processing_at": "2026-02-18T20:40:59.347840"}
+{"id": "cb902304", "url": "https://civitai.com/images/82514654", "status": "processing", "created_at": "2026-02-11T23:35:49.438544", "processing_at": "2026-02-18T20:41:30.577759"}
+{"id": "f8f6df14", "url": "https://civitai.com/images/81565714", "status": "processing", "created_at": "2026-02-11T23:36:05.395471", "processing_at": "2026-02-16T18:14:11.194795"}
+{"id": "c1aef0d1", "url": "https://civitai.com/images/110693447", "status": "processing", "created_at": "2026-02-11T23:37:17.484627", "processing_at": "2026-02-18T21:25:54.076800", "fail_at": "2026-02-16T00:48:55.723204"}
+{"id": "e77b80a1", "url": "https://civitai.com/images/90869120", "status": "pending", "created_at": "2026-02-11T23:37:37.690586", "processing_at": "2026-02-13T23:51:40.151721", "fail_at": "2026-02-18T20:41:40.114321", "retry_reason": "自动复刻异常: 'NoneType' object has no attribute 'get'"}
+{"id": "0b36ae12", "url": "https://civitai.com/images/83321075", "status": "processing", "created_at": "2026-02-11T23:40:32.803911", "processing_at": "2026-02-18T20:42:09.918709"}
+{"id": "6832a329", "url": "https://civitai.com/images/83949752", "status": "pending", "created_at": "2026-02-11T23:40:48.415157", "fail_at": "2026-02-18T20:42:23.427705", "retry_reason": "下载后仍缺模型:   checkpoint: Illusoria (model_id=1653552, version_id=1871657)"}
+{"id": "8fe9ae9f", "url": "https://civitai.com/images/91851884", "status": "fail", "created_at": "2026-02-11T23:41:00.034415", "processing_at": "2026-02-18T20:45:03.962520", "fail_at": "2026-02-18T20:55:52.455000", "fail_reason": "权重穷举步进无满意结果"}
+{"id": "21297ba2", "url": "https://civitai.com/images/79621260", "status": "processing", "created_at": "2026-02-11T23:41:13.017532", "processing_at": "2026-02-18T20:45:19.874628"}
+{"id": "9fdd8b23", "url": "https://civitai.com/images/103515401", "status": "processing", "created_at": "2026-02-11T23:41:22.300092", "processing_at": "2026-02-18T20:45:33.037796"}
+{"id": "13e02091", "url": "https://civitai.com/images/102868210", "status": "processing", "created_at": "2026-02-11T23:41:30.867335", "processing_at": "2026-02-17T23:24:57.773648"}
+{"id": "f2c1e634", "url": "https://civitai.com/images/96636816", "status": "pending", "created_at": "2026-02-11T23:41:59.495653", "fail_at": "2026-02-18T20:45:44.334534", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "9c6c84aa", "url": "https://civitai.com/images/99677546", "status": "processing", "created_at": "2026-02-11T23:42:12.487347", "processing_at": "2026-02-18T20:47:16.992260"}
+{"id": "29a42cea", "url": "https://civitai.com/images/103710339", "status": "processing", "created_at": "2026-02-11T23:42:31.145654", "processing_at": "2026-02-18T20:47:28.834275"}
+{"id": "c15876a9", "url": "https://civitai.com/images/86825144", "status": "processing", "created_at": "2026-02-11T23:42:50.208416", "processing_at": "2026-02-18T21:27:45.944964"}
+{"id": "85d5a2d4", "url": "https://civitai.com/images/85316825", "status": "pending", "created_at": "2026-02-11T23:43:06.665958", "processing_at": "2026-02-19T17:03:13.614178", "retry_reason": "参数需调整，重新生成"}
+{"id": "fa02c456", "url": "https://civitai.com/images/98672260", "status": "processing", "created_at": "2026-02-11T23:43:56.966615", "processing_at": "2026-02-18T21:30:22.033159"}
+{"id": "ad79c68b", "url": "https://civitai.com/images/83524744", "status": "pending", "created_at": "2026-02-11T23:45:54.772382", "processing_at": "2026-02-19T17:03:41.683079", "retry_reason": "参数需调整，重新生成"}
+{"id": "7852dd99", "url": "https://civitai.com/images/82920804", "status": "processing", "created_at": "2026-02-11T23:46:01.446425", "processing_at": "2026-02-16T15:40:05.944083"}
+{"id": "608668e1", "url": "https://civitai.com/images/94519874", "status": "processing", "created_at": "2026-02-11T23:46:09.445288", "processing_at": "2026-02-18T21:32:23.468165"}
+{"id": "af4afb82", "url": "https://civitai.com/images/85516801", "status": "processing", "created_at": "2026-02-11T23:46:20.135507", "processing_at": "2026-02-16T15:40:54.537972"}
+{"id": "0233e8c8", "url": "https://civitai.com/images/90640190", "status": "pending", "created_at": "2026-02-11T23:46:37.929121", "processing_at": "2026-02-19T17:03:54.754076", "retry_reason": "参数需调整，重新生成"}
+{"id": "6663e413", "url": "https://civitai.com/images/92776612", "status": "pending", "created_at": "2026-02-11T23:46:44.497399", "processing_at": "2026-02-19T17:04:07.317448", "retry_reason": "参数需调整，重新生成"}
+{"id": "85bbe4a3", "url": "https://civitai.com/images/94704049", "status": "processing", "created_at": "2026-02-11T23:46:56.111273", "processing_at": "2026-02-18T21:48:09.634654"}
+{"id": "77ec33af", "url": "https://civitai.com/images/101276785", "status": "pending", "created_at": "2026-02-11T23:47:04.504698", "processing_at": "2026-02-19T17:04:23.375560", "retry_reason": "参数需调整，重新生成"}
+{"id": "7a2cc8ca", "url": "https://civitai.com/images/102559291", "status": "processing", "created_at": "2026-02-11T23:47:17.248901", "processing_at": "2026-02-18T21:48:37.456424"}
 {"id": "804dca09", "url": "https://civitai.com/images/97573363", "status": "processing", "created_at": "2026-02-11T23:47:26.105668", "processing_at": "2026-02-13T23:53:46.303424"}
-{"id": "25a2676d", "url": "https://civitai.com/images/103504567", "status": "pending", "created_at": "2026-02-11T23:47:48.901823"}
-{"id": "84e735a1", "url": "https://civitai.com/images/83726185", "status": "pending", "created_at": "2026-02-11T23:48:03.698626"}
-{"id": "a8cc3619", "url": "https://civitai.com/images/92657998", "status": "pending", "created_at": "2026-02-11T23:48:11.730772"}
-{"id": "1da2fd0f", "url": "https://civitai.com/images/99028429", "status": "pending", "created_at": "2026-02-11T23:48:22.588317"}
-{"id": "0e7a024d", "url": "https://civitai.com/images/82283181", "status": "processing", "created_at": "2026-02-11T23:49:20.837064", "processing_at": "2026-02-12T13:42:17.665475"}
-{"id": "184fd7b6", "url": "https://civitai.com/images/82514657", "status": "processing", "created_at": "2026-02-11T23:49:35.951995", "processing_at": "2026-02-12T16:15:56.585794"}
-{"id": "18b8b6bb", "url": "https://civitai.com/images/97970838", "status": "pending", "created_at": "2026-02-11T23:49:42.299714"}
-{"id": "556ae2c0", "url": "https://civitai.com/images/90392542", "status": "processing", "created_at": "2026-02-11T23:49:50.048777", "processing_at": "2026-02-12T13:53:37.143192"}
-{"id": "4fdc49c8", "url": "https://civitai.com/images/98649252", "status": "pending", "created_at": "2026-02-11T23:50:02.469304"}
-{"id": "9a1a0ff2", "url": "https://civitai.com/images/98401377", "status": "processing", "created_at": "2026-02-11T23:50:08.928910", "processing_at": "2026-02-11T23:50:33.051514"}
-{"id": "fc553a58", "url": "https://civitai.com/images/83562640", "status": "pending", "created_at": "2026-02-11T23:51:55.421207"}
-{"id": "0c96eca8", "url": "https://civitai.com/images/98619208", "status": "pending", "created_at": "2026-02-11T23:52:01.854650"}
-{"id": "fc6c225f", "url": "https://civitai.com/images/103447239", "status": "pending", "created_at": "2026-02-11T23:52:10.026597"}
-{"id": "d0bd7a59", "url": "https://civitai.com/images/97412228", "status": "pending", "created_at": "2026-02-11T23:53:08.071966"}
-{"id": "61557f8b", "url": "https://civitai.com/images/80247570", "status": "pending", "created_at": "2026-02-11T23:53:22.291635"}
-{"id": "bdf024ac", "url": "https://civitai.com/images/98629089", "status": "pending", "created_at": "2026-02-11T23:53:33.949821"}
-{"id": "53e8ed87", "url": "https://civitai.com/images/105583480", "status": "pending", "created_at": "2026-02-11T23:53:41.655512"}
-{"id": "ee6c4011", "url": "https://civitai.com/images/99320149", "status": "processing", "created_at": "2026-02-11T23:54:01.621590", "processing_at": "2026-02-12T13:47:46.590691"}
-{"id": "362fdf67", "url": "https://civitai.com/images/97376384", "status": "pending", "created_at": "2026-02-11T23:54:11.993554"}
-{"id": "be1387d2", "url": "https://civitai.com/images/103504562", "status": "pending", "created_at": "2026-02-11T23:54:21.877990"}
-{"id": "d792412e", "url": "https://civitai.com/images/107651870", "status": "pending", "created_at": "2026-02-11T23:54:30.508894"}
-{"id": "303dc626", "url": "https://civitai.com/images/98732209", "status": "pending", "created_at": "2026-02-11T23:54:35.639437"}
-{"id": "cb922f44", "url": "https://civitai.com/images/112077713", "status": "pending", "created_at": "2026-02-11T23:54:51.434317"}
-{"id": "7d5f536b", "url": "https://civitai.com/images/95841044", "status": "pending", "created_at": "2026-02-11T23:54:56.575170"}
-{"id": "89217279", "url": "https://civitai.com/images/97542549", "status": "pending", "created_at": "2026-02-11T23:55:17.967899"}
-{"id": "65f1b7e8", "url": "https://civitai.com/images/89937998", "status": "pending", "created_at": "2026-02-11T23:55:27.028540"}
-{"id": "b0f8e76c", "url": "https://civitai.com/images/91138195", "status": "processing", "created_at": "2026-02-11T23:55:38.205963", "processing_at": "2026-02-12T13:44:42.908093"}
-{"id": "5e53add5", "url": "https://civitai.com/images/102622094", "status": "pending", "created_at": "2026-02-11T23:55:45.560152"}
-{"id": "4814911f", "url": "https://civitai.com/images/91122431", "status": "pending", "created_at": "2026-02-11T23:55:58.437220"}
-{"id": "0dad3794", "url": "https://civitai.com/images/105348017", "status": "pending", "created_at": "2026-02-11T23:56:25.879106"}
-{"id": "4419bead", "url": "https://civitai.com/images/104207987", "status": "pending", "created_at": "2026-02-11T23:56:38.708489"}
-{"id": "35b358bd", "url": "https://civitai.com/images/93215582", "status": "pending", "created_at": "2026-02-11T23:56:54.200905"}
-{"id": "acc073a1", "url": "https://civitai.com/images/98144578", "status": "pending", "created_at": "2026-02-11T23:56:59.229183"}
-{"id": "05f4bf1f", "url": "https://civitai.com/images/107651858", "status": "pending", "created_at": "2026-02-11T23:59:05.085194"}
-{"id": "0d6d24e3", "url": "https://civitai.com/images/97139308", "status": "pending", "created_at": "2026-02-11T23:59:20.932558"}
-{"id": "7cf6c4ae", "url": "https://civitai.com/images/95070053", "status": "processing", "created_at": "2026-02-12T00:00:08.101720", "processing_at": "2026-02-12T00:00:41.721993"}
-{"id": "2aaf136e", "url": "https://civitai.com/images/108214525", "status": "pending", "created_at": "2026-02-12T00:02:21.677000"}
-{"id": "e9f7dcfd", "url": "https://civitai.com/images/88030517", "status": "pending", "created_at": "2026-02-12T00:02:28.175434"}
-{"id": "1cf59713", "url": "https://civitai.com/images/82283137", "status": "processing", "created_at": "2026-02-12T00:02:35.683380", "processing_at": "2026-02-12T16:37:27.504053"}
-{"id": "46702d4a", "url": "https://civitai.com/images/92776607", "status": "pending", "created_at": "2026-02-12T00:03:24.677988"}
-{"id": "fabfa94f", "url": "https://civitai.com/images/119417519", "status": "pending", "created_at": "2026-02-12T00:03:39.873731"}
-{"id": "c95e7ec3", "url": "https://civitai.com/images/99090699", "status": "pending", "created_at": "2026-02-12T00:03:56.899972"}
-{"id": "5a457b6f", "url": "https://civitai.com/images/97416775", "status": "pending", "created_at": "2026-02-12T00:04:03.593309"}
-{"id": "00ae527e", "url": "https://civitai.com/images/103515412", "status": "pending", "created_at": "2026-02-12T00:04:11.216123"}
-{"id": "adc3c358", "url": "https://civitai.com/images/92607633", "status": "pending", "created_at": "2026-02-12T00:04:26.588354"}
-{"id": "c4f84b83", "url": "https://civitai.com/images/97529952", "status": "processing", "created_at": "2026-02-12T00:04:35.896589", "processing_at": "2026-02-12T00:05:08.406442"}
-{"id": "628aa3cd", "url": "https://civitai.com/images/103743538", "status": "pending", "created_at": "2026-02-12T00:04:44.004500"}
-{"id": "1b18791b", "url": "https://civitai.com/images/97063493", "status": "pending", "created_at": "2026-02-12T00:05:34.074338"}
-{"id": "71e900f9", "url": "https://civitai.com/images/84644435", "status": "pending", "created_at": "2026-02-12T00:06:16.325001"}
-{"id": "6a69a5ee", "url": "https://civitai.com/images/91023851", "status": "pending", "created_at": "2026-02-12T00:06:42.367382"}
-{"id": "b397a273", "url": "https://civitai.com/images/97139304", "status": "processing", "created_at": "2026-02-12T00:06:54.921497", "processing_at": "2026-02-12T13:47:01.958658"}
-{"id": "dde06523", "url": "https://civitai.com/images/97573082", "status": "pending", "created_at": "2026-02-12T00:07:31.402155"}
-{"id": "88da278e", "url": "https://civitai.com/images/85073385", "status": "processing", "created_at": "2026-02-12T00:07:40.823983", "processing_at": "2026-02-12T00:08:26.846773"}
-{"id": "bc9e22e3", "url": "https://civitai.com/images/95841035", "status": "pending", "created_at": "2026-02-12T00:08:39.566949"}
-{"id": "3371b172", "url": "https://civitai.com/images/103546075", "status": "pending", "created_at": "2026-02-12T00:08:52.453634"}
-{"id": "c5a853f9", "url": "https://civitai.com/images/93168621", "status": "processing", "created_at": "2026-02-12T00:09:05.356806", "processing_at": "2026-02-12T13:58:53.346130"}
-{"id": "d2a61220", "url": "https://civitai.com/images/102729631", "status": "pending", "created_at": "2026-02-12T00:09:27.331555"}
-{"id": "12d4bb41", "url": "https://civitai.com/images/95873595", "status": "pending", "created_at": "2026-02-12T00:11:00.922977"}
-{"id": "57fa1180", "url": "https://civitai.com/images/108398687", "status": "processing", "created_at": "2026-02-12T00:11:12.944303", "processing_at": "2026-02-12T00:11:42.090606"}
-{"id": "6205088d", "url": "https://civitai.com/images/97210397", "status": "pending", "created_at": "2026-02-12T00:13:00.905581"}
-{"id": "28274bb0", "url": "https://civitai.com/images/105345504", "status": "pending", "created_at": "2026-02-12T00:13:09.388608"}
-{"id": "a5285a94", "url": "https://civitai.com/images/120184149", "status": "processing", "created_at": "2026-02-12T00:13:30.288553", "processing_at": "2026-02-12T00:15:23.329332"}
-{"id": "5433a3fc", "url": "https://civitai.com/images/104428012", "status": "pending", "created_at": "2026-02-12T00:14:27.066147"}
-{"id": "a41ba3bc", "url": "https://civitai.com/images/79434922", "status": "fail", "created_at": "2026-02-12T00:16:37.812031", "processing_at": "2026-02-13T23:41:42.549282", "fail_at": "2026-02-13T23:46:42.023554"}
-{"id": "c520c51f", "url": "https://civitai.com/images/79434922", "status": "processing", "created_at": "2026-02-12T00:16:55.583208", "processing_at": "2026-02-12T13:41:18.587212"}
-{"id": "a55c3629", "url": "https://civitai.com/images/81167216", "status": "pending", "created_at": "2026-02-12T00:18:21.560373"}
-{"id": "47e2116d", "url": "https://civitai.com/images/94716876", "status": "pending", "created_at": "2026-02-12T00:18:38.999092"}
-{"id": "493cd874", "url": "https://civitai.com/images/80611952", "status": "processing", "created_at": "2026-02-12T00:18:48.024984", "processing_at": "2026-02-12T00:19:17.970635"}
-{"id": "53f35b19", "url": "https://civitai.com/images/79830844", "status": "pending", "created_at": "2026-02-12T00:20:03.267840"}
-{"id": "a4dc7345", "url": "https://civitai.com/images/115228943", "status": "pending", "created_at": "2026-02-12T00:20:28.808427"}
-{"id": "2160311a", "url": "https://civitai.com/images/96556031", "status": "pending", "created_at": "2026-02-12T00:20:46.483856"}
-{"id": "11e952bf", "url": "https://civitai.com/images/82711140", "status": "pending", "created_at": "2026-02-12T00:21:05.283998"}
-{"id": "762842bb", "url": "https://civitai.com/images/85326211", "status": "pending", "created_at": "2026-02-12T00:21:12.477810"}
-{"id": "ec27106a", "url": "https://civitai.com/images/88445333", "status": "processing", "created_at": "2026-02-12T00:21:44.139809", "processing_at": "2026-02-13T23:54:25.635820"}
-{"id": "b46178af", "url": "https://civitai.com/images/103035417", "status": "pending", "created_at": "2026-02-12T00:21:50.588698"}
-{"id": "6f9fcab8", "url": "https://civitai.com/images/95298470", "status": "pending", "created_at": "2026-02-12T00:23:29.367416"}
-{"id": "4b884a4f", "url": "https://civitai.com/images/101240289", "status": "pending", "created_at": "2026-02-12T00:23:45.059866"}
-{"id": "87c40160", "url": "https://civitai.com/images/88146677", "status": "pending", "created_at": "2026-02-12T00:24:46.494376"}
-{"id": "b282b90e", "url": "https://civitai.com/images/94306864", "status": "pending", "created_at": "2026-02-12T00:24:53.481553"}
-{"id": "af59353c", "url": "https://civitai.com/images/80422366", "status": "processing", "created_at": "2026-02-12T00:25:43.374530", "processing_at": "2026-02-12T00:29:54.537594"}
-{"id": "fd3961bc", "url": "https://civitai.com/images/90017924", "status": "pending", "created_at": "2026-02-12T00:30:49.685605"}
-{"id": "a9481dbf", "url": "https://civitai.com/images/96446901", "status": "pending", "created_at": "2026-02-12T00:31:16.296248"}
-{"id": "4a427396", "url": "https://civitai.com/images/118712167", "status": "processing", "created_at": "2026-02-12T00:31:32.842045", "processing_at": "2026-02-12T00:32:04.023019"}
-{"id": "04840dac", "url": "https://civitai.com/images/97682364", "status": "pending", "created_at": "2026-02-12T00:34:20.450282"}
-{"id": "b10a9072", "url": "https://civitai.com/images/99397317", "status": "pending", "created_at": "2026-02-12T00:34:28.745975"}
-{"id": "3b7c3dbf", "url": "https://civitai.com/images/99986888", "status": "pending", "created_at": "2026-02-12T00:34:43.223858"}
-{"id": "01f5e80f", "url": "https://civitai.com/images/96899300", "status": "pending", "created_at": "2026-02-12T00:35:04.877837"}
-{"id": "530de198", "url": "https://civitai.com/images/96042108", "status": "pending", "created_at": "2026-02-12T00:35:16.721719"}
-{"id": "471dda24", "url": "https://civitai.com/images/109235791", "status": "pending", "created_at": "2026-02-12T00:35:42.133035"}
-{"id": "219e77d2", "url": "https://civitai.com/images/104205774", "status": "pending", "created_at": "2026-02-12T00:35:53.579456"}
-{"id": "f74b6f96", "url": "https://civitai.com/images/104079214", "status": "pending", "created_at": "2026-02-12T00:35:58.159310"}
-{"id": "bfde9b53", "url": "https://civitai.com/images/80792617", "status": "pending", "created_at": "2026-02-12T00:36:08.220408"}
-{"id": "26ba7e79", "url": "https://civitai.com/images/103427014", "status": "pending", "created_at": "2026-02-12T00:36:17.977437"}
-{"id": "8eb240a6", "url": "https://civitai.com/images/113307855", "status": "pending", "created_at": "2026-02-12T00:36:31.749881"}
-{"id": "8e86c305", "url": "https://civitai.com/images/79713750", "status": "pending", "created_at": "2026-02-12T00:37:02.032827"}
-{"id": "0ce3ae79", "url": "https://civitai.com/images/98902971", "status": "pending", "created_at": "2026-02-12T00:37:14.094839"}
-{"id": "6b80c036", "url": "https://civitai.com/images/97843666", "status": "pending", "created_at": "2026-02-12T00:37:27.661409"}
-{"id": "34c61d82", "url": "https://civitai.com/images/98008618", "status": "processing", "created_at": "2026-02-12T00:37:35.634643", "processing_at": "2026-02-12T00:38:44.500394"}
-{"id": "a5c73fd2", "url": "https://civitai.com/images/101102866", "status": "pending", "created_at": "2026-02-12T00:39:48.564675"}
-{"id": "b39dca83", "url": "https://civitai.com/images/97890650", "status": "pending", "created_at": "2026-02-12T00:40:15.402122"}
-{"id": "f1b68a45", "url": "https://civitai.com/images/103427006", "status": "pending", "created_at": "2026-02-12T00:40:25.843042"}
-{"id": "d92354e6", "url": "https://civitai.com/images/96289549", "status": "pending", "created_at": "2026-02-12T00:40:41.712796"}
-{"id": "11e2b372", "url": "https://civitai.com/images/102480815", "status": "pending", "created_at": "2026-02-12T00:40:48.356376"}
-{"id": "4f6920f3", "url": "https://civitai.com/images/82920588", "status": "pending", "created_at": "2026-02-12T00:41:06.387215"}
-{"id": "a95b22a0", "url": "https://civitai.com/images/116807831", "status": "pending", "created_at": "2026-02-12T00:41:21.355160"}
-{"id": "060dba43", "url": "https://civitai.com/images/113313887", "status": "pending", "created_at": "2026-02-12T00:41:38.910565"}
-{"id": "61ecbf1e", "url": "https://civitai.com/images/108113297", "status": "fail", "created_at": "2026-02-12T00:42:10.768349", "processing_at": "2026-02-14T00:06:34.828236", "fail_at": "2026-02-14T00:28:26.657526"}
-{"id": "fa2b6629", "url": "https://civitai.com/images/100069363", "status": "processing", "created_at": "2026-02-12T00:42:23.264964", "processing_at": "2026-02-12T19:40:28.263089"}
-{"id": "2e375c24", "url": "https://civitai.com/images/87823578", "status": "pending", "created_at": "2026-02-12T00:42:51.167815"}
-{"id": "1550108d", "url": "https://civitai.com/images/98648538", "status": "pending", "created_at": "2026-02-12T00:43:21.184246"}
-{"id": "9c21ed52", "url": "https://civitai.com/images/98520932", "status": "pending", "created_at": "2026-02-12T00:43:31.939041"}
-{"id": "a2ce4388", "url": "https://civitai.com/images/91505544", "status": "pending", "created_at": "2026-02-12T00:43:43.733317"}
-{"id": "6e7ccc64", "url": "https://civitai.com/images/101350409", "status": "pending", "created_at": "2026-02-12T00:44:01.771402"}
-{"id": "ec9f82f7", "url": "https://civitai.com/images/112496364", "status": "pending", "created_at": "2026-02-12T00:44:14.674975"}
-{"id": "5876d8f0", "url": "https://civitai.com/images/109154715", "status": "pending", "created_at": "2026-02-12T00:44:29.631624"}
-{"id": "772b1d2b", "url": "https://civitai.com/images/98446862", "status": "pending", "created_at": "2026-02-12T00:44:36.863647"}
-{"id": "ab604e34", "url": "https://civitai.com/images/82393369", "status": "pending", "created_at": "2026-02-12T00:44:54.097691"}
-{"id": "4c420bb1", "url": "https://civitai.com/images/105519212", "status": "pending", "created_at": "2026-02-12T00:45:03.858219"}
-{"id": "8048cc7c", "url": "https://civitai.com/images/97238054", "status": "pending", "created_at": "2026-02-12T00:45:12.382932"}
-{"id": "88c51f6f", "url": "https://civitai.com/images/116728684", "status": "pending", "created_at": "2026-02-12T00:45:22.358439"}
-{"id": "f2034fce", "url": "https://civitai.com/images/103035413", "status": "pending", "created_at": "2026-02-12T00:45:40.552558"}
-{"id": "72225a35", "url": "https://civitai.com/images/92196336", "status": "pending", "created_at": "2026-02-12T00:45:57.346190"}
-{"id": "2c2d8714", "url": "https://civitai.com/images/80035217", "status": "pending", "created_at": "2026-02-12T00:46:08.549389"}
-{"id": "0a668c96", "url": "https://civitai.com/images/78040750", "status": "processing", "created_at": "2026-02-12T00:46:32.699721", "processing_at": "2026-02-12T18:44:15.215802"}
-{"id": "bd10ed99", "url": "https://civitai.com/images/110098079", "status": "pending", "created_at": "2026-02-12T00:46:45.948448"}
-{"id": "69ecbb95", "url": "https://civitai.com/images/97305722", "status": "processing", "created_at": "2026-02-12T00:47:01.102730", "processing_at": "2026-02-13T00:26:53.185016"}
-{"id": "5eba3520", "url": "https://civitai.com/images/97845193", "status": "pending", "created_at": "2026-02-12T00:47:11.813616"}
-{"id": "e4146878", "url": "https://civitai.com/images/116807857", "status": "pending", "created_at": "2026-02-12T00:47:22.254835"}
-{"id": "fb17dbfa", "url": "https://civitai.com/images/89056578", "status": "pending", "created_at": "2026-02-12T00:47:39.517973"}
-{"id": "d4c9c8c4", "url": "https://civitai.com/images/106657756", "status": "pending", "created_at": "2026-02-12T00:47:45.085016"}
-{"id": "1bb31762", "url": "https://civitai.com/images/106083714", "status": "pending", "created_at": "2026-02-12T00:47:58.221699"}
-{"id": "b2385e0f", "url": "https://civitai.com/images/112497114", "status": "pending", "created_at": "2026-02-12T00:48:10.829002"}
-{"id": "96766598", "url": "https://civitai.com/images/104327596", "status": "pending", "created_at": "2026-02-12T00:48:19.114683"}
-{"id": "5ba71ced", "url": "https://civitai.com/images/105232446", "status": "pending", "created_at": "2026-02-12T00:48:43.004370"}
-{"id": "01ef690f", "url": "https://civitai.com/images/85292714", "status": "pending", "created_at": "2026-02-12T00:48:52.575625"}
-{"id": "b96f20dc", "url": "https://civitai.com/images/102104761", "status": "pending", "created_at": "2026-02-12T00:49:03.260111"}
-{"id": "91e59236", "url": "https://civitai.com/images/82187562", "status": "pending", "created_at": "2026-02-12T00:49:13.885931"}
-{"id": "2a5f634f", "url": "https://civitai.com/images/97238119", "status": "pending", "created_at": "2026-02-12T00:49:29.003670"}
-{"id": "290250d0", "url": "https://civitai.com/images/100355917", "status": "pending", "created_at": "2026-02-12T00:49:46.073744"}
-{"id": "8c12f234", "url": "https://civitai.com/images/104326882", "status": "pending", "created_at": "2026-02-12T00:50:06.955051"}
-{"id": "0d6c6540", "url": "https://civitai.com/images/95351566", "status": "pending", "created_at": "2026-02-12T00:50:55.969745"}
-{"id": "eb73a7a4", "url": "https://civitai.com/images/78092494", "status": "pending", "created_at": "2026-02-12T00:51:10.542875"}
-{"id": "7d447a38", "url": "https://civitai.com/images/82283138", "status": "pending", "created_at": "2026-02-12T00:51:47.011094"}
-{"id": "6561a99a", "url": "https://civitai.com/images/105111874", "status": "pending", "created_at": "2026-02-12T00:52:21.354400"}
-{"id": "0ab52cf6", "url": "https://civitai.com/images/102104446", "status": "pending", "created_at": "2026-02-12T00:52:34.717428"}
-{"id": "e189efe0", "url": "https://civitai.com/images/116428733", "status": "pending", "created_at": "2026-02-12T00:52:41.542912"}
-{"id": "1da0e085", "url": "https://civitai.com/images/91179088", "status": "pending", "created_at": "2026-02-12T00:52:54.575056"}
-{"id": "ef2776be", "url": "https://civitai.com/images/102842243", "status": "pending", "created_at": "2026-02-12T00:53:16.580084"}
-{"id": "e1f2521f", "url": "https://civitai.com/images/82187561", "status": "processing", "created_at": "2026-02-12T00:53:29.668034", "processing_at": "2026-02-12T18:20:07.539836"}
-{"id": "60d652da", "url": "https://civitai.com/images/102265307", "status": "pending", "created_at": "2026-02-12T00:53:47.566659"}
-{"id": "7b43f22c", "url": "https://civitai.com/images/97829936", "status": "pending", "created_at": "2026-02-12T00:54:32.944704"}
-{"id": "7218308a", "url": "https://civitai.com/images/101812902", "status": "pending", "created_at": "2026-02-12T00:54:52.190371"}
-{"id": "274f7366", "url": "https://civitai.com/images/102840128", "status": "pending", "created_at": "2026-02-12T00:55:27.418300"}
-{"id": "16a71ad3", "url": "https://civitai.com/images/110740122", "status": "pending", "created_at": "2026-02-12T00:55:54.633519"}
-{"id": "73d29ae1", "url": "https://civitai.com/images/110746536", "status": "pending", "created_at": "2026-02-12T00:56:07.148920"}
-{"id": "5711ac5d", "url": "https://civitai.com/images/79953648", "status": "processing", "created_at": "2026-02-12T00:56:15.191178", "processing_at": "2026-02-12T18:39:54.633405"}
-{"id": "75e551f1", "url": "https://civitai.com/images/98404203", "status": "pending", "created_at": "2026-02-12T01:16:28.392393"}
-{"id": "7b36a79c", "url": "https://civitai.com/images/88938294", "status": "pending", "created_at": "2026-02-12T01:17:27.023627"}
-{"id": "d98b294a", "url": "https://civitai.com/images/80173059", "status": "pending", "created_at": "2026-02-12T01:17:52.568127"}
-{"id": "5909733f", "url": "https://civitai.com/images/110738548", "status": "pending", "created_at": "2026-02-12T01:18:35.947753"}
-{"id": "bd5a68fe", "url": "https://civitai.com/images/83609224", "status": "pending", "created_at": "2026-02-12T01:18:45.205846"}
-{"id": "41c8f882", "url": "https://civitai.com/images/79953638", "status": "pending", "created_at": "2026-02-12T01:19:02.240584"}
-{"id": "3156a728", "url": "https://civitai.com/images/105413339", "status": "pending", "created_at": "2026-02-12T01:19:18.228511"}
-{"id": "f08db6b6", "url": "https://civitai.com/images/103290162", "status": "pending", "created_at": "2026-02-12T01:19:35.401801"}
-{"id": "fbc87934", "url": "https://civitai.com/images/110726998", "status": "pending", "created_at": "2026-02-12T01:20:11.311928"}
-{"id": "70589fa6", "url": "https://civitai.com/images/98053038", "status": "pending", "created_at": "2026-02-12T01:20:25.302146"}
-{"id": "5cadfac1", "url": "https://civitai.com/images/98651613", "status": "pending", "created_at": "2026-02-12T01:20:46.689058"}
-{"id": "e208abdc", "url": "https://civitai.com/images/99003023", "status": "processing", "created_at": "2026-02-12T01:21:05.661621", "processing_at": "2026-02-12T13:41:45.963681"}
-{"id": "eafb7af0", "url": "https://civitai.com/images/99829720", "status": "pending", "created_at": "2026-02-12T01:21:12.115901"}
-{"id": "8e8cbe5e", "url": "https://civitai.com/images/67407971", "status": "pending", "created_at": "2026-02-12T01:21:20.903646"}
-{"id": "1fb9a0b4", "url": "https://civitai.com/images/97515869", "status": "processing", "created_at": "2026-02-12T01:21:58.086750", "processing_at": "2026-02-12T01:22:40.076979"}
-{"id": "abef31c1", "url": "https://civitai.com/images/104685206", "status": "processing", "created_at": "2026-02-12T01:22:08.854986", "processing_at": "2026-02-12T18:19:24.951563"}
-{"id": "7adc85f0", "url": "https://civitai.com/images/101240291", "status": "pending", "created_at": "2026-02-12T01:22:49.513752"}
-{"id": "c95bf92b", "url": "https://civitai.com/images/94167502", "status": "pending", "created_at": "2026-02-12T01:23:04.893293"}
+{"id": "25a2676d", "url": "https://civitai.com/images/103504567", "status": "processing", "created_at": "2026-02-11T23:47:48.901823", "processing_at": "2026-02-18T21:48:49.093917"}
+{"id": "84e735a1", "url": "https://civitai.com/images/83726185", "status": "processing", "created_at": "2026-02-11T23:48:03.698626", "processing_at": "2026-02-18T21:49:10.324765"}
+{"id": "a8cc3619", "url": "https://civitai.com/images/92657998", "status": "processing", "created_at": "2026-02-11T23:48:11.730772", "processing_at": "2026-02-16T15:41:46.070872"}
+{"id": "1da2fd0f", "url": "https://civitai.com/images/99028429", "status": "pending", "created_at": "2026-02-11T23:48:22.588317", "processing_at": "2026-02-19T17:04:39.902403", "retry_reason": "参数需调整，重新生成"}
+{"id": "0e7a024d", "url": "https://civitai.com/images/82283181", "status": "pending", "created_at": "2026-02-11T23:49:20.837064", "processing_at": "2026-02-16T00:37:30.501509", "retry_reason": "模型下载失败: lora 'version_1817372'"}
+{"id": "184fd7b6", "url": "https://civitai.com/images/82514657", "status": "processing", "created_at": "2026-02-11T23:49:35.951995", "processing_at": "2026-02-18T21:52:24.727500"}
+{"id": "18b8b6bb", "url": "https://civitai.com/images/97970838", "status": "processing", "created_at": "2026-02-11T23:49:42.299714", "processing_at": "2026-02-18T21:53:40.116178"}
+{"id": "556ae2c0", "url": "https://civitai.com/images/90392542", "status": "processing", "created_at": "2026-02-11T23:49:50.048777", "processing_at": "2026-02-18T21:53:53.113536"}
+{"id": "4fdc49c8", "url": "https://civitai.com/images/98649252", "status": "processing", "created_at": "2026-02-11T23:50:02.469304", "processing_at": "2026-02-18T21:55:22.170791"}
+{"id": "9a1a0ff2", "url": "https://civitai.com/images/98401377", "status": "processing", "created_at": "2026-02-11T23:50:08.928910", "processing_at": "2026-02-18T21:55:36.716906"}
+{"id": "fc553a58", "url": "https://civitai.com/images/83562640", "status": "processing", "created_at": "2026-02-11T23:51:55.421207", "processing_at": "2026-02-18T22:09:38.877830"}
+{"id": "0c96eca8", "url": "https://civitai.com/images/98619208", "status": "processing", "created_at": "2026-02-11T23:52:01.854650", "processing_at": "2026-02-18T22:09:51.798855"}
+{"id": "fc6c225f", "url": "https://civitai.com/images/103447239", "status": "processing", "created_at": "2026-02-11T23:52:10.026597", "processing_at": "2026-02-18T22:10:05.613238"}
+{"id": "d0bd7a59", "url": "https://civitai.com/images/97412228", "status": "processing", "created_at": "2026-02-11T23:53:08.071966", "processing_at": "2026-02-18T22:11:53.620497"}
+{"id": "61557f8b", "url": "https://civitai.com/images/80247570", "status": "pending", "created_at": "2026-02-11T23:53:22.291635", "processing_at": "2026-02-19T17:05:25.855242", "retry_reason": "参数需调整，重新生成"}
+{"id": "bdf024ac", "url": "https://civitai.com/images/98629089", "status": "processing", "created_at": "2026-02-11T23:53:33.949821", "processing_at": "2026-02-18T22:12:37.073608"}
+{"id": "53e8ed87", "url": "https://civitai.com/images/105583480", "status": "processing", "created_at": "2026-02-11T23:53:41.655512", "processing_at": "2026-02-16T15:20:02.041934"}
+{"id": "ee6c4011", "url": "https://civitai.com/images/99320149", "status": "processing", "created_at": "2026-02-11T23:54:01.621590", "processing_at": "2026-02-18T22:12:49.039547"}
+{"id": "362fdf67", "url": "https://civitai.com/images/97376384", "status": "processing", "created_at": "2026-02-11T23:54:11.993554", "processing_at": "2026-02-18T22:13:02.591194"}
+{"id": "be1387d2", "url": "https://civitai.com/images/103504562", "status": "processing", "created_at": "2026-02-11T23:54:21.877990", "processing_at": "2026-02-18T22:13:14.717010"}
+{"id": "d792412e", "url": "https://civitai.com/images/107651870", "status": "pending", "created_at": "2026-02-11T23:54:30.508894", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "303dc626", "url": "https://civitai.com/images/98732209", "status": "processing", "created_at": "2026-02-11T23:54:35.639437", "processing_at": "2026-02-18T22:15:54.214019"}
+{"id": "cb922f44", "url": "https://civitai.com/images/112077713", "status": "processing", "created_at": "2026-02-11T23:54:51.434317", "processing_at": "2026-02-18T22:16:12.911708"}
+{"id": "7d5f536b", "url": "https://civitai.com/images/95841044", "status": "processing", "created_at": "2026-02-11T23:54:56.575170", "processing_at": "2026-02-18T22:16:26.279234"}
+{"id": "89217279", "url": "https://civitai.com/images/97542549", "status": "processing", "created_at": "2026-02-11T23:55:17.967899", "processing_at": "2026-02-18T22:16:40.094007"}
+{"id": "65f1b7e8", "url": "https://civitai.com/images/89937998", "status": "processing", "created_at": "2026-02-11T23:55:27.028540", "processing_at": "2026-02-18T22:42:25.581589"}
+{"id": "b0f8e76c", "url": "https://civitai.com/images/91138195", "status": "pending", "created_at": "2026-02-11T23:55:38.205963", "processing_at": "2026-02-19T17:06:08.178420", "retry_reason": "参数需调整，重新生成"}
+{"id": "5e53add5", "url": "https://civitai.com/images/102622094", "status": "processing", "created_at": "2026-02-11T23:55:45.560152", "processing_at": "2026-02-18T22:43:25.430046"}
+{"id": "4814911f", "url": "https://civitai.com/images/91122431", "status": "processing", "created_at": "2026-02-11T23:55:58.437220", "processing_at": "2026-02-19T17:06:19.574061"}
+{"id": "0dad3794", "url": "https://civitai.com/images/105348017", "status": "pending", "created_at": "2026-02-11T23:56:25.879106", "retry_reason": "模型下载失败: lora 'Comically Tall Sandwich | Like, Zoinks Scoob | ILXL'"}
+{"id": "4419bead", "url": "https://civitai.com/images/104207987", "status": "processing", "created_at": "2026-02-11T23:56:38.708489", "processing_at": "2026-02-19T17:06:47.777506"}
+{"id": "35b358bd", "url": "https://civitai.com/images/93215582", "status": "processing", "created_at": "2026-02-11T23:56:54.200905", "processing_at": "2026-02-18T22:44:26.579633"}
+{"id": "acc073a1", "url": "https://civitai.com/images/98144578", "status": "processing", "created_at": "2026-02-11T23:56:59.229183", "processing_at": "2026-02-18T22:44:39.783533"}
+{"id": "05f4bf1f", "url": "https://civitai.com/images/107651858", "status": "pending", "created_at": "2026-02-11T23:59:05.085194", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "0d6d24e3", "url": "https://civitai.com/images/97139308", "status": "processing", "created_at": "2026-02-11T23:59:20.932558", "processing_at": "2026-02-18T22:45:05.919942"}
+{"id": "7cf6c4ae", "url": "https://civitai.com/images/95070053", "status": "processing", "created_at": "2026-02-12T00:00:08.101720", "processing_at": "2026-02-18T22:45:28.789274"}
+{"id": "2aaf136e", "url": "https://civitai.com/images/108214525", "status": "processing", "created_at": "2026-02-12T00:02:21.677000", "processing_at": "2026-02-19T17:07:11.056607"}
+{"id": "e9f7dcfd", "url": "https://civitai.com/images/88030517", "status": "processing", "created_at": "2026-02-12T00:02:28.175434", "processing_at": "2026-02-19T17:07:39.367405"}
+{"id": "1cf59713", "url": "https://civitai.com/images/82283137", "status": "pending", "created_at": "2026-02-12T00:02:35.683380", "processing_at": "2026-02-12T16:37:27.504053", "retry_reason": "模型下载失败: lora 'version_1817372'"}
+{"id": "46702d4a", "url": "https://civitai.com/images/92776607", "status": "processing", "created_at": "2026-02-12T00:03:24.677988", "processing_at": "2026-02-16T00:55:04.204906"}
+{"id": "fabfa94f", "url": "https://civitai.com/images/119417519", "status": "processing", "created_at": "2026-02-12T00:03:39.873731", "processing_at": "2026-02-18T22:48:35.917920"}
+{"id": "c95e7ec3", "url": "https://civitai.com/images/99090699", "status": "processing", "created_at": "2026-02-12T00:03:56.899972", "processing_at": "2026-02-18T22:48:51.504169"}
+{"id": "5a457b6f", "url": "https://civitai.com/images/97416775", "status": "processing", "created_at": "2026-02-12T00:04:03.593309", "processing_at": "2026-02-18T22:49:04.400037"}
+{"id": "00ae527e", "url": "https://civitai.com/images/103515412", "status": "processing", "created_at": "2026-02-12T00:04:11.216123", "processing_at": "2026-02-16T15:14:49.573084"}
+{"id": "adc3c358", "url": "https://civitai.com/images/92607633", "status": "processing", "created_at": "2026-02-12T00:04:26.588354", "processing_at": "2026-02-18T22:49:17.897123"}
+{"id": "c4f84b83", "url": "https://civitai.com/images/97529952", "status": "processing", "created_at": "2026-02-12T00:04:35.896589", "processing_at": "2026-02-18T22:49:32.039636"}
+{"id": "628aa3cd", "url": "https://civitai.com/images/103743538", "status": "processing", "created_at": "2026-02-12T00:04:44.004500", "processing_at": "2026-02-18T22:49:45.693140"}
+{"id": "1b18791b", "url": "https://civitai.com/images/97063493", "status": "processing", "created_at": "2026-02-12T00:05:34.074338", "processing_at": "2026-02-18T22:49:58.793266"}
+{"id": "71e900f9", "url": "https://civitai.com/images/84644435", "status": "pending", "created_at": "2026-02-12T00:06:16.325001", "retry_reason": "下载后仍缺模型:   checkpoint: Illustrious-XL (model_id=795765, version_id=889818)"}
+{"id": "6a69a5ee", "url": "https://civitai.com/images/91023851", "status": "processing", "created_at": "2026-02-12T00:06:42.367382", "processing_at": "2026-02-19T17:08:42.956338"}
+{"id": "b397a273", "url": "https://civitai.com/images/97139304", "status": "processing", "created_at": "2026-02-12T00:06:54.921497", "processing_at": "2026-02-18T22:51:04.148888"}
+{"id": "dde06523", "url": "https://civitai.com/images/97573082", "status": "processing", "created_at": "2026-02-12T00:07:31.402155", "processing_at": "2026-02-18T22:56:27.687576"}
+{"id": "88da278e", "url": "https://civitai.com/images/85073385", "status": "processing", "created_at": "2026-02-12T00:07:40.823983", "processing_at": "2026-02-18T22:56:43.357761"}
+{"id": "bc9e22e3", "url": "https://civitai.com/images/95841035", "status": "processing", "created_at": "2026-02-12T00:08:39.566949", "processing_at": "2026-02-18T22:58:42.058477"}
+{"id": "3371b172", "url": "https://civitai.com/images/103546075", "status": "processing", "created_at": "2026-02-12T00:08:52.453634", "processing_at": "2026-02-16T15:16:01.825937"}
+{"id": "c5a853f9", "url": "https://civitai.com/images/93168621", "status": "processing", "created_at": "2026-02-12T00:09:05.356806", "processing_at": "2026-02-18T22:58:57.564460"}
+{"id": "d2a61220", "url": "https://civitai.com/images/102729631", "status": "pending", "created_at": "2026-02-12T00:09:27.331555", "retry_reason": "下载后仍缺模型:   checkpoint: Nova Asian XL (model_id=641919, version_id=2199835)"}
+{"id": "12d4bb41", "url": "https://civitai.com/images/95873595", "status": "processing", "created_at": "2026-02-12T00:11:00.922977", "processing_at": "2026-02-18T23:32:41.002556"}
+{"id": "57fa1180", "url": "https://civitai.com/images/108398687", "status": "processing", "created_at": "2026-02-12T00:11:12.944303", "processing_at": "2026-02-18T23:32:55.891280"}
+{"id": "6205088d", "url": "https://civitai.com/images/97210397", "status": "processing", "created_at": "2026-02-12T00:13:00.905581", "processing_at": "2026-02-18T23:33:12.746031"}
+{"id": "28274bb0", "url": "https://civitai.com/images/105345504", "status": "pending", "created_at": "2026-02-12T00:13:09.388608", "retry_reason": "下载后仍缺模型:   lora: Rain (model_id=521990, version_id=1229466)"}
+{"id": "a5285a94", "url": "https://civitai.com/images/120184149", "status": "processing", "created_at": "2026-02-12T00:13:30.288553", "processing_at": "2026-02-19T17:10:09.105987"}
+{"id": "5433a3fc", "url": "https://civitai.com/images/104428012", "status": "processing", "created_at": "2026-02-12T00:14:27.066147", "processing_at": "2026-02-18T23:37:00.215497"}
+{"id": "a41ba3bc", "url": "https://civitai.com/images/79434922", "status": "processing", "created_at": "2026-02-12T00:16:37.812031", "processing_at": "2026-02-19T17:10:27.923188", "fail_at": "2026-02-13T23:46:42.023554"}
+{"id": "c520c51f", "url": "https://civitai.com/images/79434922", "status": "processing", "created_at": "2026-02-12T00:16:55.583208", "processing_at": "2026-02-19T17:10:46.527877"}
+{"id": "a55c3629", "url": "https://civitai.com/images/81167216", "status": "processing", "created_at": "2026-02-12T00:18:21.560373", "processing_at": "2026-02-19T17:11:11.473286"}
+{"id": "47e2116d", "url": "https://civitai.com/images/94716876", "status": "processing", "created_at": "2026-02-12T00:18:38.999092", "processing_at": "2026-02-18T23:38:30.796630"}
+{"id": "493cd874", "url": "https://civitai.com/images/80611952", "status": "processing", "created_at": "2026-02-12T00:18:48.024984", "processing_at": "2026-02-19T17:11:36.519751"}
+{"id": "53f35b19", "url": "https://civitai.com/images/79830844", "status": "processing", "created_at": "2026-02-12T00:20:03.267840", "processing_at": "2026-02-19T17:12:00.272095"}
+{"id": "a4dc7345", "url": "https://civitai.com/images/115228943", "status": "pending", "created_at": "2026-02-12T00:20:28.808427", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "2160311a", "url": "https://civitai.com/images/96556031", "status": "pending", "created_at": "2026-02-12T00:20:46.483856", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "11e952bf", "url": "https://civitai.com/images/82711140", "status": "processing", "created_at": "2026-02-12T00:21:05.283998", "processing_at": "2026-02-19T17:12:50.953352"}
+{"id": "762842bb", "url": "https://civitai.com/images/85326211", "status": "processing", "created_at": "2026-02-12T00:21:12.477810", "processing_at": "2026-02-19T00:05:11.529003"}
+{"id": "ec27106a", "url": "https://civitai.com/images/88445333", "status": "processing", "created_at": "2026-02-12T00:21:44.139809", "processing_at": "2026-02-19T17:13:06.542737"}
+{"id": "b46178af", "url": "https://civitai.com/images/103035417", "status": "processing", "created_at": "2026-02-12T00:21:50.588698", "processing_at": "2026-02-19T00:05:28.610837"}
+{"id": "6f9fcab8", "url": "https://civitai.com/images/95298470", "status": "processing", "created_at": "2026-02-12T00:23:29.367416", "processing_at": "2026-02-19T00:05:56.027273"}
+{"id": "4b884a4f", "url": "https://civitai.com/images/101240289", "status": "processing", "created_at": "2026-02-12T00:23:45.059866", "processing_at": "2026-02-19T00:11:07.303438"}
+{"id": "87c40160", "url": "https://civitai.com/images/88146677", "status": "processing", "created_at": "2026-02-12T00:24:46.494376", "processing_at": "2026-02-19T00:12:44.654736"}
+{"id": "b282b90e", "url": "https://civitai.com/images/94306864", "status": "processing", "created_at": "2026-02-12T00:24:53.481553", "processing_at": "2026-02-19T00:14:18.378406"}
+{"id": "af59353c", "url": "https://civitai.com/images/80422366", "status": "processing", "created_at": "2026-02-12T00:25:43.374530", "processing_at": "2026-02-19T17:13:31.547236"}
+{"id": "fd3961bc", "url": "https://civitai.com/images/90017924", "status": "processing", "created_at": "2026-02-12T00:30:49.685605", "processing_at": "2026-02-19T00:16:19.315658"}
+{"id": "a9481dbf", "url": "https://civitai.com/images/96446901", "status": "pending", "created_at": "2026-02-12T00:31:16.296248", "retry_reason": "模型下载失败: lora 'Ultra Lora Detailer and Glow'"}
+{"id": "4a427396", "url": "https://civitai.com/images/118712167", "status": "processing", "created_at": "2026-02-12T00:31:32.842045", "processing_at": "2026-02-19T17:14:07.851151"}
+{"id": "04840dac", "url": "https://civitai.com/images/97682364", "status": "pending", "created_at": "2026-02-12T00:34:20.450282", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "b10a9072", "url": "https://civitai.com/images/99397317", "status": "processing", "created_at": "2026-02-12T00:34:28.745975", "processing_at": "2026-02-19T00:22:46.917211"}
+{"id": "3b7c3dbf", "url": "https://civitai.com/images/99986888", "status": "processing", "created_at": "2026-02-12T00:34:43.223858", "processing_at": "2026-02-19T00:24:18.878100"}
+{"id": "01f5e80f", "url": "https://civitai.com/images/96899300", "status": "processing", "created_at": "2026-02-12T00:35:04.877837", "processing_at": "2026-02-19T00:24:39.450339"}
+{"id": "530de198", "url": "https://civitai.com/images/96042108", "status": "pending", "created_at": "2026-02-12T00:35:16.721719", "retry_reason": "自动复刻异常: 'NoneType' object has no attribute 'get'"}
+{"id": "471dda24", "url": "https://civitai.com/images/109235791", "status": "processing", "created_at": "2026-02-12T00:35:42.133035", "processing_at": "2026-02-19T00:25:19.227796"}
+{"id": "219e77d2", "url": "https://civitai.com/images/104205774", "status": "processing", "created_at": "2026-02-12T00:35:53.579456", "processing_at": "2026-02-19T00:27:00.553890"}
+{"id": "f74b6f96", "url": "https://civitai.com/images/104079214", "status": "processing", "created_at": "2026-02-12T00:35:58.159310", "processing_at": "2026-02-19T00:27:30.782384"}
+{"id": "bfde9b53", "url": "https://civitai.com/images/80792617", "status": "processing", "created_at": "2026-02-12T00:36:08.220408", "processing_at": "2026-02-19T17:15:11.276325"}
+{"id": "26ba7e79", "url": "https://civitai.com/images/103427014", "status": "processing", "created_at": "2026-02-12T00:36:17.977437", "processing_at": "2026-02-19T00:28:16.990229"}
+{"id": "8eb240a6", "url": "https://civitai.com/images/113307855", "status": "processing", "created_at": "2026-02-12T00:36:31.749881", "processing_at": "2026-02-19T17:15:32.982960"}
+{"id": "8e86c305", "url": "https://civitai.com/images/79713750", "status": "processing", "created_at": "2026-02-12T00:37:02.032827", "processing_at": "2026-02-19T00:33:18.245784"}
+{"id": "0ce3ae79", "url": "https://civitai.com/images/98902971", "status": "processing", "created_at": "2026-02-12T00:37:14.094839", "processing_at": "2026-02-19T17:15:47.042037"}
+{"id": "6b80c036", "url": "https://civitai.com/images/97843666", "status": "processing", "created_at": "2026-02-12T00:37:27.661409", "processing_at": "2026-02-19T17:16:05.324531"}
+{"id": "34c61d82", "url": "https://civitai.com/images/98008618", "status": "processing", "created_at": "2026-02-12T00:37:35.634643", "processing_at": "2026-02-19T17:16:22.948193"}
+{"id": "a5c73fd2", "url": "https://civitai.com/images/101102866", "status": "processing", "created_at": "2026-02-12T00:39:48.564675", "processing_at": "2026-02-19T00:36:13.735125"}
+{"id": "b39dca83", "url": "https://civitai.com/images/97890650", "status": "pending", "created_at": "2026-02-12T00:40:15.402122", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "f1b68a45", "url": "https://civitai.com/images/103427006", "status": "processing", "created_at": "2026-02-12T00:40:25.843042", "processing_at": "2026-02-19T00:39:55.069239"}
+{"id": "d92354e6", "url": "https://civitai.com/images/96289549", "status": "pending", "created_at": "2026-02-12T00:40:41.712796", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "11e2b372", "url": "https://civitai.com/images/102480815", "status": "processing", "created_at": "2026-02-12T00:40:48.356376", "processing_at": "2026-02-19T17:18:34.478013"}
+{"id": "4f6920f3", "url": "https://civitai.com/images/82920588", "status": "pending", "created_at": "2026-02-12T00:41:06.387215", "retry_reason": "模型下载失败: lora 'Fern (3 Outfits + 2 Hairstyles) - Sousou no Frieren'"}
+{"id": "a95b22a0", "url": "https://civitai.com/images/116807831", "status": "processing", "created_at": "2026-02-12T00:41:21.355160", "processing_at": "2026-02-19T17:19:22.020784"}
+{"id": "060dba43", "url": "https://civitai.com/images/113313887", "status": "processing", "created_at": "2026-02-12T00:41:38.910565", "processing_at": "2026-02-19T17:19:44.879603"}
+{"id": "61ecbf1e", "url": "https://civitai.com/images/108113297", "status": "processing", "created_at": "2026-02-12T00:42:10.768349", "processing_at": "2026-02-19T01:05:25.075304", "fail_at": "2026-02-14T00:28:26.657526"}
+{"id": "fa2b6629", "url": "https://civitai.com/images/100069363", "status": "pending", "created_at": "2026-02-12T00:42:23.264964", "processing_at": "2026-02-12T19:40:28.263089", "retry_reason": "下载后仍缺模型:   lora: lighting (model_id=1697073, version_id=1967210)"}
+{"id": "2e375c24", "url": "https://civitai.com/images/87823578", "status": "pending", "created_at": "2026-02-12T00:42:51.167815", "retry_reason": "下载后仍缺模型:   checkpoint: Unfazed3D (model_id=1717586, version_id=1943723)"}
+{"id": "1550108d", "url": "https://civitai.com/images/98648538", "status": "processing", "created_at": "2026-02-12T00:43:21.184246", "processing_at": "2026-02-19T17:21:15.129014"}
+{"id": "9c21ed52", "url": "https://civitai.com/images/98520932", "status": "pending", "created_at": "2026-02-12T00:43:31.939041", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "a2ce4388", "url": "https://civitai.com/images/91505544", "status": "processing", "created_at": "2026-02-12T00:43:43.733317", "processing_at": "2026-02-19T17:21:49.923214"}
+{"id": "6e7ccc64", "url": "https://civitai.com/images/101350409", "status": "pending", "created_at": "2026-02-12T00:44:01.771402", "retry_reason": "模型下载失败: lora 'Cunnyfunky style'"}
+{"id": "ec9f82f7", "url": "https://civitai.com/images/112496364", "status": "processing", "created_at": "2026-02-12T00:44:14.674975", "processing_at": "2026-02-16T15:10:57.941169"}
+{"id": "5876d8f0", "url": "https://civitai.com/images/109154715", "status": "processing", "created_at": "2026-02-12T00:44:29.631624", "processing_at": "2026-02-19T01:51:00.204300"}
+{"id": "772b1d2b", "url": "https://civitai.com/images/98446862", "status": "processing", "created_at": "2026-02-12T00:44:36.863647", "processing_at": "2026-02-19T17:22:27.451694"}
+{"id": "ab604e34", "url": "https://civitai.com/images/82393369", "status": "pending", "created_at": "2026-02-12T00:44:54.097691", "processing_at": "2026-02-16T00:49:23.244578", "retry_reason": "模型下载失败: embedding 'lazyhand:1.4)'"}
+{"id": "4c420bb1", "url": "https://civitai.com/images/105519212", "status": "processing", "created_at": "2026-02-12T00:45:03.858219", "processing_at": "2026-02-19T01:51:46.739395"}
+{"id": "8048cc7c", "url": "https://civitai.com/images/97238054", "status": "pending", "created_at": "2026-02-12T00:45:12.382932", "processing_at": "2026-02-19T17:23:00.128037", "retry_reason": "参数需调整，重新生成"}
+{"id": "88c51f6f", "url": "https://civitai.com/images/116728684", "status": "processing", "created_at": "2026-02-12T00:45:22.358439", "processing_at": "2026-02-19T01:53:46.385771"}
+{"id": "f2034fce", "url": "https://civitai.com/images/103035413", "status": "processing", "created_at": "2026-02-12T00:45:40.552558", "processing_at": "2026-02-19T01:54:02.259340"}
+{"id": "72225a35", "url": "https://civitai.com/images/92196336", "status": "processing", "created_at": "2026-02-12T00:45:57.346190", "processing_at": "2026-02-19T01:56:40.596207"}
+{"id": "2c2d8714", "url": "https://civitai.com/images/80035217", "status": "pending", "created_at": "2026-02-12T00:46:08.549389", "processing_at": "2026-02-19T17:23:24.472081", "retry_reason": "参数需调整，重新生成"}
+{"id": "0a668c96", "url": "https://civitai.com/images/78040750", "status": "processing", "created_at": "2026-02-12T00:46:32.699721", "processing_at": "2026-02-19T17:23:57.618973"}
+{"id": "bd10ed99", "url": "https://civitai.com/images/110098079", "status": "processing", "created_at": "2026-02-12T00:46:45.948448", "processing_at": "2026-02-19T01:59:19.485346"}
+{"id": "69ecbb95", "url": "https://civitai.com/images/97305722", "status": "processing", "created_at": "2026-02-12T00:47:01.102730", "processing_at": "2026-02-19T01:59:40.006713"}
+{"id": "5eba3520", "url": "https://civitai.com/images/97845193", "status": "processing", "created_at": "2026-02-12T00:47:11.813616", "processing_at": "2026-02-19T01:59:58.815983"}
+{"id": "e4146878", "url": "https://civitai.com/images/116807857", "status": "processing", "created_at": "2026-02-12T00:47:22.254835", "processing_at": "2026-02-19T02:00:22.655537"}
+{"id": "fb17dbfa", "url": "https://civitai.com/images/89056578", "status": "processing", "created_at": "2026-02-12T00:47:39.517973", "processing_at": "2026-02-19T17:25:42.384569"}
+{"id": "d4c9c8c4", "url": "https://civitai.com/images/106657756", "status": "processing", "created_at": "2026-02-12T00:47:45.085016", "processing_at": "2026-02-19T17:27:30.590033"}
+{"id": "1bb31762", "url": "https://civitai.com/images/106083714", "status": "processing", "created_at": "2026-02-12T00:47:58.221699", "processing_at": "2026-02-19T17:29:17.429543"}
+{"id": "b2385e0f", "url": "https://civitai.com/images/112497114", "status": "pending", "created_at": "2026-02-12T00:48:10.829002", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "96766598", "url": "https://civitai.com/images/104327596", "status": "processing", "created_at": "2026-02-12T00:48:19.114683", "processing_at": "2026-02-19T02:30:34.466160"}
+{"id": "5ba71ced", "url": "https://civitai.com/images/105232446", "status": "pending", "created_at": "2026-02-12T00:48:43.004370", "retry_reason": "下载后仍缺模型:   lora: lighting (model_id=1697073, version_id=1967210)"}
+{"id": "01ef690f", "url": "https://civitai.com/images/85292714", "status": "processing", "created_at": "2026-02-12T00:48:52.575625", "processing_at": "2026-02-19T02:32:58.597314"}
+{"id": "b96f20dc", "url": "https://civitai.com/images/102104761", "status": "pending", "created_at": "2026-02-12T00:49:03.260111", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "91e59236", "url": "https://civitai.com/images/82187562", "status": "pending", "created_at": "2026-02-12T00:49:13.885931", "processing_at": "2026-02-19T17:30:56.498001", "retry_reason": "参数需调整，重新生成"}
+{"id": "2a5f634f", "url": "https://civitai.com/images/97238119", "status": "processing", "created_at": "2026-02-12T00:49:29.003670", "processing_at": "2026-02-19T02:33:57.756204"}
+{"id": "290250d0", "url": "https://civitai.com/images/100355917", "status": "pending", "created_at": "2026-02-12T00:49:46.073744", "processing_at": "2026-02-19T17:31:12.458941", "retry_reason": "参数需调整，重新生成"}
+{"id": "8c12f234", "url": "https://civitai.com/images/104326882", "status": "processing", "created_at": "2026-02-12T00:50:06.955051", "processing_at": "2026-02-19T17:31:38.082857"}
+{"id": "0d6c6540", "url": "https://civitai.com/images/95351566", "status": "pending", "created_at": "2026-02-12T00:50:55.969745", "processing_at": "2026-02-16T15:10:03.412497", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "eb73a7a4", "url": "https://civitai.com/images/78092494", "status": "processing", "created_at": "2026-02-12T00:51:10.542875", "processing_at": "2026-02-19T02:39:20.335763"}
+{"id": "7d447a38", "url": "https://civitai.com/images/82283138", "status": "pending", "created_at": "2026-02-12T00:51:47.011094", "retry_reason": "模型下载失败: lora 'version_1817372'"}
+{"id": "6561a99a", "url": "https://civitai.com/images/105111874", "status": "processing", "created_at": "2026-02-12T00:52:21.354400", "processing_at": "2026-02-19T02:39:58.659231"}
+{"id": "0ab52cf6", "url": "https://civitai.com/images/102104446", "status": "pending", "created_at": "2026-02-12T00:52:34.717428", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "e189efe0", "url": "https://civitai.com/images/116428733", "status": "pending", "created_at": "2026-02-12T00:52:41.542912", "retry_reason": "下载后仍缺模型:   checkpoint: Illustrious-XL (model_id=795765, version_id=889818)"}
+{"id": "1da0e085", "url": "https://civitai.com/images/91179088", "status": "processing", "created_at": "2026-02-12T00:52:54.575056", "processing_at": "2026-02-19T02:45:33.821679"}
+{"id": "ef2776be", "url": "https://civitai.com/images/102842243", "status": "processing", "created_at": "2026-02-12T00:53:16.580084", "processing_at": "2026-02-19T17:33:01.531999"}
+{"id": "e1f2521f", "url": "https://civitai.com/images/82187561", "status": "processing", "created_at": "2026-02-12T00:53:29.668034", "processing_at": "2026-02-19T17:33:26.453780"}
+{"id": "60d652da", "url": "https://civitai.com/images/102265307", "status": "pending", "created_at": "2026-02-12T00:53:47.566659", "retry_reason": "模型下载失败: lora 'version_2188594'"}
+{"id": "7b43f22c", "url": "https://civitai.com/images/97829936", "status": "pending", "created_at": "2026-02-12T00:54:32.944704", "retry_reason": "自动复刻异常: 'NoneType' object has no attribute 'get'"}
+{"id": "7218308a", "url": "https://civitai.com/images/101812902", "status": "pending", "created_at": "2026-02-12T00:54:52.190371", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "274f7366", "url": "https://civitai.com/images/102840128", "status": "processing", "created_at": "2026-02-12T00:55:27.418300", "processing_at": "2026-02-19T02:48:44.644647"}
+{"id": "16a71ad3", "url": "https://civitai.com/images/110740122", "status": "processing", "created_at": "2026-02-12T00:55:54.633519", "processing_at": "2026-02-19T02:49:02.829223"}
+{"id": "73d29ae1", "url": "https://civitai.com/images/110746536", "status": "processing", "created_at": "2026-02-12T00:56:07.148920", "processing_at": "2026-02-19T02:49:18.247931"}
+{"id": "5711ac5d", "url": "https://civitai.com/images/79953648", "status": "pending", "created_at": "2026-02-12T00:56:15.191178", "processing_at": "2026-02-12T18:39:54.633405", "retry_reason": "下载后仍缺模型:   lora: Frieren (4 Outfits + multiple hairstyles) - Sousou no Frieren (model_id=1640836, version_id=1857253)"}
+{"id": "75e551f1", "url": "https://civitai.com/images/98404203", "status": "processing", "created_at": "2026-02-12T01:16:28.392393", "processing_at": "2026-02-19T02:51:09.059901"}
+{"id": "7b36a79c", "url": "https://civitai.com/images/88938294", "status": "pending", "created_at": "2026-02-12T01:17:27.023627", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "d98b294a", "url": "https://civitai.com/images/80173059", "status": "processing", "created_at": "2026-02-12T01:17:52.568127", "processing_at": "2026-02-19T17:37:14.218093"}
+{"id": "5909733f", "url": "https://civitai.com/images/110738548", "status": "processing", "created_at": "2026-02-12T01:18:35.947753", "processing_at": "2026-02-19T17:37:34.840020"}
+{"id": "bd5a68fe", "url": "https://civitai.com/images/83609224", "status": "done", "created_at": "2026-02-12T01:18:45.205846", "processing_at": "2026-02-19T02:55:30.507684", "done_at": "2026-02-19T17:37:53.884933"}
+{"id": "41c8f882", "url": "https://civitai.com/images/79953638", "status": "pending", "created_at": "2026-02-12T01:19:02.240584", "retry_reason": "下载后仍缺模型:   lora: Frieren (4 Outfits + multiple hairstyles) - Sousou no Frieren (model_id=1640836, version_id=1857253)"}
+{"id": "3156a728", "url": "https://civitai.com/images/105413339", "status": "processing", "created_at": "2026-02-12T01:19:18.228511", "processing_at": "2026-02-16T00:56:41.016671"}
+{"id": "f08db6b6", "url": "https://civitai.com/images/103290162", "status": "processing", "created_at": "2026-02-12T01:19:35.401801", "processing_at": "2026-02-19T17:39:56.952248"}
+{"id": "fbc87934", "url": "https://civitai.com/images/110726998", "status": "processing", "created_at": "2026-02-12T01:20:11.311928", "processing_at": "2026-02-19T02:56:38.243893"}
+{"id": "70589fa6", "url": "https://civitai.com/images/98053038", "status": "processing", "created_at": "2026-02-12T01:20:25.302146", "processing_at": "2026-02-19T17:40:15.244642"}
+{"id": "5cadfac1", "url": "https://civitai.com/images/98651613", "status": "processing", "created_at": "2026-02-12T01:20:46.689058", "processing_at": "2026-02-19T02:57:18.500345"}
+{"id": "e208abdc", "url": "https://civitai.com/images/99003023", "status": "processing", "created_at": "2026-02-12T01:21:05.661621", "processing_at": "2026-02-19T02:57:35.157761"}
+{"id": "eafb7af0", "url": "https://civitai.com/images/99829720", "status": "processing", "created_at": "2026-02-12T01:21:12.115901", "processing_at": "2026-02-19T17:40:33.573329"}
+{"id": "8e8cbe5e", "url": "https://civitai.com/images/67407971", "status": "pending", "created_at": "2026-02-12T01:21:20.903646", "retry_reason": "ComfyUI 拒绝: ComfyUI 拒绝了工作流: Prompt outputs failed validation"}
+{"id": "1fb9a0b4", "url": "https://civitai.com/images/97515869", "status": "processing", "created_at": "2026-02-12T01:21:58.086750", "processing_at": "2026-02-19T17:41:11.925967"}
+{"id": "abef31c1", "url": "https://civitai.com/images/104685206", "status": "done", "created_at": "2026-02-12T01:22:08.854986", "processing_at": "2026-02-19T03:05:41.974813", "done_at": "2026-02-19T17:41:32.271117"}
+{"id": "7adc85f0", "url": "https://civitai.com/images/101240291", "status": "processing", "created_at": "2026-02-12T01:22:49.513752", "processing_at": "2026-02-19T03:05:59.090897"}
+{"id": "c95bf92b", "url": "https://civitai.com/images/94167502", "status": "pending", "created_at": "2026-02-12T01:23:04.893293", "retry_reason": "下载后仍缺模型:   lora: Prinz Eugen (Azur Lane: Slow Ahead!) (model_id=1559883, version_id=1765166)"}
 {"id": "998de1ef", "url": "https://civitai.com/images/102777532", "status": "processing", "created_at": "2026-02-12T01:23:26.321106", "processing_at": "2026-02-14T00:29:39.753637"}
-{"id": "bc9f090c", "url": "https://civitai.com/images/94289690", "status": "pending", "created_at": "2026-02-12T01:23:47.090968"}
-{"id": "283af593", "url": "https://civitai.com/images/95633787", "status": "pending", "created_at": "2026-02-12T01:23:53.692582"}
-{"id": "e4b8b420", "url": "https://civitai.com/images/101928489", "status": "pending", "created_at": "2026-02-12T01:24:04.812203"}
+{"id": "bc9f090c", "url": "https://civitai.com/images/94289690", "status": "pending", "created_at": "2026-02-12T01:23:47.090968", "retry_reason": "下载后仍缺模型:   lora: Prinz Eugen (Azur Lane: Slow Ahead!) (model_id=1559883, version_id=1765166)"}
+{"id": "283af593", "url": "https://civitai.com/images/95633787", "status": "pending", "created_at": "2026-02-12T01:23:53.692582", "retry_reason": "自动复刻异常: 'NoneType' object has no attribute 'get'"}
+{"id": "e4b8b420", "url": "https://civitai.com/images/101928489", "status": "processing", "created_at": "2026-02-12T01:24:04.812203", "processing_at": "2026-02-19T17:42:59.714168"}
 {"id": "21ef0148", "url": "https://civitai.com/images/109196109", "status": "pending", "created_at": "2026-02-12T01:24:11.493104"}
-{"id": "f331e446", "url": "https://civitai.com/images/104345700", "status": "processing", "created_at": "2026-02-12T01:24:19.010361", "processing_at": "2026-02-12T16:14:28.541833"}
+{"id": "f331e446", "url": "https://civitai.com/images/104345700", "status": "processing", "created_at": "2026-02-12T01:24:19.010361", "processing_at": "2026-02-19T03:08:10.403644"}
 {"id": "ddae10cc", "url": "https://civitai.com/images/103805097", "status": "pending", "created_at": "2026-02-12T01:24:56.287742"}
-{"id": "48164518", "url": "https://civitai.com/images/120105755", "status": "processing", "created_at": "2026-02-12T01:25:07.275294", "processing_at": "2026-02-12T13:58:12.374093"}
-{"id": "94194484", "url": "https://civitai.com/images/104079210", "status": "pending", "created_at": "2026-02-12T01:26:32.964686"}
+{"id": "48164518", "url": "https://civitai.com/images/120105755", "status": "processing", "created_at": "2026-02-12T01:25:07.275294", "processing_at": "2026-02-19T03:11:09.539356"}
+{"id": "94194484", "url": "https://civitai.com/images/104079210", "status": "processing", "created_at": "2026-02-12T01:26:32.964686", "processing_at": "2026-02-19T03:11:26.556767"}
 {"id": "8a918613", "url": "https://civitai.com/images/96060230", "status": "pending", "created_at": "2026-02-12T01:26:45.502427"}
-{"id": "fc569fa9", "url": "https://civitai.com/images/113588071", "status": "pending", "created_at": "2026-02-12T01:27:31.138463"}
-{"id": "3f1beda4", "url": "https://civitai.com/images/98054666", "status": "pending", "created_at": "2026-02-12T01:28:13.240493"}
+{"id": "fc569fa9", "url": "https://civitai.com/images/113588071", "status": "pending", "created_at": "2026-02-12T01:27:31.138463", "processing_at": "2026-02-19T03:24:07.127534"}
+{"id": "3f1beda4", "url": "https://civitai.com/images/98054666", "status": "pending", "created_at": "2026-02-12T01:28:13.240493", "processing_at": "2026-02-19T03:24:31.243910"}
 {"id": "46244529", "url": "https://civitai.com/images/97996707", "status": "pending", "created_at": "2026-02-12T01:28:24.971135"}
 {"id": "96927bbd", "url": "https://civitai.com/images/88823781", "status": "pending", "created_at": "2026-02-12T01:28:41.921747"}
-{"id": "d384f754", "url": "https://civitai.com/images/112440102", "status": "pending", "created_at": "2026-02-12T01:29:38.040436"}
-{"id": "83ad504b", "url": "https://civitai.com/images/98651650", "status": "pending", "created_at": "2026-02-12T01:31:11.356506"}
-{"id": "e34c8c13", "url": "https://civitai.com/images/99393275", "status": "pending", "created_at": "2026-02-12T01:31:20.312479"}
+{"id": "d384f754", "url": "https://civitai.com/images/112440102", "status": "pending", "created_at": "2026-02-12T01:29:38.040436", "processing_at": "2026-02-19T09:38:29.315265"}
+{"id": "83ad504b", "url": "https://civitai.com/images/98651650", "status": "processing", "created_at": "2026-02-12T01:31:11.356506", "processing_at": "2026-02-19T09:38:47.174897"}
+{"id": "e34c8c13", "url": "https://civitai.com/images/99393275", "status": "processing", "created_at": "2026-02-12T01:31:20.312479", "processing_at": "2026-02-19T09:39:03.145589"}
 {"id": "eca7c616", "url": "https://civitai.com/images/104357357", "status": "pending", "created_at": "2026-02-12T01:31:34.671064"}
-{"id": "515d531a", "url": "https://civitai.com/images/108114676", "status": "pending", "created_at": "2026-02-12T01:31:42.848041"}
-{"id": "d8f8871e", "url": "https://civitai.com/images/113129582", "status": "pending", "created_at": "2026-02-12T01:33:28.801726"}
+{"id": "515d531a", "url": "https://civitai.com/images/108114676", "status": "pending", "created_at": "2026-02-12T01:31:42.848041", "processing_at": "2026-02-19T09:52:38.624800"}
+{"id": "d8f8871e", "url": "https://civitai.com/images/113129582", "status": "pending", "created_at": "2026-02-12T01:33:28.801726", "processing_at": "2026-02-19T09:52:56.942655"}
 {"id": "edc3c42e", "url": "https://civitai.com/images/89703257", "status": "pending", "created_at": "2026-02-12T01:33:44.045096"}
-{"id": "89e6cb52", "url": "https://civitai.com/images/86040075", "status": "pending", "created_at": "2026-02-12T01:33:56.753593"}
-{"id": "afec93cb", "url": "https://civitai.com/images/111901946", "status": "pending", "created_at": "2026-02-12T01:34:28.575710"}
+{"id": "89e6cb52", "url": "https://civitai.com/images/86040075", "status": "pending", "created_at": "2026-02-12T01:33:56.753593", "processing_at": "2026-02-19T09:53:54.895514"}
+{"id": "afec93cb", "url": "https://civitai.com/images/111901946", "status": "pending", "created_at": "2026-02-12T01:34:28.575710", "processing_at": "2026-02-19T09:54:13.842460"}
 {"id": "38b41682", "url": "https://civitai.com/images/120418975", "status": "pending", "created_at": "2026-02-12T01:34:38.627936"}
-{"id": "8637850c", "url": "https://civitai.com/images/75053822", "status": "pending", "created_at": "2026-02-12T01:35:26.577565"}
+{"id": "8637850c", "url": "https://civitai.com/images/75053822", "status": "processing", "created_at": "2026-02-12T01:35:26.577565", "processing_at": "2026-02-19T09:54:55.486190"}
 {"id": "16357a07", "url": "https://civitai.com/images/97991556", "status": "pending", "created_at": "2026-02-12T01:35:44.057283"}
-{"id": "d2615d84", "url": "https://civitai.com/images/100746694", "status": "pending", "created_at": "2026-02-12T01:36:00.206551"}
-{"id": "057e830c", "url": "https://civitai.com/images/109136821", "status": "pending", "created_at": "2026-02-12T01:36:11.017922"}
+{"id": "d2615d84", "url": "https://civitai.com/images/100746694", "status": "processing", "created_at": "2026-02-12T01:36:00.206551", "processing_at": "2026-02-19T09:59:19.121474"}
+{"id": "057e830c", "url": "https://civitai.com/images/109136821", "status": "processing", "created_at": "2026-02-12T01:36:11.017922", "processing_at": "2026-02-19T09:59:38.772183"}
 {"id": "263e6da3", "url": "https://civitai.com/images/81363974", "status": "pending", "created_at": "2026-02-12T01:36:21.992167"}
 {"id": "d79bb98a", "url": "https://civitai.com/images/101862943", "status": "pending", "created_at": "2026-02-12T01:37:13.136896"}
-{"id": "37ec97cb", "url": "https://civitai.com/images/109132011", "status": "processing", "created_at": "2026-02-12T01:37:26.010480", "processing_at": "2026-02-12T13:45:45.057147"}
-{"id": "9d88ceb5", "url": "https://civitai.com/images/78433113", "status": "pending", "created_at": "2026-02-12T01:38:09.654432"}
-{"id": "98fca5c9", "url": "https://civitai.com/images/101345081", "status": "pending", "created_at": "2026-02-12T01:38:18.973339"}
-{"id": "7a62e3cb", "url": "https://civitai.com/images/104547932", "status": "processing", "created_at": "2026-02-12T01:38:28.016093", "processing_at": "2026-02-12T16:37:56.251476"}
+{"id": "37ec97cb", "url": "https://civitai.com/images/109132011", "status": "pending", "created_at": "2026-02-12T01:37:26.010480", "processing_at": "2026-02-19T10:00:34.286068"}
+{"id": "9d88ceb5", "url": "https://civitai.com/images/78433113", "status": "pending", "created_at": "2026-02-12T01:38:09.654432", "processing_at": "2026-02-19T10:02:05.564394"}
+{"id": "98fca5c9", "url": "https://civitai.com/images/101345081", "status": "pending", "created_at": "2026-02-12T01:38:18.973339", "processing_at": "2026-02-19T10:03:47.104126"}
+{"id": "7a62e3cb", "url": "https://civitai.com/images/104547932", "status": "processing", "created_at": "2026-02-12T01:38:28.016093", "processing_at": "2026-02-19T10:04:12.733769"}
 {"id": "98ab7139", "url": "https://civitai.com/images/103602211", "status": "pending", "created_at": "2026-02-12T01:38:33.578796"}
-{"id": "5df23950", "url": "https://civitai.com/images/105402024", "status": "pending", "created_at": "2026-02-12T01:38:40.973129"}
-{"id": "fda55111", "url": "https://civitai.com/images/112934261", "status": "pending", "created_at": "2026-02-12T01:38:54.879430"}
-{"id": "ae9b1ba2", "url": "https://civitai.com/images/103756196", "status": "pending", "created_at": "2026-02-12T01:39:26.986284"}
-{"id": "29c460c8", "url": "https://civitai.com/images/95291862", "status": "pending", "created_at": "2026-02-12T01:39:56.284706"}
+{"id": "5df23950", "url": "https://civitai.com/images/105402024", "status": "processing", "created_at": "2026-02-12T01:38:40.973129", "processing_at": "2026-02-19T10:17:23.180894"}
+{"id": "fda55111", "url": "https://civitai.com/images/112934261", "status": "processing", "created_at": "2026-02-12T01:38:54.879430", "processing_at": "2026-02-19T10:19:01.722028"}
+{"id": "ae9b1ba2", "url": "https://civitai.com/images/103756196", "status": "pending", "created_at": "2026-02-12T01:39:26.986284", "processing_at": "2026-02-19T10:19:21.001093"}
+{"id": "29c460c8", "url": "https://civitai.com/images/95291862", "status": "processing", "created_at": "2026-02-12T01:39:56.284706", "processing_at": "2026-02-19T10:22:05.731999"}
 {"id": "fa845b90", "url": "https://civitai.com/images/96058821", "status": "pending", "created_at": "2026-02-12T01:40:06.504923"}
 {"id": "ade49635", "url": "https://civitai.com/images/97430090", "status": "pending", "created_at": "2026-02-12T01:40:18.274316"}
 {"id": "1c586365", "url": "https://civitai.com/images/101817321", "status": "pending", "created_at": "2026-02-12T01:40:34.766377"}
-{"id": "34fbfddc", "url": "https://civitai.com/images/103161150", "status": "pending", "created_at": "2026-02-12T01:40:44.954771"}
-{"id": "41b7a5ba", "url": "https://civitai.com/images/115289757", "status": "processing", "created_at": "2026-02-12T01:41:04.208398", "processing_at": "2026-02-12T16:38:25.585835"}
-{"id": "ad20561e", "url": "https://civitai.com/images/100092360", "status": "pending", "created_at": "2026-02-12T01:41:39.915269"}
+{"id": "34fbfddc", "url": "https://civitai.com/images/103161150", "status": "pending", "created_at": "2026-02-12T01:40:44.954771", "processing_at": "2026-02-19T10:25:57.776494"}
+{"id": "41b7a5ba", "url": "https://civitai.com/images/115289757", "status": "processing", "created_at": "2026-02-12T01:41:04.208398", "processing_at": "2026-02-19T10:26:18.973617"}
+{"id": "ad20561e", "url": "https://civitai.com/images/100092360", "status": "processing", "created_at": "2026-02-12T01:41:39.915269", "processing_at": "2026-02-19T10:26:37.077395"}
 {"id": "33e9d8da", "url": "https://civitai.com/images/100721757", "status": "pending", "created_at": "2026-02-12T01:41:48.720673"}
 {"id": "37851e61", "url": "https://civitai.com/images/101540134", "status": "pending", "created_at": "2026-02-12T01:41:57.292534"}
-{"id": "4a575614", "url": "https://civitai.com/images/86294959", "status": "pending", "created_at": "2026-02-12T01:42:36.280747"}
+{"id": "4a575614", "url": "https://civitai.com/images/86294959", "status": "pending", "created_at": "2026-02-12T01:42:36.280747", "processing_at": "2026-02-19T10:31:31.676926"}
 {"id": "b4030ce0", "url": "https://civitai.com/images/101948647", "status": "pending", "created_at": "2026-02-12T01:43:17.843035"}
-{"id": "6f0825ab", "url": "https://civitai.com/images/81998702", "status": "pending", "created_at": "2026-02-12T01:43:39.265736"}
-{"id": "4d3db238", "url": "https://civitai.com/images/116042197", "status": "pending", "created_at": "2026-02-12T01:44:21.869446"}
-{"id": "8a489789", "url": "https://civitai.com/images/81363972", "status": "processing", "created_at": "2026-02-12T01:44:37.799769", "processing_at": "2026-02-12T18:44:33.251960"}
-{"id": "ebe63c8a", "url": "https://civitai.com/images/84341893", "status": "processing", "created_at": "2026-02-12T01:44:45.670336", "processing_at": "2026-02-12T14:01:11.666841"}
+{"id": "6f0825ab", "url": "https://civitai.com/images/81998702", "status": "processing", "created_at": "2026-02-12T01:43:39.265736", "processing_at": "2026-02-19T10:32:00.822208"}
+{"id": "4d3db238", "url": "https://civitai.com/images/116042197", "status": "pending", "created_at": "2026-02-12T01:44:21.869446", "processing_at": "2026-02-19T10:32:23.962880"}
+{"id": "8a489789", "url": "https://civitai.com/images/81363972", "status": "pending", "created_at": "2026-02-12T01:44:37.799769", "processing_at": "2026-02-12T18:44:33.251960"}
+{"id": "ebe63c8a", "url": "https://civitai.com/images/84341893", "status": "processing", "created_at": "2026-02-12T01:44:45.670336", "processing_at": "2026-02-19T10:32:49.258689"}
 {"id": "4f91740e", "url": "https://civitai.com/images/85068844", "status": "pending", "created_at": "2026-02-12T01:44:53.107817"}
 {"id": "b22ca4cc", "url": "https://civitai.com/images/113183338", "status": "pending", "created_at": "2026-02-12T01:45:24.806814"}
-{"id": "68c8a566", "url": "https://civitai.com/images/101536679", "status": "pending", "created_at": "2026-02-12T01:45:32.376498"}
+{"id": "68c8a566", "url": "https://civitai.com/images/101536679", "status": "pending", "created_at": "2026-02-12T01:45:32.376498", "processing_at": "2026-02-19T10:33:49.738652"}
 {"id": "65a7f2b3", "url": "https://civitai.com/images/96223891", "status": "pending", "created_at": "2026-02-12T01:46:25.310672"}
 {"id": "24e75cc2", "url": "https://civitai.com/images/96880053", "status": "pending", "created_at": "2026-02-12T01:46:34.363867"}
 {"id": "6304dc14", "url": "https://civitai.com/images/97262777", "status": "pending", "created_at": "2026-02-12T01:46:42.468167"}
-{"id": "43969d70", "url": "https://civitai.com/images/106870379", "status": "pending", "created_at": "2026-02-12T01:47:16.585350"}
+{"id": "43969d70", "url": "https://civitai.com/images/106870379", "status": "processing", "created_at": "2026-02-12T01:47:16.585350", "processing_at": "2026-02-19T11:13:12.662879"}
 {"id": "ec815556", "url": "https://civitai.com/images/108867833", "status": "pending", "created_at": "2026-02-12T01:48:33.908295"}
 {"id": "7e670fc8", "url": "https://civitai.com/images/81363969", "status": "pending", "created_at": "2026-02-12T01:48:53.301396"}
 {"id": "24e846a2", "url": "https://civitai.com/images/95700481", "status": "pending", "created_at": "2026-02-12T01:49:22.799899"}
-{"id": "286124f5", "url": "https://civitai.com/images/100586969", "status": "pending", "created_at": "2026-02-12T01:49:44.546912"}
-{"id": "dc020516", "url": "https://civitai.com/images/104357352", "status": "pending", "created_at": "2026-02-12T01:50:11.733934"}
-{"id": "b930893f", "url": "https://civitai.com/images/96489929", "status": "pending", "created_at": "2026-02-12T01:50:51.374557"}
+{"id": "286124f5", "url": "https://civitai.com/images/100586969", "status": "processing", "created_at": "2026-02-12T01:49:44.546912", "processing_at": "2026-02-19T11:17:39.077953"}
+{"id": "dc020516", "url": "https://civitai.com/images/104357352", "status": "pending", "created_at": "2026-02-12T01:50:11.733934", "processing_at": "2026-02-15T23:39:03.231480"}
+{"id": "b930893f", "url": "https://civitai.com/images/96489929", "status": "pending", "created_at": "2026-02-12T01:50:51.374557", "processing_at": "2026-02-19T11:30:07.377164"}
 {"id": "b7f79b0e", "url": "https://civitai.com/images/110731984", "status": "pending", "created_at": "2026-02-12T01:51:38.502960"}
-{"id": "95bbd69c", "url": "https://civitai.com/images/119947007", "status": "pending", "created_at": "2026-02-12T01:54:26.097433"}
-{"id": "b2adc7e1", "url": "https://civitai.com/images/116949946", "status": "pending", "created_at": "2026-02-12T01:54:31.788861"}
+{"id": "95bbd69c", "url": "https://civitai.com/images/119947007", "status": "pending", "created_at": "2026-02-12T01:54:26.097433", "processing_at": "2026-02-19T11:34:16.888768"}
+{"id": "b2adc7e1", "url": "https://civitai.com/images/116949946", "status": "pending", "created_at": "2026-02-12T01:54:31.788861", "processing_at": "2026-02-19T11:35:40.263405"}
 {"id": "75ea2701", "url": "https://civitai.com/images/117468822", "status": "pending", "created_at": "2026-02-12T01:54:45.435402"}
 {"id": "20a7ff5f", "url": "https://civitai.com/images/117899353", "status": "pending", "created_at": "2026-02-12T01:55:02.396407"}
-{"id": "8183e7a0", "url": "https://civitai.com/images/120286147", "status": "pending", "created_at": "2026-02-12T01:55:21.312793"}
-{"id": "b89e26cf", "url": "https://civitai.com/images/118506046", "status": "pending", "created_at": "2026-02-12T01:55:28.771519"}
-{"id": "e5cb3960", "url": "https://civitai.com/images/120488990", "status": "pending", "created_at": "2026-02-12T01:55:32.900405"}
-{"id": "d7669220", "url": "https://civitai.com/images/119124223", "status": "pending", "created_at": "2026-02-12T01:55:39.736136"}
-{"id": "ad38669a", "url": "https://civitai.com/images/119077049", "status": "pending", "created_at": "2026-02-12T01:55:54.733957"}
+{"id": "8183e7a0", "url": "https://civitai.com/images/120286147", "status": "pending", "created_at": "2026-02-12T01:55:21.312793", "processing_at": "2026-02-19T11:42:40.671429"}
+{"id": "b89e26cf", "url": "https://civitai.com/images/118506046", "status": "pending", "created_at": "2026-02-12T01:55:28.771519", "processing_at": "2026-02-19T11:44:07.702036"}
+{"id": "e5cb3960", "url": "https://civitai.com/images/120488990", "status": "processing", "created_at": "2026-02-12T01:55:32.900405", "processing_at": "2026-02-19T11:44:20.625854"}
+{"id": "d7669220", "url": "https://civitai.com/images/119124223", "status": "pending", "created_at": "2026-02-12T01:55:39.736136", "processing_at": "2026-02-19T11:46:41.617981"}
+{"id": "ad38669a", "url": "https://civitai.com/images/119077049", "status": "pending", "created_at": "2026-02-12T01:55:54.733957", "processing_at": "2026-02-19T11:48:09.132192"}
 {"id": "fce9efda", "url": "https://civitai.com/images/118687528", "status": "pending", "created_at": "2026-02-12T01:56:15.136987"}
 {"id": "59f228b3", "url": "https://civitai.com/images/100497523", "status": "pending", "created_at": "2026-02-12T01:56:45.176830"}
 {"id": "ccbf5254", "url": "https://civitai.com/images/94832469", "status": "pending", "created_at": "2026-02-12T01:57:02.697960"}
 {"id": "89c70a83", "url": "https://civitai.com/images/94835063", "status": "pending", "created_at": "2026-02-12T01:57:12.474135"}
-{"id": "7a3b9e57", "url": "https://civitai.com/images/103005388", "status": "pending", "created_at": "2026-02-12T01:57:20.223206"}
-{"id": "37360f30", "url": "https://civitai.com/images/98386003", "status": "pending", "created_at": "2026-02-12T01:57:26.948529"}
-{"id": "c75dd6c6", "url": "https://civitai.com/images/98385997", "status": "pending", "created_at": "2026-02-12T01:57:35.456158"}
-{"id": "e893278f", "url": "https://civitai.com/images/97612848", "status": "processing", "created_at": "2026-02-12T01:57:48.176976", "processing_at": "2026-02-12T09:56:32.111798"}
-{"id": "b0b7296d", "url": "https://civitai.com/images/103823665", "status": "processing", "created_at": "2026-02-12T01:57:57.210844", "processing_at": "2026-02-14T00:03:00.899384"}
-{"id": "da5d76ee", "url": "https://civitai.com/images/97387790", "status": "processing", "created_at": "2026-02-12T01:58:05.494095", "processing_at": "2026-02-13T00:25:49.401968"}
-{"id": "3d143ca8", "url": "https://civitai.com/images/98384734", "status": "fail", "created_at": "2026-02-12T01:58:14.072482", "processing_at": "2026-02-12T09:51:24.232093", "fail_at": "2026-02-13T10:39:25.013265"}
-{"id": "5aaf8659", "url": "https://civitai.com/images/102550923", "status": "processing", "created_at": "2026-02-12T01:58:26.451981", "processing_at": "2026-02-13T23:45:37.353485"}
-{"id": "092978b5", "url": "https://civitai.com/images/104511289", "status": "processing", "created_at": "2026-02-12T01:58:35.689287", "processing_at": "2026-02-12T13:40:56.527148"}
-{"id": "d2f6f192", "url": "https://civitai.com/images/103167306", "status": "processing", "created_at": "2026-02-12T01:58:51.664070", "processing_at": "2026-02-13T23:41:02.239661"}
-{"id": "c47e0487", "url": "https://civitai.com/images/98777890", "status": "fail", "created_at": "2026-02-12T01:59:00.019679", "processing_at": "2026-02-13T10:37:58.371639", "fail_at": "2026-02-13T10:39:54.974746"}
-{"id": "45a48422", "url": "https://civitai.com/images/98004048", "status": "fail", "created_at": "2026-02-12T01:59:08.389478", "processing_at": "2026-02-13T00:29:19.114158", "done_at": "2026-02-13T00:31:21.723404", "fail_at": "2026-02-13T10:40:30.597949"}
+{"id": "7a3b9e57", "url": "https://civitai.com/images/103005388", "status": "processing", "created_at": "2026-02-12T01:57:20.223206", "processing_at": "2026-02-19T11:53:32.900436"}
+{"id": "37360f30", "url": "https://civitai.com/images/98386003", "status": "processing", "created_at": "2026-02-12T01:57:26.948529", "processing_at": "2026-02-19T11:53:44.176340"}
+{"id": "c75dd6c6", "url": "https://civitai.com/images/98385997", "status": "processing", "created_at": "2026-02-12T01:57:35.456158", "processing_at": "2026-02-19T11:53:55.616791"}
+{"id": "e893278f", "url": "https://civitai.com/images/97612848", "status": "processing", "created_at": "2026-02-12T01:57:48.176976", "processing_at": "2026-02-19T11:54:07.442986"}
+{"id": "b0b7296d", "url": "https://civitai.com/images/103823665", "status": "pending", "created_at": "2026-02-12T01:57:57.210844", "processing_at": "2026-02-14T00:03:00.899384"}
+{"id": "da5d76ee", "url": "https://civitai.com/images/97387790", "status": "pending", "created_at": "2026-02-12T01:58:05.494095", "processing_at": "2026-02-13T00:25:49.401968"}
+{"id": "3d143ca8", "url": "https://civitai.com/images/98384734", "status": "processing", "created_at": "2026-02-12T01:58:14.072482", "processing_at": "2026-02-19T11:54:54.335823", "fail_at": "2026-02-13T10:39:25.013265"}
+{"id": "5aaf8659", "url": "https://civitai.com/images/102550923", "status": "processing", "created_at": "2026-02-12T01:58:26.451981", "processing_at": "2026-02-19T11:55:11.840380"}
+{"id": "092978b5", "url": "https://civitai.com/images/104511289", "status": "pending", "created_at": "2026-02-12T01:58:35.689287", "processing_at": "2026-02-12T13:40:56.527148"}
+{"id": "d2f6f192", "url": "https://civitai.com/images/103167306", "status": "pending", "created_at": "2026-02-12T01:58:51.664070", "processing_at": "2026-02-13T23:41:02.239661"}
+{"id": "c47e0487", "url": "https://civitai.com/images/98777890", "status": "processing", "created_at": "2026-02-12T01:59:00.019679", "processing_at": "2026-02-15T23:42:53.158924", "fail_at": "2026-02-13T10:39:54.974746"}
+{"id": "45a48422", "url": "https://civitai.com/images/98004048", "status": "processing", "created_at": "2026-02-12T01:59:08.389478", "processing_at": "2026-02-19T11:56:00.034956", "done_at": "2026-02-13T00:31:21.723404", "fail_at": "2026-02-13T10:40:30.597949"}
 {"id": "a570a2b1", "url": "https://civitai.com/images/118687528", "status": "pending", "created_at": "2026-02-13T00:51:29.947255"}
-{"id": "c9a8ccf4", "url": "https://civitai.com/images/118573978", "status": "pending", "created_at": "2026-02-13T00:51:44.477474"}
+{"id": "c9a8ccf4", "url": "https://civitai.com/images/118573978", "status": "processing", "created_at": "2026-02-13T00:51:44.477474", "processing_at": "2026-02-19T11:56:20.524545"}
 {"id": "7d4caa36", "url": "https://civitai.com/images/117529332", "status": "pending", "created_at": "2026-02-13T00:51:48.642512"}
-{"id": "9e6ee047", "url": "https://civitai.com/images/119106970", "status": "pending", "created_at": "2026-02-13T00:52:00.654894"}
-{"id": "546c10b9", "url": "https://civitai.com/images/118592685", "status": "pending", "created_at": "2026-02-13T00:52:23.609056"}
+{"id": "9e6ee047", "url": "https://civitai.com/images/119106970", "status": "processing", "created_at": "2026-02-13T00:52:00.654894", "processing_at": "2026-02-19T11:57:43.902238"}
+{"id": "546c10b9", "url": "https://civitai.com/images/118592685", "status": "processing", "created_at": "2026-02-13T00:52:23.609056", "processing_at": "2026-02-19T11:59:36.832291"}
 {"id": "b5c2512e", "url": "https://civitai.com/images/119061470", "status": "pending", "created_at": "2026-02-13T00:52:27.728279"}
-{"id": "d54f0d07", "url": "https://civitai.com/images/120289099", "status": "pending", "created_at": "2026-02-13T00:52:55.892126"}
-{"id": "408365fe", "url": "https://civitai.com/images/120408773", "status": "pending", "created_at": "2026-02-13T00:53:10.161267"}
+{"id": "d54f0d07", "url": "https://civitai.com/images/120289099", "status": "pending", "created_at": "2026-02-13T00:52:55.892126", "processing_at": "2026-02-19T12:01:09.379639"}
+{"id": "408365fe", "url": "https://civitai.com/images/120408773", "status": "processing", "created_at": "2026-02-13T00:53:10.161267", "processing_at": "2026-02-19T12:01:21.166719"}
 {"id": "55a5c279", "url": "https://civitai.com/images/118687527", "status": "pending", "created_at": "2026-02-13T00:53:14.417041"}
-{"id": "7c5ab7a4", "url": "https://civitai.com/images/119066239", "status": "pending", "created_at": "2026-02-13T00:53:17.790659"}
-{"id": "410ce136", "url": "https://civitai.com/images/120608043", "status": "pending", "created_at": "2026-02-13T00:53:20.891932"}
-{"id": "b84d5558", "url": "https://civitai.com/images/117959471", "status": "pending", "created_at": "2026-02-13T00:53:32.615736"}
-{"id": "24497f1a", "url": "https://civitai.com/images/120298117", "status": "pending", "created_at": "2026-02-13T00:53:40.350296"}
-{"id": "21774b60", "url": "https://civitai.com/images/119784920", "status": "pending", "created_at": "2026-02-13T00:53:44.273844"}
-{"id": "d84ec583", "url": "https://civitai.com/images/120173644", "status": "pending", "created_at": "2026-02-13T00:53:50.291634"}
-{"id": "ee0cab07", "url": "https://civitai.com/images/117284090", "status": "pending", "created_at": "2026-02-13T00:53:53.036858"}
+{"id": "7c5ab7a4", "url": "https://civitai.com/images/119066239", "status": "processing", "created_at": "2026-02-13T00:53:17.790659", "processing_at": "2026-02-19T12:01:40.749758"}
+{"id": "410ce136", "url": "https://civitai.com/images/120608043", "status": "processing", "created_at": "2026-02-13T00:53:20.891932", "processing_at": "2026-02-19T12:02:54.884135"}
+{"id": "b84d5558", "url": "https://civitai.com/images/117959471", "status": "processing", "created_at": "2026-02-13T00:53:32.615736", "processing_at": "2026-02-19T12:05:06.644921"}
+{"id": "24497f1a", "url": "https://civitai.com/images/120298117", "status": "pending", "created_at": "2026-02-13T00:53:40.350296", "processing_at": "2026-02-19T12:05:18.281341"}
+{"id": "21774b60", "url": "https://civitai.com/images/119784920", "status": "pending", "created_at": "2026-02-13T00:53:44.273844", "processing_at": "2026-02-19T12:08:10.036013"}
+{"id": "d84ec583", "url": "https://civitai.com/images/120173644", "status": "processing", "created_at": "2026-02-13T00:53:50.291634", "processing_at": "2026-02-19T12:08:21.834762"}
+{"id": "ee0cab07", "url": "https://civitai.com/images/117284090", "status": "processing", "created_at": "2026-02-13T00:53:53.036858", "processing_at": "2026-02-19T12:11:31.920154"}
 {"id": "71594d12", "url": "https://civitai.com/images/120496302", "status": "pending", "created_at": "2026-02-13T00:54:04.757477"}
 {"id": "fb9d8168", "url": "https://civitai.com/images/119490546", "status": "pending", "created_at": "2026-02-13T00:54:06.500917"}
-{"id": "e780dca9", "url": "https://civitai.com/images/119191337", "status": "pending", "created_at": "2026-02-13T00:54:09.344635"}
-{"id": "49aa7c30", "url": "https://civitai.com/images/119881621", "status": "pending", "created_at": "2026-02-13T00:54:22.610293"}
-{"id": "3c7d5ebf", "url": "https://civitai.com/images/117537438", "status": "pending", "created_at": "2026-02-13T00:54:32.201951"}
-{"id": "d1b890c0", "url": "https://civitai.com/images/117350998", "status": "pending", "created_at": "2026-02-13T00:54:42.330268"}
-{"id": "1e2b8350", "url": "https://civitai.com/images/118577662", "status": "pending", "created_at": "2026-02-13T00:55:04.733291"}
-{"id": "b0f477ea", "url": "https://civitai.com/images/119681767", "status": "pending", "created_at": "2026-02-13T00:55:28.433871"}
-{"id": "57d6f28e", "url": "https://civitai.com/images/120610187", "status": "pending", "created_at": "2026-02-13T00:55:38.381525"}
+{"id": "e780dca9", "url": "https://civitai.com/images/119191337", "status": "processing", "created_at": "2026-02-13T00:54:09.344635", "processing_at": "2026-02-19T12:15:30.075896"}
+{"id": "49aa7c30", "url": "https://civitai.com/images/119881621", "status": "processing", "created_at": "2026-02-13T00:54:22.610293", "processing_at": "2026-02-19T12:20:07.348220"}
+{"id": "3c7d5ebf", "url": "https://civitai.com/images/117537438", "status": "processing", "created_at": "2026-02-13T00:54:32.201951", "processing_at": "2026-02-19T12:21:19.797026"}
+{"id": "d1b890c0", "url": "https://civitai.com/images/117350998", "status": "processing", "created_at": "2026-02-13T00:54:42.330268", "processing_at": "2026-02-19T12:21:34.705064"}
+{"id": "1e2b8350", "url": "https://civitai.com/images/118577662", "status": "pending", "created_at": "2026-02-13T00:55:04.733291", "processing_at": "2026-02-19T12:22:38.881840"}
+{"id": "b0f477ea", "url": "https://civitai.com/images/119681767", "status": "processing", "created_at": "2026-02-13T00:55:28.433871", "processing_at": "2026-02-19T12:24:12.340350"}
+{"id": "57d6f28e", "url": "https://civitai.com/images/120610187", "status": "processing", "created_at": "2026-02-13T00:55:38.381525", "processing_at": "2026-02-19T12:25:26.260020"}
 {"id": "32eba674", "url": "https://civitai.com/images/118687854", "status": "pending", "created_at": "2026-02-13T00:59:51.802975"}
-{"id": "0a1e6f89", "url": "https://civitai.com/images/119283077", "status": "pending", "created_at": "2026-02-13T00:59:55.221862"}
-{"id": "05d4bcda", "url": "https://civitai.com/images/116796991", "status": "pending", "created_at": "2026-02-13T01:00:02.624437"}
-{"id": "dcd26571", "url": "https://civitai.com/images/118951542", "status": "pending", "created_at": "2026-02-13T01:00:09.580890"}
+{"id": "0a1e6f89", "url": "https://civitai.com/images/119283077", "status": "processing", "created_at": "2026-02-13T00:59:55.221862", "processing_at": "2026-02-19T12:25:45.862137"}
+{"id": "05d4bcda", "url": "https://civitai.com/images/116796991", "status": "processing", "created_at": "2026-02-13T01:00:02.624437", "processing_at": "2026-02-19T12:25:57.797008"}
+{"id": "dcd26571", "url": "https://civitai.com/images/118951542", "status": "processing", "created_at": "2026-02-13T01:00:09.580890", "processing_at": "2026-02-19T12:26:11.652046"}
 {"id": "75a1bc0f", "url": "https://civitai.com/images/119127013", "status": "pending", "created_at": "2026-02-13T01:00:53.197595"}
-{"id": "4b101244", "url": "https://civitai.com/images/117293268", "status": "pending", "created_at": "2026-02-13T01:01:04.185485"}
-{"id": "f70f2bb3", "url": "https://civitai.com/images/119689569", "status": "pending", "created_at": "2026-02-13T01:02:08.119647"}
+{"id": "4b101244", "url": "https://civitai.com/images/117293268", "status": "processing", "created_at": "2026-02-13T01:01:04.185485", "processing_at": "2026-02-19T12:27:47.344233"}
+{"id": "f70f2bb3", "url": "https://civitai.com/images/119689569", "status": "processing", "created_at": "2026-02-13T01:02:08.119647", "processing_at": "2026-02-19T12:27:59.468530"}
 {"id": "4284b7f5", "url": "https://civitai.com/images/119061142", "status": "pending", "created_at": "2026-02-13T01:02:14.375352"}
-{"id": "aeb5452f", "url": "https://civitai.com/images/120382709", "status": "pending", "created_at": "2026-02-13T01:02:25.376268"}
-{"id": "c17939a8", "url": "https://civitai.com/images/118101374", "status": "pending", "created_at": "2026-02-13T01:02:41.076385"}
-{"id": "c3946694", "url": "https://civitai.com/images/117807379", "status": "pending", "created_at": "2026-02-13T01:03:08.301813"}
+{"id": "aeb5452f", "url": "https://civitai.com/images/120382709", "status": "processing", "created_at": "2026-02-13T01:02:25.376268", "processing_at": "2026-02-19T12:28:19.266028"}
+{"id": "c17939a8", "url": "https://civitai.com/images/118101374", "status": "pending", "created_at": "2026-02-13T01:02:41.076385", "processing_at": "2026-02-19T12:31:31.685841"}
+{"id": "c3946694", "url": "https://civitai.com/images/117807379", "status": "pending", "created_at": "2026-02-13T01:03:08.301813", "processing_at": "2026-02-19T12:31:56.747442"}
 {"id": "5e6d6fe3", "url": "https://civitai.com/images/118690471", "status": "pending", "created_at": "2026-02-13T01:03:28.203591"}
-{"id": "153c989b", "url": "https://civitai.com/images/118495368", "status": "pending", "created_at": "2026-02-13T01:03:34.921996"}
-{"id": "81aa9f73", "url": "https://civitai.com/images/118573858", "status": "pending", "created_at": "2026-02-13T01:03:48.935946"}
-{"id": "6ed3124b", "url": "https://civitai.com/images/120442835", "status": "pending", "created_at": "2026-02-13T01:03:58.649035"}
-{"id": "59f14ec5", "url": "https://civitai.com/images/117360934", "status": "pending", "created_at": "2026-02-13T01:04:04.997131"}
-{"id": "3fb2ed1e", "url": "https://civitai.com/images/120589684", "status": "pending", "created_at": "2026-02-13T01:04:10.443395"}
-{"id": "ab20eb53", "url": "https://civitai.com/images/120430385", "status": "pending", "created_at": "2026-02-13T01:05:39.616868"}
-{"id": "82465205", "url": "https://civitai.com/images/118155299", "status": "pending", "created_at": "2026-02-13T01:06:58.992191"}
-{"id": "0aeb3c39", "url": "https://civitai.com/images/118482799", "status": "pending", "created_at": "2026-02-13T01:07:01.362855"}
-{"id": "39552785", "url": "https://civitai.com/images/120748689", "status": "pending", "created_at": "2026-02-13T01:07:09.674962"}
-{"id": "542f034b", "url": "https://civitai.com/images/118034886", "status": "pending", "created_at": "2026-02-13T01:07:27.447495"}
+{"id": "153c989b", "url": "https://civitai.com/images/118495368", "status": "processing", "created_at": "2026-02-13T01:03:34.921996", "processing_at": "2026-02-19T12:32:22.970298"}
+{"id": "81aa9f73", "url": "https://civitai.com/images/118573858", "status": "processing", "created_at": "2026-02-13T01:03:48.935946", "processing_at": "2026-02-19T12:32:37.426890"}
+{"id": "6ed3124b", "url": "https://civitai.com/images/120442835", "status": "processing", "created_at": "2026-02-13T01:03:58.649035", "processing_at": "2026-02-19T12:32:50.292424"}
+{"id": "59f14ec5", "url": "https://civitai.com/images/117360934", "status": "processing", "created_at": "2026-02-13T01:04:04.997131", "processing_at": "2026-02-19T12:33:01.805118"}
+{"id": "3fb2ed1e", "url": "https://civitai.com/images/120589684", "status": "processing", "created_at": "2026-02-13T01:04:10.443395", "processing_at": "2026-02-19T12:33:14.531749"}
+{"id": "ab20eb53", "url": "https://civitai.com/images/120430385", "status": "processing", "created_at": "2026-02-13T01:05:39.616868", "processing_at": "2026-02-19T12:33:26.121694"}
+{"id": "82465205", "url": "https://civitai.com/images/118155299", "status": "processing", "created_at": "2026-02-13T01:06:58.992191", "processing_at": "2026-02-19T12:33:44.465284"}
+{"id": "0aeb3c39", "url": "https://civitai.com/images/118482799", "status": "processing", "created_at": "2026-02-13T01:07:01.362855", "processing_at": "2026-02-19T12:34:02.705315"}
+{"id": "39552785", "url": "https://civitai.com/images/120748689", "status": "processing", "created_at": "2026-02-13T01:07:09.674962", "processing_at": "2026-02-19T12:35:30.711615"}
+{"id": "542f034b", "url": "https://civitai.com/images/118034886", "status": "pending", "created_at": "2026-02-13T01:07:27.447495", "processing_at": "2026-02-19T12:35:53.587562"}
 {"id": "fe310203", "url": "https://civitai.com/images/118977326", "status": "pending", "created_at": "2026-02-13T01:08:09.533155"}
-{"id": "2e97e2cb", "url": "https://civitai.com/images/118034436", "status": "pending", "created_at": "2026-02-13T01:08:20.849958"}
-{"id": "ccd1dcbd", "url": "https://civitai.com/images/118505651", "status": "processing", "created_at": "2026-02-13T01:08:28.470532", "processing_at": "2026-02-13T23:47:53.180134"}
-{"id": "c0f75893", "url": "https://civitai.com/images/119830480", "status": "pending", "created_at": "2026-02-13T01:08:36.072050"}
-{"id": "9160746a", "url": "https://civitai.com/images/120507146", "status": "pending", "created_at": "2026-02-13T01:09:32.307896"}
-{"id": "47993e0c", "url": "https://civitai.com/images/119451824", "status": "pending", "created_at": "2026-02-13T01:11:07.246693"}
-{"id": "e87bb891", "url": "https://civitai.com/images/118030250", "status": "pending", "created_at": "2026-02-13T01:11:38.345474"}
-{"id": "f318fcf8", "url": "https://civitai.com/images/118287529", "status": "pending", "created_at": "2026-02-13T23:49:31.743514"}
+{"id": "2e97e2cb", "url": "https://civitai.com/images/118034436", "status": "pending", "created_at": "2026-02-13T01:08:20.849958", "processing_at": "2026-02-19T12:37:58.532040"}
+{"id": "ccd1dcbd", "url": "https://civitai.com/images/118505651", "status": "processing", "created_at": "2026-02-13T01:08:28.470532", "processing_at": "2026-02-15T23:29:41.497867"}
+{"id": "c0f75893", "url": "https://civitai.com/images/119830480", "status": "pending", "created_at": "2026-02-13T01:08:36.072050", "processing_at": "2026-02-19T12:39:23.361928"}
+{"id": "9160746a", "url": "https://civitai.com/images/120507146", "status": "processing", "created_at": "2026-02-13T01:09:32.307896", "processing_at": "2026-02-19T12:39:34.999681"}
+{"id": "47993e0c", "url": "https://civitai.com/images/119451824", "status": "pending", "created_at": "2026-02-13T01:11:07.246693", "processing_at": "2026-02-19T12:39:46.492657"}
+{"id": "e87bb891", "url": "https://civitai.com/images/118030250", "status": "processing", "created_at": "2026-02-13T01:11:38.345474", "processing_at": "2026-02-19T12:39:58.689099"}
+{"id": "f318fcf8", "url": "https://civitai.com/images/118287529", "status": "processing", "created_at": "2026-02-13T23:49:31.743514", "processing_at": "2026-02-19T12:53:25.218216"}
+{"id": "e2e8acd5", "url": "https://civitai.com/images/78192333", "status": "pending", "created_at": "2026-02-19T16:04:18.687340"}
+{"id": "c6cf133e", "url": "https://civitai.com/images/79045821", "status": "pending", "created_at": "2026-02-19T16:09:54.950311"}
+{"id": "3d4f759f", "url": "https://civitai.com/images/80589600", "status": "pending", "created_at": "2026-02-19T16:09:57.061389"}
+{"id": "99f5766d", "url": "https://civitai.com/images/77157998", "status": "pending", "created_at": "2026-02-19T16:10:00.276401"}
+{"id": "696b93df", "url": "https://civitai.com/images/87685867", "status": "pending", "created_at": "2026-02-19T16:10:28.438759"}
+{"id": "9e3342f9", "url": "https://civitai.com/images/88144492", "status": "pending", "created_at": "2026-02-19T16:13:36.554307"}
+{"id": "0b652a9d", "url": "https://civitai.com/images/83911724", "status": "pending", "created_at": "2026-02-19T16:13:38.502825"}
+{"id": "28c81190", "url": "https://civitai.com/images/82355661", "status": "pending", "created_at": "2026-02-19T16:13:46.130222"}
+{"id": "4990dbe6", "url": "https://civitai.com/images/81896151", "status": "pending", "created_at": "2026-02-19T16:13:47.661113"}
+{"id": "6d9b8061", "url": "https://civitai.com/images/82048969", "status": "pending", "created_at": "2026-02-19T16:13:51.259309"}
+{"id": "e8fdd569", "url": "https://civitai.com/images/101697853", "status": "pending", "created_at": "2026-02-19T16:13:54.246955"}
+{"id": "8d507cee", "url": "https://civitai.com/images/78373022", "status": "pending", "created_at": "2026-02-19T16:13:56.743963"}
+{"id": "fe23e608", "url": "https://civitai.com/images/88556737", "status": "pending", "created_at": "2026-02-19T16:13:58.319491"}
+{"id": "2a276c84", "url": "https://civitai.com/images/104197759", "status": "pending", "created_at": "2026-02-19T16:14:03.799570"}
+{"id": "0dbe021b", "url": "https://civitai.com/images/80741622", "status": "pending", "created_at": "2026-02-19T16:14:08.986099"}
+{"id": "b80be579", "url": "https://civitai.com/images/80724855", "status": "pending", "created_at": "2026-02-19T16:14:10.226484"}
+{"id": "5e1b5eca", "url": "https://civitai.com/images/100409165", "status": "pending", "created_at": "2026-02-19T16:14:13.043959"}
+{"id": "64d76492", "url": "https://civitai.com/images/83525215", "status": "pending", "created_at": "2026-02-19T16:14:17.987452"}
+{"id": "2aec7613", "url": "https://civitai.com/images/82514654", "status": "pending", "created_at": "2026-02-19T16:14:19.847009"}
+{"id": "49a5a841", "url": "https://civitai.com/images/87869771", "status": "pending", "created_at": "2026-02-19T16:14:20.877331"}
+{"id": "1a733d64", "url": "https://civitai.com/images/103943241", "status": "pending", "created_at": "2026-02-19T16:14:23.177066"}
+{"id": "d76530bd", "url": "https://civitai.com/images/81919879", "status": "pending", "created_at": "2026-02-19T16:14:25.315899"}
+{"id": "19e4a24b", "url": "https://civitai.com/images/88233278", "status": "pending", "created_at": "2026-02-19T16:14:28.066020"}
+{"id": "000451bb", "url": "https://civitai.com/images/88623772", "status": "pending", "created_at": "2026-02-19T16:14:31.320248"}
+{"id": "f4aa24a9", "url": "https://civitai.com/images/109333717", "status": "pending", "created_at": "2026-02-19T16:14:33.257292"}
+{"id": "343fcc5f", "url": "https://civitai.com/images/120147491", "status": "pending", "created_at": "2026-02-19T16:14:38.597978"}
+{"id": "77430f2b", "url": "https://civitai.com/images/85126668", "status": "pending", "created_at": "2026-02-19T16:14:41.013451"}
+{"id": "1f2fbf96", "url": "https://civitai.com/images/110317621", "status": "pending", "created_at": "2026-02-19T16:14:51.909279"}
+{"id": "d85bfc0a", "url": "https://civitai.com/images/120849622", "status": "pending", "created_at": "2026-02-19T16:14:54.088489"}
+{"id": "346b813e", "url": "https://civitai.com/images/77390112", "status": "pending", "created_at": "2026-02-19T16:14:55.771263"}
+{"id": "50d5fea7", "url": "https://civitai.com/images/78007507", "status": "pending", "created_at": "2026-02-19T16:14:57.656909"}
+{"id": "433531e9", "url": "https://civitai.com/images/88140015", "status": "pending", "created_at": "2026-02-19T16:14:59.551283"}
+{"id": "587686cd", "url": "https://civitai.com/images/77642970", "status": "pending", "created_at": "2026-02-19T16:15:10.334008"}
+{"id": "ae24da19", "url": "https://civitai.com/images/81735360", "status": "pending", "created_at": "2026-02-19T16:15:12.195528"}
+{"id": "58908f63", "url": "https://civitai.com/images/119959306", "status": "pending", "created_at": "2026-02-19T16:15:13.623237"}
+{"id": "22c67efa", "url": "https://civitai.com/images/88332374", "status": "pending", "created_at": "2026-02-19T16:15:14.781126"}
+{"id": "2d69fc2c", "url": "https://civitai.com/images/81703476", "status": "pending", "created_at": "2026-02-19T16:15:17.495308"}
+{"id": "63feaf7e", "url": "https://civitai.com/images/90496202", "status": "pending", "created_at": "2026-02-19T16:15:21.685802"}
+{"id": "52ff21ad", "url": "https://civitai.com/images/78076394", "status": "pending", "created_at": "2026-02-19T16:15:34.352354"}
+{"id": "2a00d7b1", "url": "https://civitai.com/images/78093471", "status": "pending", "created_at": "2026-02-19T16:15:35.300330"}
+{"id": "0be0d33c", "url": "https://civitai.com/images/79827021", "status": "pending", "created_at": "2026-02-19T16:15:37.354984"}
+{"id": "ed9d6724", "url": "https://civitai.com/images/120035148", "status": "pending", "created_at": "2026-02-19T16:15:42.710388"}
+{"id": "fe4e0e7f", "url": "https://civitai.com/images/115853646", "status": "pending", "created_at": "2026-02-19T16:15:44.456679"}
+{"id": "d9e1e73b", "url": "https://civitai.com/images/83316265", "status": "pending", "created_at": "2026-02-19T16:15:45.639183"}
+{"id": "48762fed", "url": "https://civitai.com/images/80731940", "status": "pending", "created_at": "2026-02-19T16:15:47.510536"}
+{"id": "09e8056e", "url": "https://civitai.com/images/113078213", "status": "pending", "created_at": "2026-02-19T16:15:49.543578"}
+{"id": "274208be", "url": "https://civitai.com/images/77643034", "status": "pending", "created_at": "2026-02-19T16:15:51.163622"}
+{"id": "56d3b4be", "url": "https://civitai.com/images/88984683", "status": "pending", "created_at": "2026-02-19T16:15:54.383518"}
+{"id": "4214aec4", "url": "https://civitai.com/images/78555389", "status": "pending", "created_at": "2026-02-19T16:26:05.523627"}
+{"id": "c81f3db9", "url": "https://civitai.com/images/113076171", "status": "pending", "created_at": "2026-02-19T16:26:09.477208"}
+{"id": "e7d54f0a", "url": "https://civitai.com/images/115106822", "status": "pending", "created_at": "2026-02-19T16:26:11.630879"}
+{"id": "48335bc3", "url": "https://civitai.com/images/79532378", "status": "pending", "created_at": "2026-02-19T16:26:13.538215"}
+{"id": "acc10a21", "url": "https://civitai.com/images/89340221", "status": "pending", "created_at": "2026-02-19T16:26:14.970641"}
+{"id": "b71b7ee2", "url": "https://civitai.com/images/110975348", "status": "pending", "created_at": "2026-02-19T16:26:17.287396"}
+{"id": "5e8029b3", "url": "https://civitai.com/images/80362978", "status": "pending", "created_at": "2026-02-19T16:26:20.604718"}
+{"id": "9c0ed8ad", "url": "https://civitai.com/images/113325411", "status": "pending", "created_at": "2026-02-19T16:26:21.486094"}
+{"id": "470ad362", "url": "https://civitai.com/images/112684243", "status": "pending", "created_at": "2026-02-19T16:26:24.264349"}
+{"id": "ffa71692", "url": "https://civitai.com/images/82837702", "status": "pending", "created_at": "2026-02-19T16:26:29.979901"}
+{"id": "b624ca8c", "url": "https://civitai.com/images/109403411", "status": "pending", "created_at": "2026-02-19T16:26:32.128794"}
+{"id": "fb3a2d90", "url": "https://civitai.com/images/94216529", "status": "pending", "created_at": "2026-02-19T16:26:35.723140"}
+{"id": "46e79fdb", "url": "https://civitai.com/images/120653736", "status": "pending", "created_at": "2026-02-19T16:26:37.401642"}
+{"id": "24889436", "url": "https://civitai.com/images/80366599", "status": "pending", "created_at": "2026-02-19T16:26:41.380621"}
+{"id": "2966c75d", "url": "https://civitai.com/images/105346378", "status": "pending", "created_at": "2026-02-19T16:26:46.411756"}
+{"id": "a555e400", "url": "https://civitai.com/images/120067567", "status": "pending", "created_at": "2026-02-19T16:26:58.518121"}
+{"id": "5db2302d", "url": "https://civitai.com/images/115249615", "status": "pending", "created_at": "2026-02-19T16:27:08.480619"}
+{"id": "64eac480", "url": "https://civitai.com/images/89031710", "status": "pending", "created_at": "2026-02-19T16:27:11.848986"}
+{"id": "b6704b3e", "url": "https://civitai.com/images/89031411", "status": "pending", "created_at": "2026-02-19T16:27:15.320382"}
+{"id": "cafd2652", "url": "https://civitai.com/images/88952865", "status": "pending", "created_at": "2026-02-19T16:27:17.159618"}
+{"id": "7be38dcc", "url": "https://civitai.com/images/87452595", "status": "pending", "created_at": "2026-02-19T16:27:24.621769"}
+{"id": "06bcf2e2", "url": "https://civitai.com/images/88843738", "status": "pending", "created_at": "2026-02-19T16:27:28.671803"}
+{"id": "aac8298a", "url": "https://civitai.com/images/84437660", "status": "pending", "created_at": "2026-02-19T16:27:31.864548"}
+{"id": "e357c4a5", "url": "https://civitai.com/images/120066355", "status": "pending", "created_at": "2026-02-19T16:27:34.179721"}
+{"id": "8d56fa5e", "url": "https://civitai.com/images/81869325", "status": "pending", "created_at": "2026-02-19T16:27:37.748407"}
+{"id": "9c0384a6", "url": "https://civitai.com/images/119868096", "status": "pending", "created_at": "2026-02-19T16:27:42.374686"}
+{"id": "d9c994e6", "url": "https://civitai.com/images/86410054", "status": "pending", "created_at": "2026-02-19T16:27:50.785238"}
+{"id": "5005bdad", "url": "https://civitai.com/images/106907731", "status": "pending", "created_at": "2026-02-19T16:27:52.756563"}
+{"id": "8ab48467", "url": "https://civitai.com/images/78076580", "status": "pending", "created_at": "2026-02-19T16:27:56.193467"}
+{"id": "d4746591", "url": "https://civitai.com/images/120200040", "status": "pending", "created_at": "2026-02-19T16:28:06.546457"}
+{"id": "65765a88", "url": "https://civitai.com/images/112779940", "status": "pending", "created_at": "2026-02-19T16:28:22.539895"}
+{"id": "11d86c3e", "url": "https://civitai.com/images/78783695", "status": "pending", "created_at": "2026-02-19T16:28:33.875851"}
+{"id": "cce826b7", "url": "https://civitai.com/images/85307273", "status": "pending", "created_at": "2026-02-19T16:28:37.112794"}
+{"id": "4ee2b715", "url": "https://civitai.com/images/90974619", "status": "pending", "created_at": "2026-02-19T16:28:41.390128"}
+{"id": "fb820b76", "url": "https://civitai.com/images/85477180", "status": "pending", "created_at": "2026-02-19T16:28:48.530757"}
+{"id": "dc44adac", "url": "https://civitai.com/images/110486847", "status": "pending", "created_at": "2026-02-19T16:29:02.662111"}
+{"id": "1d94af7e", "url": "https://civitai.com/images/120067185", "status": "pending", "created_at": "2026-02-19T16:29:04.017032"}
+{"id": "a74c96ac", "url": "https://civitai.com/images/78566251", "status": "pending", "created_at": "2026-02-19T16:29:09.210745"}
+{"id": "deabe5e7", "url": "https://civitai.com/images/79829791", "status": "pending", "created_at": "2026-02-19T16:29:13.656575"}
+{"id": "a58b6b96", "url": "https://civitai.com/images/87125254", "status": "pending", "created_at": "2026-02-19T16:29:15.080791"}
+{"id": "1aa74aba", "url": "https://civitai.com/images/110486764", "status": "pending", "created_at": "2026-02-19T16:29:17.727093"}
+{"id": "d00a606c", "url": "https://civitai.com/images/110705212", "status": "pending", "created_at": "2026-02-19T16:29:19.786598"}
+{"id": "18075ce6", "url": "https://civitai.com/images/78835516", "status": "pending", "created_at": "2026-02-19T16:29:25.016179"}
+{"id": "b0ee1788", "url": "https://civitai.com/images/78432489", "status": "pending", "created_at": "2026-02-19T16:29:29.143283"}
+{"id": "91de876b", "url": "https://civitai.com/images/82193307", "status": "pending", "created_at": "2026-02-19T16:29:33.098802"}
+{"id": "88fa5014", "url": "https://civitai.com/images/79614034", "status": "pending", "created_at": "2026-02-19T16:29:41.428524"}
+{"id": "c09623be", "url": "https://civitai.com/images/111874389", "status": "pending", "created_at": "2026-02-19T16:29:44.829114"}
+{"id": "6520d546", "url": "https://civitai.com/images/88007166", "status": "pending", "created_at": "2026-02-19T16:29:48.093085"}
+{"id": "1048ec03", "url": "https://civitai.com/images/94305673", "status": "pending", "created_at": "2026-02-19T16:29:49.725661"}
+{"id": "825f3f71", "url": "https://civitai.com/images/79387953", "status": "pending", "created_at": "2026-02-19T16:29:54.787307"}
+{"id": "27819028", "url": "https://civitai.com/images/117405137", "status": "pending", "created_at": "2026-02-19T16:30:04.638675"}
+{"id": "09c34829", "url": "https://civitai.com/images/77132064", "status": "pending", "created_at": "2026-02-19T16:30:08.496470"}
+{"id": "6de47bed", "url": "https://civitai.com/images/112467452", "status": "pending", "created_at": "2026-02-19T16:31:16.809484"}
+{"id": "a137d168", "url": "https://civitai.com/images/78875189", "status": "pending", "created_at": "2026-02-19T16:31:28.658895"}
+{"id": "96bba072", "url": "https://civitai.com/images/80228041", "status": "pending", "created_at": "2026-02-19T16:31:30.735221"}
+{"id": "ffef44f8", "url": "https://civitai.com/images/104114098", "status": "pending", "created_at": "2026-02-19T16:31:35.294778"}
+{"id": "3533692b", "url": "https://civitai.com/images/86570265", "status": "pending", "created_at": "2026-02-19T16:31:37.492161"}
+{"id": "836df6b8", "url": "https://civitai.com/images/110310407", "status": "pending", "created_at": "2026-02-19T16:31:40.696632"}
+{"id": "ca7a99cc", "url": "https://civitai.com/images/88356832", "status": "pending", "created_at": "2026-02-19T16:31:45.995073"}
+{"id": "45ebeac5", "url": "https://civitai.com/images/92339896", "status": "pending", "created_at": "2026-02-19T16:31:48.736768"}
+{"id": "66bdb35c", "url": "https://civitai.com/images/93350667", "status": "pending", "created_at": "2026-02-19T16:31:56.405495"}
+{"id": "990fa339", "url": "https://civitai.com/images/88972243", "status": "pending", "created_at": "2026-02-19T16:32:10.627631"}
+{"id": "d371ddcd", "url": "https://civitai.com/images/89158704", "status": "pending", "created_at": "2026-02-19T16:32:15.593821"}
+{"id": "11e370e1", "url": "https://civitai.com/images/92622805", "status": "pending", "created_at": "2026-02-19T16:32:28.503466"}
+{"id": "88f5e8ca", "url": "https://civitai.com/images/86047021", "status": "pending", "created_at": "2026-02-19T16:32:31.365732"}
+{"id": "b4285319", "url": "https://civitai.com/images/92997121", "status": "pending", "created_at": "2026-02-19T16:32:34.932202"}
+{"id": "80ca459b", "url": "https://civitai.com/images/100129784", "status": "pending", "created_at": "2026-02-19T16:32:38.024307"}
+{"id": "5b2f7ff4", "url": "https://civitai.com/images/115106733", "status": "pending", "created_at": "2026-02-19T16:32:46.196122"}
+{"id": "c5475d7e", "url": "https://civitai.com/images/79832175", "status": "pending", "created_at": "2026-02-19T16:32:49.528620"}
+{"id": "389ee83b", "url": "https://civitai.com/images/81391254", "status": "pending", "created_at": "2026-02-19T16:32:52.229213"}
+{"id": "750927f5", "url": "https://civitai.com/images/99636525", "status": "pending", "created_at": "2026-02-19T16:32:58.419341"}
+{"id": "e4e5683e", "url": "https://civitai.com/images/120067067", "status": "pending", "created_at": "2026-02-19T16:33:02.925204"}
+{"id": "37236ae3", "url": "https://civitai.com/images/86396430", "status": "pending", "created_at": "2026-02-19T16:33:04.743503"}
+{"id": "c75a3760", "url": "https://civitai.com/images/120099606", "status": "pending", "created_at": "2026-02-19T16:33:05.779464"}
+{"id": "00bbf823", "url": "https://civitai.com/images/78432518", "status": "pending", "created_at": "2026-02-19T16:33:10.232003"}
+{"id": "e3db5351", "url": "https://civitai.com/images/77132060", "status": "pending", "created_at": "2026-02-19T16:33:21.487173"}
+{"id": "1df91b2f", "url": "https://civitai.com/images/77713918", "status": "pending", "created_at": "2026-02-19T16:33:37.380164"}
+{"id": "77bd9c3e", "url": "https://civitai.com/images/79828036", "status": "pending", "created_at": "2026-02-19T16:33:44.718346"}
+{"id": "5d7c1c73", "url": "https://civitai.com/images/88532790", "status": "pending", "created_at": "2026-02-19T16:33:49.802122"}
+{"id": "fb96c738", "url": "https://civitai.com/images/94807876", "status": "pending", "created_at": "2026-02-19T16:34:02.308973"}
+{"id": "f4b6b5f8", "url": "https://civitai.com/images/88427781", "status": "pending", "created_at": "2026-02-19T16:39:56.036997"}
+{"id": "a2b89cda", "url": "https://civitai.com/images/82049569", "status": "pending", "created_at": "2026-02-19T16:40:09.229286"}
+{"id": "d3ac9db1", "url": "https://civitai.com/images/86396428", "status": "pending", "created_at": "2026-02-19T16:40:11.866833"}
+{"id": "3c339fc6", "url": "https://civitai.com/images/103975426", "status": "pending", "created_at": "2026-02-19T16:40:29.006579"}
+{"id": "21425d77", "url": "https://civitai.com/images/90454314", "status": "pending", "created_at": "2026-02-19T16:40:30.408548"}
+{"id": "c1a41a09", "url": "https://civitai.com/images/112672924", "status": "pending", "created_at": "2026-02-19T16:40:33.307349"}
+{"id": "1d1fb124", "url": "https://civitai.com/images/81395813", "status": "pending", "created_at": "2026-02-19T16:40:39.089463"}
+{"id": "ddaaa5fa", "url": "https://civitai.com/images/94034279", "status": "pending", "created_at": "2026-02-19T16:40:45.825190"}
+{"id": "0a3d6537", "url": "https://civitai.com/images/119872299", "status": "pending", "created_at": "2026-02-19T16:40:50.302735"}
+{"id": "99fc8461", "url": "https://civitai.com/images/120254193", "status": "pending", "created_at": "2026-02-19T16:40:53.242256"}
+{"id": "e1984689", "url": "https://civitai.com/images/83271394", "status": "pending", "created_at": "2026-02-19T16:41:06.362019"}
+{"id": "5a48a9a2", "url": "https://civitai.com/images/84323331", "status": "pending", "created_at": "2026-02-19T16:42:41.475220"}
+{"id": "1cfac8fd", "url": "https://civitai.com/images/83418759", "status": "pending", "created_at": "2026-02-19T16:43:07.098012"}
+{"id": "5798293f", "url": "https://civitai.com/images/99636473", "status": "pending", "created_at": "2026-02-19T16:43:11.775976"}
+{"id": "9a67f7f5", "url": "https://civitai.com/images/101154208", "status": "pending", "created_at": "2026-02-19T16:43:13.851406"}
+{"id": "b170e55d", "url": "https://civitai.com/images/112847810", "status": "pending", "created_at": "2026-02-19T16:43:18.322989"}
+{"id": "cef6d734", "url": "https://civitai.com/images/118792296", "status": "pending", "created_at": "2026-02-19T16:43:19.416120"}
+{"id": "21dd3d49", "url": "https://civitai.com/images/78105959", "status": "pending", "created_at": "2026-02-19T16:43:21.707697"}
+{"id": "b4e04631", "url": "https://civitai.com/images/78563156", "status": "pending", "created_at": "2026-02-19T16:43:24.263969"}
+{"id": "fcad4f54", "url": "https://civitai.com/images/79195491", "status": "pending", "created_at": "2026-02-19T16:43:26.033280"}
+{"id": "ad6d9dd8", "url": "https://civitai.com/images/83007586", "status": "pending", "created_at": "2026-02-19T16:43:35.761708"}
+{"id": "fea6050d", "url": "https://civitai.com/images/117962246", "status": "pending", "created_at": "2026-02-19T16:43:42.994107"}
+{"id": "05b044e9", "url": "https://civitai.com/images/85723121", "status": "pending", "created_at": "2026-02-19T16:43:56.963049"}
+{"id": "d2456e65", "url": "https://civitai.com/images/92022679", "status": "pending", "created_at": "2026-02-19T16:44:01.647818"}
+{"id": "8544d0d6", "url": "https://civitai.com/images/87942136", "status": "pending", "created_at": "2026-02-19T16:44:12.959365"}
+{"id": "aaf9cd62", "url": "https://civitai.com/images/112685856", "status": "pending", "created_at": "2026-02-19T16:44:27.447565"}
+{"id": "9dbe44d3", "url": "https://civitai.com/images/120657641", "status": "pending", "created_at": "2026-02-19T16:44:31.255493"}
+{"id": "aa3caf8b", "url": "https://civitai.com/images/77132061", "status": "pending", "created_at": "2026-02-19T16:44:33.302755"}
+{"id": "5788b94a", "url": "https://civitai.com/images/119601343", "status": "pending", "created_at": "2026-02-19T16:44:56.921430"}
+{"id": "94345ca3", "url": "https://civitai.com/images/120068674", "status": "pending", "created_at": "2026-02-19T16:44:58.546452"}
+{"id": "ec0bdbfc", "url": "https://civitai.com/images/79903076", "status": "pending", "created_at": "2026-02-19T16:45:11.270555"}
+{"id": "bade76dc", "url": "https://civitai.com/images/84086761", "status": "pending", "created_at": "2026-02-19T16:45:48.350057"}
+{"id": "8a055d61", "url": "https://civitai.com/images/92303110", "status": "pending", "created_at": "2026-02-19T16:45:52.229397"}
+{"id": "cde6b04d", "url": "https://civitai.com/images/91052835", "status": "pending", "created_at": "2026-02-19T16:45:55.195288"}
+{"id": "b5040fbf", "url": "https://civitai.com/images/117628394", "status": "pending", "created_at": "2026-02-19T16:45:58.625437"}
+{"id": "caa668cf", "url": "https://civitai.com/images/99628545", "status": "pending", "created_at": "2026-02-19T16:46:12.581234"}
+{"id": "908e521b", "url": "https://civitai.com/images/111879913", "status": "pending", "created_at": "2026-02-19T16:46:19.962089"}
+{"id": "379ee922", "url": "https://civitai.com/images/120034826", "status": "pending", "created_at": "2026-02-19T16:46:22.374269"}
+{"id": "4db4fbf7", "url": "https://civitai.com/images/80423954", "status": "pending", "created_at": "2026-02-19T16:46:29.522257"}
+{"id": "d0eb9f56", "url": "https://civitai.com/images/83620487", "status": "pending", "created_at": "2026-02-19T16:46:32.620647"}
+{"id": "f6d91615", "url": "https://civitai.com/images/111483317", "status": "pending", "created_at": "2026-02-19T16:46:48.536432"}
+{"id": "7ea0594b", "url": "https://civitai.com/images/114030530", "status": "pending", "created_at": "2026-02-19T16:46:51.253297"}
+{"id": "b2a192e0", "url": "https://civitai.com/images/117477967", "status": "pending", "created_at": "2026-02-19T16:46:54.184648"}
+{"id": "59442f37", "url": "https://civitai.com/images/118496115", "status": "pending", "created_at": "2026-02-19T16:46:59.818707"}
+{"id": "52e01fea", "url": "https://civitai.com/images/119872296", "status": "pending", "created_at": "2026-02-19T16:47:00.633003"}
+{"id": "10843b8e", "url": "https://civitai.com/images/119977423", "status": "pending", "created_at": "2026-02-19T16:47:04.853955"}
+{"id": "dec2b99f", "url": "https://civitai.com/images/82944234", "status": "pending", "created_at": "2026-02-19T16:47:22.351074"}
+{"id": "4b9a0143", "url": "https://civitai.com/images/99628455", "status": "pending", "created_at": "2026-02-19T16:47:38.134905"}
+{"id": "30cb9e17", "url": "https://civitai.com/images/117511928", "status": "pending", "created_at": "2026-02-19T16:47:45.928963"}
+{"id": "5c1f0185", "url": "https://civitai.com/images/96277729", "status": "pending", "created_at": "2026-02-19T16:48:17.784501"}
+{"id": "3ba2e41c", "url": "https://civitai.com/images/104728980", "status": "pending", "created_at": "2026-02-19T16:48:24.297417"}
+{"id": "37be934e", "url": "https://civitai.com/images/103975411", "status": "pending", "created_at": "2026-02-19T16:48:25.621347"}
+{"id": "a21ab7b3", "url": "https://civitai.com/images/104116488", "status": "pending", "created_at": "2026-02-19T16:48:26.271109"}
+{"id": "52db3742", "url": "https://civitai.com/images/117469500", "status": "pending", "created_at": "2026-02-19T16:48:30.460386"}
+{"id": "fd473254", "url": "https://civitai.com/images/118899950", "status": "pending", "created_at": "2026-02-19T16:48:32.434867"}
+{"id": "0fa2fa9c", "url": "https://civitai.com/images/119970625", "status": "pending", "created_at": "2026-02-19T16:48:36.956628"}
+{"id": "03226d14", "url": "https://civitai.com/images/78463620", "status": "pending", "created_at": "2026-02-19T16:48:42.268345"}
+{"id": "fccb6ec7", "url": "https://civitai.com/images/78841466", "status": "pending", "created_at": "2026-02-19T16:48:44.225473"}
+{"id": "70158c66", "url": "https://civitai.com/images/78881532", "status": "pending", "created_at": "2026-02-19T16:48:45.286196"}
+{"id": "aae76255", "url": "https://civitai.com/images/79444970", "status": "pending", "created_at": "2026-02-19T16:48:47.285270"}
+{"id": "55269ba8", "url": "https://civitai.com/images/82106968", "status": "pending", "created_at": "2026-02-19T16:48:53.667958"}
+{"id": "14ed3453", "url": "https://civitai.com/images/83841449", "status": "pending", "created_at": "2026-02-19T16:48:57.747591"}
+{"id": "4069e530", "url": "https://civitai.com/images/99628550", "status": "pending", "created_at": "2026-02-19T16:49:14.707431"}
+{"id": "60a59cc9", "url": "https://civitai.com/images/87872141", "status": "pending", "created_at": "2026-02-19T16:49:19.474265"}
+{"id": "52de86c7", "url": "https://civitai.com/images/104113963", "status": "pending", "created_at": "2026-02-19T16:49:27.788618"}
+{"id": "10dc90e9", "url": "https://civitai.com/images/106907700", "status": "pending", "created_at": "2026-02-19T16:49:30.239627"}
+{"id": "c73968f1", "url": "https://civitai.com/images/78671263", "status": "pending", "created_at": "2026-02-19T16:49:41.360195"}
+{"id": "53db4f43", "url": "https://civitai.com/images/79830212", "status": "pending", "created_at": "2026-02-19T16:49:44.631837"}
+{"id": "53632bf2", "url": "https://civitai.com/images/80696602", "status": "pending", "created_at": "2026-02-19T16:49:46.423413"}
+{"id": "f9cbe557", "url": "https://civitai.com/images/83487316", "status": "pending", "created_at": "2026-02-19T16:49:54.234713"}
+{"id": "0bd14223", "url": "https://civitai.com/images/86399910", "status": "pending", "created_at": "2026-02-19T16:52:01.986615"}
+{"id": "959bd82b", "url": "https://civitai.com/images/89262505", "status": "pending", "created_at": "2026-02-19T16:52:04.648235"}
+{"id": "893be80f", "url": "https://civitai.com/images/104116498", "status": "pending", "created_at": "2026-02-19T16:52:15.943790"}
+{"id": "011c8ffc", "url": "https://civitai.com/images/112466630", "status": "pending", "created_at": "2026-02-19T16:52:26.818366"}
+{"id": "a53534f6", "url": "https://civitai.com/images/119963711", "status": "pending", "created_at": "2026-02-19T16:52:38.874988"}
+{"id": "27cd714b", "url": "https://civitai.com/images/120199623", "status": "pending", "created_at": "2026-02-19T16:52:43.431066"}
+{"id": "baeb72a1", "url": "https://civitai.com/images/85960380", "status": "pending", "created_at": "2026-02-19T16:52:56.315882"}
+{"id": "75f6627a", "url": "https://civitai.com/images/93166707", "status": "pending", "created_at": "2026-02-19T16:53:04.334577"}
+{"id": "04b003e3", "url": "https://civitai.com/images/100509412", "status": "pending", "created_at": "2026-02-19T16:53:09.962815"}
+{"id": "2e96fa7c", "url": "https://civitai.com/images/117670615", "status": "pending", "created_at": "2026-02-19T16:53:18.466330"}
+{"id": "55b0e45f", "url": "https://civitai.com/images/119851971", "status": "pending", "created_at": "2026-02-19T16:53:29.062054"}
+{"id": "5b78c676", "url": "https://civitai.com/images/79195413", "status": "pending", "created_at": "2026-02-19T16:53:37.901899"}
+{"id": "5c4620d5", "url": "https://civitai.com/images/92022585", "status": "pending", "created_at": "2026-02-19T16:53:57.367994"}
+{"id": "690e820f", "url": "https://civitai.com/images/92303109", "status": "pending", "created_at": "2026-02-19T16:54:00.857039"}
+{"id": "782f3a5c", "url": "https://civitai.com/images/96277728", "status": "pending", "created_at": "2026-02-19T16:54:09.164035"}
+{"id": "07fbb8fd", "url": "https://civitai.com/images/121554452", "status": "pending", "created_at": "2026-02-19T16:54:13.404142"}
+{"id": "ea9ea4d2", "url": "https://civitai.com/images/99636459", "status": "pending", "created_at": "2026-02-19T16:54:21.435188"}
+{"id": "f927a953", "url": "https://civitai.com/images/101530515", "status": "pending", "created_at": "2026-02-19T16:54:23.796910"}
+{"id": "823c1569", "url": "https://civitai.com/images/110486707", "status": "pending", "created_at": "2026-02-19T16:58:47.325656"}
+{"id": "993644d9", "url": "https://civitai.com/images/113325435", "status": "pending", "created_at": "2026-02-19T16:58:48.589366"}
+{"id": "e29b5953", "url": "https://civitai.com/images/118019420", "status": "pending", "created_at": "2026-02-19T16:58:57.843361"}
+{"id": "0f3ddb60", "url": "https://civitai.com/images/119570137", "status": "pending", "created_at": "2026-02-19T16:59:01.651277"}
+{"id": "f82d34d2", "url": "https://civitai.com/images/119851987", "status": "pending", "created_at": "2026-02-19T16:59:04.915715"}
+{"id": "3c6aec1e", "url": "https://civitai.com/images/119852288", "status": "pending", "created_at": "2026-02-19T16:59:06.042008"}
+{"id": "06999a2c", "url": "https://civitai.com/images/78562377", "status": "pending", "created_at": "2026-02-19T16:59:13.322094"}
+{"id": "f457f637", "url": "https://civitai.com/images/79818925", "status": "pending", "created_at": "2026-02-19T16:59:15.943158"}
+{"id": "580e91bf", "url": "https://civitai.com/images/80485091", "status": "pending", "created_at": "2026-02-19T16:59:19.623822"}
+{"id": "81e6cb53", "url": "https://civitai.com/images/82832111", "status": "pending", "created_at": "2026-02-19T16:59:24.598485"}
+{"id": "eba707f2", "url": "https://civitai.com/images/83012790", "status": "pending", "created_at": "2026-02-19T16:59:28.080829"}
+{"id": "493afc63", "url": "https://civitai.com/images/89313238", "status": "pending", "created_at": "2026-02-19T16:59:33.980416"}
+{"id": "a1b27e10", "url": "https://civitai.com/images/92340021", "status": "pending", "created_at": "2026-02-19T16:59:36.092950"}
+{"id": "00d3da88", "url": "https://civitai.com/images/87898716", "status": "pending", "created_at": "2026-02-19T16:59:46.722226"}
+{"id": "2ce7cc5f", "url": "https://civitai.com/images/93561640", "status": "pending", "created_at": "2026-02-19T16:59:58.123908"}
+{"id": "e9900d44", "url": "https://civitai.com/images/99628430", "status": "pending", "created_at": "2026-02-19T17:00:05.184729"}
+{"id": "b7acac5e", "url": "https://civitai.com/images/104729069", "status": "pending", "created_at": "2026-02-19T17:00:09.672079"}
+{"id": "67b16ee8", "url": "https://civitai.com/images/104763405", "status": "pending", "created_at": "2026-02-19T17:00:12.233544"}
+{"id": "e77c3026", "url": "https://civitai.com/images/108481204", "status": "pending", "created_at": "2026-02-19T17:00:16.517409"}
+{"id": "7375f773", "url": "https://civitai.com/images/110303359", "status": "pending", "created_at": "2026-02-19T17:00:18.054312"}
+{"id": "f856fa62", "url": "https://civitai.com/images/111483314", "status": "pending", "created_at": "2026-02-19T17:00:21.459397"}
+{"id": "978a1d41", "url": "https://civitai.com/images/112112413", "status": "pending", "created_at": "2026-02-19T17:00:22.944714"}
+{"id": "a32e1032", "url": "https://civitai.com/images/117288600", "status": "pending", "created_at": "2026-02-19T17:00:26.209802"}
+{"id": "ba021c2c", "url": "https://civitai.com/images/83535765", "status": "pending", "created_at": "2026-02-19T17:00:44.493097"}
+{"id": "0b80e036", "url": "https://civitai.com/images/119852289", "status": "pending", "created_at": "2026-02-19T17:00:50.125189"}
+{"id": "8ce1a8a0", "url": "https://civitai.com/images/83096942", "status": "pending", "created_at": "2026-02-19T17:13:43.945367"}
+{"id": "43203393", "url": "https://civitai.com/images/89902777", "status": "pending", "created_at": "2026-02-19T17:14:18.639608"}
+{"id": "cabe40bf", "url": "https://civitai.com/images/92300860", "status": "pending", "created_at": "2026-02-19T17:14:22.716708"}
+{"id": "729c356e", "url": "https://civitai.com/images/92547839", "status": "pending", "created_at": "2026-02-19T17:14:25.640277"}
+{"id": "3db80fb3", "url": "https://civitai.com/images/94041849", "status": "pending", "created_at": "2026-02-19T17:14:31.541585"}
+{"id": "a529b2ed", "url": "https://civitai.com/images/93710062", "status": "pending", "created_at": "2026-02-19T17:14:32.224387"}
+{"id": "6ddc6554", "url": "https://civitai.com/images/94210801", "status": "pending", "created_at": "2026-02-19T17:14:34.463343"}
+{"id": "6cf3359d", "url": "https://civitai.com/images/94787638", "status": "pending", "created_at": "2026-02-19T17:14:35.867387"}
+{"id": "144e1bec", "url": "https://civitai.com/images/95710964", "status": "pending", "created_at": "2026-02-19T17:14:38.951538"}
+{"id": "0c7015be", "url": "https://civitai.com/images/119562979", "status": "pending", "created_at": "2026-02-19T17:14:43.670132"}
+{"id": "823db0cd", "url": "https://civitai.com/images/104115125", "status": "pending", "created_at": "2026-02-19T17:14:58.440827"}
+{"id": "ca3be0fb", "url": "https://civitai.com/images/112094983", "status": "pending", "created_at": "2026-02-19T17:15:04.511420"}
+{"id": "5b40da0f", "url": "https://civitai.com/images/117719626", "status": "pending", "created_at": "2026-02-19T17:15:14.744276"}
+{"id": "b9e76dcd", "url": "https://civitai.com/images/118187120", "status": "pending", "created_at": "2026-02-19T17:15:21.474433"}
+{"id": "5278c500", "url": "https://civitai.com/images/119781345", "status": "pending", "created_at": "2026-02-19T17:15:33.035932"}
+{"id": "dd263227", "url": "https://civitai.com/images/119781143", "status": "pending", "created_at": "2026-02-19T17:19:04.863996"}
+{"id": "24f5e5d6", "url": "https://civitai.com/images/120651507", "status": "pending", "created_at": "2026-02-19T17:19:19.061800"}
+{"id": "2b21e6f0", "url": "https://civitai.com/images/93871669", "status": "pending", "created_at": "2026-02-19T17:21:07.876465"}
+{"id": "505a6674", "url": "https://civitai.com/images/96451178", "status": "pending", "created_at": "2026-02-19T17:21:12.124435"}
+{"id": "09fd6f74", "url": "https://civitai.com/images/91719010", "status": "pending", "created_at": "2026-02-19T17:21:19.091195"}
+{"id": "58441646", "url": "https://civitai.com/images/99636365", "status": "pending", "created_at": "2026-02-19T17:21:46.927508"}
+{"id": "f7c8feae", "url": "https://civitai.com/images/104509063", "status": "pending", "created_at": "2026-02-19T17:21:52.144331"}
+{"id": "2c67584e", "url": "https://civitai.com/images/104113966", "status": "pending", "created_at": "2026-02-19T17:21:54.735661"}
+{"id": "a22f1c48", "url": "https://civitai.com/images/104729551", "status": "pending", "created_at": "2026-02-19T17:21:57.167218"}
+{"id": "6a85690d", "url": "https://civitai.com/images/110486721", "status": "pending", "created_at": "2026-02-19T17:21:59.646970"}
+{"id": "982da7d4", "url": "https://civitai.com/images/118052190", "status": "pending", "created_at": "2026-02-19T17:22:09.983299"}
+{"id": "371e992e", "url": "https://civitai.com/images/119825416", "status": "pending", "created_at": "2026-02-19T17:22:33.615112"}
+{"id": "ccd0c69c", "url": "https://civitai.com/images/85793345", "status": "pending", "created_at": "2026-02-19T17:22:37.681141"}
+{"id": "ca8b0d4b", "url": "https://civitai.com/images/81918702", "status": "pending", "created_at": "2026-02-19T17:22:45.377502"}
+{"id": "c28497d4", "url": "https://civitai.com/images/85520383", "status": "pending", "created_at": "2026-02-19T17:23:00.645804"}
+{"id": "5e2b9181", "url": "https://civitai.com/images/111088917", "status": "pending", "created_at": "2026-02-19T17:23:37.365894"}
+{"id": "b79621ac", "url": "https://civitai.com/images/104115130", "status": "pending", "created_at": "2026-02-19T17:24:39.684953"}
+{"id": "eb14c878", "url": "https://civitai.com/images/104116485", "status": "pending", "created_at": "2026-02-19T17:24:41.069820"}
+{"id": "240f8ab5", "url": "https://civitai.com/images/104218968", "status": "pending", "created_at": "2026-02-19T17:24:44.226896"}
+{"id": "3b1203bd", "url": "https://civitai.com/images/105805355", "status": "pending", "created_at": "2026-02-19T17:24:48.809691"}
+{"id": "148dba5f", "url": "https://civitai.com/images/110303358", "status": "pending", "created_at": "2026-02-19T17:24:51.824688"}
+{"id": "edc2ba99", "url": "https://civitai.com/images/117471289", "status": "pending", "created_at": "2026-02-19T17:25:02.934846"}
+{"id": "719fde93", "url": "https://civitai.com/images/81309241", "status": "pending", "created_at": "2026-02-19T17:25:31.773082"}
+{"id": "eade847c", "url": "https://civitai.com/images/82946991", "status": "pending", "created_at": "2026-02-19T17:25:38.106709"}
+{"id": "416ab9ac", "url": "https://civitai.com/images/89864911", "status": "pending", "created_at": "2026-02-19T17:26:05.775614"}
+{"id": "a318ec2c", "url": "https://civitai.com/images/95438256", "status": "pending", "created_at": "2026-02-19T17:26:20.223587"}
+{"id": "e2e4d5e1", "url": "https://civitai.com/images/96331181", "status": "pending", "created_at": "2026-02-19T17:26:24.456813"}
+{"id": "b177d387", "url": "https://civitai.com/images/97549123", "status": "pending", "created_at": "2026-02-19T17:26:27.893555"}
+{"id": "17527941", "url": "https://civitai.com/images/98498084", "status": "pending", "created_at": "2026-02-19T17:26:31.953901"}
+{"id": "26054b58", "url": "https://civitai.com/images/100907036", "status": "pending", "created_at": "2026-02-19T17:26:35.951462"}
+{"id": "03dc3ca8", "url": "https://civitai.com/images/99636309", "status": "pending", "created_at": "2026-02-19T17:26:38.711378"}
+{"id": "77e5b9a2", "url": "https://civitai.com/images/104113964", "status": "pending", "created_at": "2026-02-19T17:26:41.977302"}
+{"id": "fb110599", "url": "https://civitai.com/images/104217775", "status": "pending", "created_at": "2026-02-19T17:26:43.813812"}
+{"id": "940a7e21", "url": "https://civitai.com/images/104729428", "status": "pending", "created_at": "2026-02-19T17:26:46.642684"}
+{"id": "bea396e2", "url": "https://civitai.com/images/106182634", "status": "pending", "created_at": "2026-02-19T17:26:49.298303"}
+{"id": "9d7dbec2", "url": "https://civitai.com/images/119865943", "status": "pending", "created_at": "2026-02-19T17:27:16.937249"}
+{"id": "0b9087e4", "url": "https://civitai.com/images/79011868", "status": "pending", "created_at": "2026-02-19T17:28:39.244983"}
+{"id": "3f7363a3", "url": "https://civitai.com/images/121557429", "status": "pending", "created_at": "2026-02-19T17:28:51.284824"}
+{"id": "2a41b66b", "url": "https://civitai.com/images/96072106", "status": "pending", "created_at": "2026-02-19T17:28:58.997950"}
+{"id": "262d4a21", "url": "https://civitai.com/images/82294243", "status": "pending", "created_at": "2026-02-19T17:29:01.183939"}
+{"id": "23a9e1a4", "url": "https://civitai.com/images/82615467", "status": "pending", "created_at": "2026-02-19T17:29:02.363794"}
+{"id": "0b310df2", "url": "https://civitai.com/images/85108776", "status": "pending", "created_at": "2026-02-19T17:29:14.422464"}
+{"id": "a66ecd1f", "url": "https://civitai.com/images/86399911", "status": "pending", "created_at": "2026-02-19T17:29:23.809745"}
+{"id": "c8f35c48", "url": "https://civitai.com/images/86398993", "status": "pending", "created_at": "2026-02-19T17:29:24.440914"}
+{"id": "8744bde3", "url": "https://civitai.com/images/93871668", "status": "pending", "created_at": "2026-02-19T17:29:41.971075"}
+{"id": "72ea773e", "url": "https://civitai.com/images/100747453", "status": "pending", "created_at": "2026-02-19T17:29:48.494017"}
+{"id": "ce374e63", "url": "https://civitai.com/images/112702638", "status": "pending", "created_at": "2026-02-19T17:29:53.240119"}
+{"id": "016d1e4a", "url": "https://civitai.com/images/101361934", "status": "pending", "created_at": "2026-02-19T17:30:03.773439"}
+{"id": "cbdb9fba", "url": "https://civitai.com/images/110705211", "status": "pending", "created_at": "2026-02-19T17:37:36.755795"}
+{"id": "91d5de5c", "url": "https://civitai.com/images/116729819", "status": "pending", "created_at": "2026-02-19T17:37:48.089328"}
+{"id": "14172785", "url": "https://civitai.com/images/119863736", "status": "pending", "created_at": "2026-02-19T17:38:14.334621"}
+{"id": "7b1a5716", "url": "https://civitai.com/images/79027218", "status": "pending", "created_at": "2026-02-19T17:38:23.976219"}
+{"id": "5b1bb225", "url": "https://civitai.com/images/79735647", "status": "pending", "created_at": "2026-02-19T17:38:28.957459"}
+{"id": "efa1b878", "url": "https://civitai.com/images/80282816", "status": "pending", "created_at": "2026-02-19T17:38:32.290120"}
+{"id": "a39a9b90", "url": "https://civitai.com/images/81698256", "status": "pending", "created_at": "2026-02-19T17:38:43.359891"}
+{"id": "c82a17a0", "url": "https://civitai.com/images/82940203", "status": "pending", "created_at": "2026-02-19T17:38:50.018490"}
+{"id": "b179bda3", "url": "https://civitai.com/images/83635862", "status": "pending", "created_at": "2026-02-19T17:38:57.119777"}
+{"id": "9d84a4eb", "url": "https://civitai.com/images/86398383", "status": "pending", "created_at": "2026-02-19T17:39:18.949867"}
+{"id": "81f01929", "url": "https://civitai.com/images/90561874", "status": "pending", "created_at": "2026-02-19T17:39:30.523367"}
+{"id": "e7c3408c", "url": "https://civitai.com/images/107271759", "status": "pending", "created_at": "2026-02-19T17:39:44.284716"}
+{"id": "4b8627e4", "url": "https://civitai.com/images/108450774", "status": "pending", "created_at": "2026-02-19T17:40:07.057581"}
+{"id": "f5674008", "url": "https://civitai.com/images/111315095", "status": "pending", "created_at": "2026-02-19T17:40:12.260359"}
+{"id": "95c0e5f6", "url": "https://civitai.com/images/112702597", "status": "pending", "created_at": "2026-02-19T17:40:15.259704"}
+{"id": "c1623436", "url": "https://civitai.com/images/112754881", "status": "pending", "created_at": "2026-02-19T17:40:16.771454"}
+{"id": "685efc22", "url": "https://civitai.com/images/85195365", "status": "pending", "created_at": "2026-02-19T17:41:03.314846"}

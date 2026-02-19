@@ -1,0 +1,66 @@
+/* Civitai 收藏助手 - 注入按钮样式 */
+
+.civitai-fav-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 9999;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(15, 15, 25, 0.72);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+  padding: 0;
+  font-family: sans-serif;
+}
+
+.civitai-fav-btn:hover {
+  transform: scale(1.18);
+  background: rgba(99, 60, 180, 0.88);
+  border-color: #c084fc;
+}
+
+.civitai-fav-btn[data-state="loading"] {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.civitai-fav-btn[data-state="done"] {
+  background: rgba(22, 120, 60, 0.88);
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.civitai-fav-btn[data-state="duplicate"] {
+  background: rgba(80, 80, 80, 0.82);
+  border-color: #a3a3a3;
+  color: #d4d4d4;
+}
+
+.civitai-fav-btn[data-state="error"] {
+  background: rgba(180, 30, 30, 0.88);
+  border-color: #f87171;
+}
+
+/* 详情页：固定在右下角 */
+.civitai-fav-detail {
+  position: fixed !important;
+  bottom: 80px;
+  right: 24px;
+  top: auto;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+  z-index: 99999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}

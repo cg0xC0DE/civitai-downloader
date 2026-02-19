@@ -97,12 +97,33 @@ def _read_all_entries() -> list:
     return []
 
 
+def _backup_local():
+    """写入前做每日滚动备份（保留最近 7 天）"""
+    if not os.path.exists(_LOCAL_PATH):
+        return
+    import datetime, glob
+    today = datetime.date.today().isoformat()
+    backup_dir = os.path.join(os.path.dirname(_LOCAL_PATH), 'backup')
+    os.makedirs(backup_dir, exist_ok=True)
+    backup_path = os.path.join(backup_dir, f'queue_{today}.jsonl')
+    if not os.path.exists(backup_path):
+        import shutil
+        shutil.copy2(_LOCAL_PATH, backup_path)
+    # 清理 7 天前的备份
+    for old in sorted(glob.glob(os.path.join(backup_dir, 'queue_*.jsonl')))[:-7]:
+        try:
+            os.remove(old)
+        except Exception:
+            pass
+
+
 def _write_all_entries(entries: list):
     """写入所有条目（本地 + Azure 双写）"""
     text = _entries_to_jsonl(entries)
 
-    # 1. 始终写本地
+    # 1. 始终写本地（写入前先备份当天快照）
     os.makedirs(os.path.dirname(_LOCAL_PATH), exist_ok=True)
+    _backup_local()
     with open(_LOCAL_PATH, 'w', encoding='utf-8') as f:
         f.write(text)
 
@@ -276,9 +297,12 @@ def list_all() -> list:
     return _read_all_entries()
 
 
-def update_status(entry_id: str, new_status: str) -> dict:
+def update_status(entry_id: str, new_status: str, fail_reason: str = None, retry_reason: str = None) -> dict:
     """
     按 id 更新收藏条目状态
+    fail_reason:  仅 status='fail' 时有效，记录失败原因
+    retry_reason: 仅 status='pending' 时有效，记录重试原因（如"参数需调整"），
+                  有此字段的 pending 条目可在前端单独筛选
     返回: {"status": "ok"/"error", "message": "..."}
     """
     try:
@@ -290,10 +314,23 @@ def update_status(entry_id: str, new_status: str) -> dict:
                     entry['status'] = new_status
                     if new_status == 'processing':
                         entry['processing_at'] = __import__('datetime').datetime.now().isoformat()
+                        entry.pop('fail_reason', None)
+                        entry.pop('retry_reason', None)
                     elif new_status == 'done':
                         entry['done_at'] = __import__('datetime').datetime.now().isoformat()
+                        entry.pop('fail_reason', None)
+                        entry.pop('retry_reason', None)
                     elif new_status == 'fail':
                         entry['fail_at'] = __import__('datetime').datetime.now().isoformat()
+                        if fail_reason:
+                            entry['fail_reason'] = fail_reason
+                        entry.pop('retry_reason', None)
+                    elif new_status == 'pending':
+                        entry.pop('fail_reason', None)
+                        if retry_reason:
+                            entry['retry_reason'] = retry_reason
+                        else:
+                            entry.pop('retry_reason', None)
                     updated = True
                     break
             

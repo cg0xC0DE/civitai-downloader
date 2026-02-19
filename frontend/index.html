@@ -51,6 +51,9 @@
         .parse-edit-text { width: 100%; text-align: left; }
         .parse-edit-prompt { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 12px; color: var(--text-primary); font-family: inherit; width: 100%; min-height: 60px; max-height: 150px; resize: vertical; outline: none; box-sizing: border-box; }
         .parse-edit-prompt:focus { border-color: var(--accent); }
+        .btn-ai-edit { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; font-size:12px; font-weight:500; color:#a78bfa; background:#a78bfa1a; border:1px solid #a78bfa44; border-radius:6px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+        .btn-ai-edit:hover { background:#a78bfa33; border-color:#a78bfa88; }
+        .btn-ai-edit.active { background:#a78bfa33; border-color:#a78bfa; }
         .parse-size-group { display: inline-flex; align-items: center; gap: 4px; }
         .parse-edited-marker { color: var(--accent); font-size: 10px; margin-left: 4px; opacity: 0; transition: opacity .2s; }
         .parse-edited-marker.show { opacity: 1; }
@@ -78,14 +81,25 @@
         .draw-mode.active { display: block; }
 
         /* ============ Gallery ============ */
-        .gallery-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .gallery-image-outer { position: relative; }
+        .gallery-controls {
+            position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 10px;
+            background: linear-gradient(to bottom, #000000cc 0%, #00000000 100%);
+            border-radius: 12px 12px 0 0;
+            pointer-events: none;
+        }
+        .gallery-controls > * { pointer-events: auto; }
         .gallery-nav { display: flex; gap: 8px; }
-        .gallery-nav .btn { width: auto; padding: 10px 20px; }
+        .gallery-nav .btn { width: auto; padding: 6px 14px; color: #fff; border-color: #ffffff55; background: #00000044; }
+        .gallery-nav .btn:hover { background: #00000088; border-color: #fff; color: #fff; }
         .gallery-nav .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .gallery-counter { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+        .gallery-counter { font-size: 14px; font-weight: 500; color: #fff; text-shadow: 0 1px 3px #0008; }
         .gallery-image-wrapper {
             position: relative;
             width: 100%;
+            min-height: 120px;
             background: #000;
             border-radius: 12px;
             overflow: hidden;
@@ -138,13 +152,47 @@
         .btn-clear:hover { opacity: 1; background: var(--bg-hover); }
         .btn-clear:empty { display: none; }
 
+        /* ============ Compact Generation Result ============ */
+        .result-compact { padding:8px 12px; margin:8px 0; border-radius:8px; }
+        .result-compact .result-header { padding:4px 0; font-size:13px; gap:6px; }
+        .result-compact .result-body { padding:2px 0 0 0; font-size:12px; }
+        .result-compact .result-body p { margin:0; }
+        .gen-history { margin:8px 0; }
+        .gen-history-toggle { cursor:pointer; padding:6px 0; font-size:13px; font-weight:500; display:flex; align-items:center; gap:6px; user-select:none; }
+        .gen-history-toggle:hover { opacity:0.8; }
+        .toggle-arrow { font-size:10px; transition:transform .2s; display:inline-block; }
+        .toggle-arrow.open { transform:rotate(90deg); }
+        .gen-history .collapsed { display:none; }
+        #genHistoryList .gen-history-item { padding:4px 0; border-bottom:1px solid var(--border); font-size:12px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+
+        /* ============ Admin Model Index ============ */
+        .admin-model-card { background:var(--bg-primary); border-radius:10px; padding:14px; margin-bottom:10px; border:1px solid var(--border); }
+        .admin-model-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+        .admin-versions { font-size:13px; }
+        .admin-btn { padding:4px 8px; border:none; background:transparent; cursor:pointer; font-size:14px; border-radius:6px; transition:all .2s; }
+        .admin-btn:hover { background:var(--bg-hover, #ffffff15); }
+        .admin-btn-del:hover { background:#dc262622; }
+        .admin-btn-add-ver { font-size:16px; }
+        .admin-btn-pick { padding:6px 12px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; cursor:pointer; font-size:12px; white-space:nowrap; }
+        .admin-btn-pick:hover { opacity:0.85; }
+        .admin-modal-overlay { display:none; position:fixed; inset:0; background:#000a; z-index:10000; align-items:center; justify-content:center; }
+        .admin-modal { background:var(--bg-secondary, #1a1a2e); border-radius:14px; padding:20px; width:90%; max-width:480px; max-height:85vh; overflow-y:auto; box-shadow:0 8px 32px #0008; }
+        .admin-modal-title { font-size:16px; font-weight:600; margin-bottom:14px; }
+        .admin-form label { display:block; font-size:12px; color:var(--text-secondary); margin-bottom:10px; }
+        .admin-form input[type="text"] { display:block; width:100%; margin-top:4px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg-primary); color:var(--text-primary); font-size:13px; outline:none; box-sizing:border-box; }
+        .admin-form input[type="text"]:focus { border-color:var(--accent); }
+        .admin-picker-item { display:flex; align-items:center; gap:6px; padding:6px 10px; cursor:pointer; border-bottom:1px solid var(--border); font-size:12px; }
+        .admin-picker-item:hover { background:var(--accent); color:#fff; }
+        .admin-picker-item:hover span { color:#fff !important; }
+
         /* 通用无边框图标按钮 */
         .icon-btn {
             padding: 2px 6px; border-radius: 8px; border: none;
-            background: transparent; color: var(--text-secondary); font-size: 20px;
+            background: transparent; color: #fff; font-size: 20px;
             cursor: pointer; transition: all .2s; line-height: 1; flex-shrink: 0;
+            text-shadow: 0 1px 3px #0008;
         }
-        .icon-btn:hover { background: #ffffff1a; color: var(--text-primary); transform: scale(1.15); }
+        .icon-btn:hover { background: #ffffff22; color: #fff; transform: scale(1.15); }
 
         /* ComfyUI 重启按钮（跟 status-badge 风格一致但可点击） */
         .comfy-restart-btn {
@@ -176,29 +224,53 @@
         .fav-status-done { background: #05966922; color: #34d399; border: 1px solid #05966944; }
         .fav-status-fail { background: #dc262622; color: #f87171; border: 1px solid #dc262644; }
 
-        /* Favorites 控制栏：筛选 + 翻页同行 */
+        /* Favorites 控制栏：悬浮在图片顶部 */
+        .fav-image-outer { position: relative; }
         .fav-controls-row {
+            position: absolute; top: 0; left: 0; right: 0; z-index: 10;
             display: flex; align-items: center; justify-content: space-between;
-            gap: 8px; margin-bottom: 12px; flex-wrap: nowrap; min-width: 0;
+            gap: 8px; flex-wrap: nowrap; min-width: 0;
+            padding: 6px 10px;
+            background: linear-gradient(to bottom, #000000cc 0%, #00000000 100%);
+            border-radius: 12px 12px 0 0;
+            pointer-events: none;
         }
-        .fav-controls-row .btn { width: auto; min-width: 0; padding: 6px 10px; }
+        .fav-controls-row > * { pointer-events: auto; }
+        .fav-controls-row .btn { width: auto; min-width: 0; padding: 6px 10px; color: #fff; border-color: #ffffff55; background: #00000044; }
+        .fav-controls-row .btn:hover { background: #00000088; border-color: #fff; color: #fff; }
         .fav-nav-group {
             display: flex; align-items: center; gap: 6px; flex-shrink: 0;
         }
         .fav-nav-group .gallery-counter { white-space: nowrap; margin: 0 2px; }
         .fav-filter-select {
             padding: 4px 10px; border-radius: 14px; border: none;
-            background: #ffffff0d; color: var(--text-secondary);
+            background: #00000055; color: #fff;
             font-size: 12px; cursor: pointer; flex-shrink: 0;
             outline: none; transition: all .2s;
         }
-        .fav-filter-select:hover, .fav-filter-select:focus { background: #ffffff1a; color: var(--text-primary); }
+        .fav-filter-select:hover, .fav-filter-select:focus { background: #00000088; color: #fff; }
         .fav-random-btn {
             padding: 2px 6px; border-radius: 8px; border: none;
-            background: transparent; color: #a78bfa; font-size: 20px; cursor: pointer;
+            background: transparent; color: #fff; font-size: 20px; cursor: pointer;
             transition: all .2s; white-space: nowrap; flex-shrink: 0; line-height: 1;
+            text-shadow: 0 1px 3px #0008;
         }
-        .fav-random-btn:hover { background: #7c3aed22; color: #c4b5fd; transform: scale(1.15); }
+        .fav-random-btn:hover { background: #ffffff22; color: #fff; transform: scale(1.15); }
+
+        /* ============ Auto-Replicate Panel ============ */
+        .ar-panel { margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; background: #ffffff08; border: 1px solid var(--border); }
+        .ar-header { display: flex; align-items: center; gap: 8px; }
+        .ar-btn-start { padding: 5px 14px; border-radius: 8px; border: none; background: #7c3aed; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+        .ar-btn-start:hover { background: #6d28d9; }
+        .ar-btn-start.running { background: #dc2626; }
+        .ar-btn-start.running:hover { background: #b91c1c; }
+        .ar-btn-start:disabled { opacity: .5; cursor: not-allowed; }
+        .ar-status { font-size: 12px; color: var(--text-secondary); }
+        .ar-stats { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--text-secondary); }
+        .ar-stats span { display: flex; align-items: center; gap: 3px; }
+        .ar-log { margin-top: 8px; max-height: 120px; overflow-y: auto; font-size: 11px; font-family: monospace; color: #e5e7eb; line-height: 1.6; background: #0004; border-radius: 6px; padding: 6px 8px; display: none; }
+        .ar-log-toggle { font-size: 11px; color: #6b7280; cursor: pointer; margin-left: auto; }
+        .ar-log-toggle:hover { color: #a78bfa; }
 
         /* Tab 文字移动端隐藏 */
         @media (max-width: 600px) {
@@ -230,6 +302,9 @@
             <button class="tab-btn" data-tab="favorites">
                 <span class="icon">⭐</span>
                 <span class="tab-label">收藏</span>
+            </button>
+            <button class="tab-btn" data-tab="admin">
+                <span class="icon">⚙️</span>
             </button>
         </nav>
 
@@ -342,16 +417,31 @@
                             </span>
                         </button>
                     </div>
+                    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);margin-top:6px;cursor:pointer;">
+                        <input type="checkbox" id="weightSweepCheck" checked style="accent-color:#7c3aed;">
+                        LoRA 权重扫描（未知权重自动步进尝试）
+                    </label>
+                </div>
+
+                <!-- 生成状态（紧凑） -->
+                <div id="drawResultInline" class="result result-compact" style="display:none;">
+                    <div class="result-header">
+                        <span class="result-icon"></span>
+                        <span class="result-title"></span>
+                    </div>
+                    <div class="result-body"></div>
+                </div>
+
+                <!-- 生成历史（默认折叠） -->
+                <div class="gen-history" id="genHistory" style="display:none;">
+                    <div class="gen-history-toggle" id="genHistoryToggle" onclick="document.getElementById('genHistoryList').classList.toggle('collapsed');this.querySelector('.toggle-arrow').classList.toggle('open');">
+                        <span class="toggle-arrow">▶</span> <span>📜 生成历史</span> <span id="genHistoryCount" style="color:var(--text-secondary);font-size:11px;"></span>
+                    </div>
+                    <div id="genHistoryList" class="collapsed"></div>
                 </div>
 
                 <!-- 解析结果区域 -->
                 <div id="parseResult" style="display:none;"></div>
-
-                <!-- 生成历史 -->
-                <div class="gen-history" id="genHistory" style="display:none; margin-top:20px;">
-                    <h4 style="font-size:14px; margin-bottom:8px;">📜 生成历史</h4>
-                    <div id="genHistoryList"></div>
-                </div>
             </div>
 
             <!-- ========== Manual Mode ========== -->
@@ -438,20 +528,6 @@
 
         <!-- ==================== Gallery Tab ==================== -->
         <section id="gallery" class="tab-content">
-            <!-- 控制栏 -->
-            <div class="gallery-controls">
-                <button type="button" id="galleryRefreshBtn" class="icon-btn" title="刷新">🔄</button>
-                <div class="gallery-nav" style="align-items:center;">
-                    <button type="button" id="galleryPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">
-                        ◀
-                    </button>
-                    <span class="gallery-counter" id="galleryCounter">0 / 0</span>
-                    <button type="button" id="galleryNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">
-                        ▶
-                    </button>
-                </div>
-            </div>
-
             <!-- 加载状态 -->
             <div id="galleryLoading" class="gallery-loading" style="display: none;">
                 <div class="loading-spinner"></div>
@@ -465,9 +541,20 @@
                 <p style="font-size: 12px; margin-top: 8px;">生成图片后会自动显示在这里</p>
             </div>
 
-            <!-- 图片展示区 -->
-            <div id="galleryImageContainer" class="gallery-image-wrapper">
-                <!-- 图片将在这里显示 -->
+            <!-- 图片展示区（控制栏悬浮在顶部） -->
+            <div class="gallery-image-outer">
+                <!-- 控制栏：悬浮在图片顶部 -->
+                <div class="gallery-controls">
+                    <button type="button" id="galleryRefreshBtn" class="icon-btn" title="刷新">🔄</button>
+                    <div class="gallery-nav" style="align-items:center;">
+                        <button type="button" id="galleryPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">◀</button>
+                        <span class="gallery-counter" id="galleryCounter">0 / 0</span>
+                        <button type="button" id="galleryNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">▶</button>
+                    </div>
+                </div>
+                <div id="galleryImageContainer" class="gallery-image-wrapper">
+                    <!-- 图片将在这里显示 -->
+                </div>
             </div>
 
             <!-- 图片信息 -->
@@ -478,27 +565,6 @@
 
         <!-- ==================== Favorites Tab ==================== -->
         <section id="favorites" class="tab-content">
-            <!-- 控制栏：筛选 + 翻页 同行 -->
-            <div class="fav-controls-row">
-                <button type="button" id="favRefreshBtn" class="icon-btn" title="刷新">🔄</button>
-
-                <select class="fav-filter-select" id="favFilterSelect">
-                    <option value="all">全部</option>
-                    <option value="pending">待处理</option>
-                    <option value="processing">处理中</option>
-                    <option value="done">已完成</option>
-                    <option value="fail">复刻失败</option>
-                </select>
-
-                <button type="button" id="favRandomBtn" class="fav-random-btn" title="猜你喜欢">🎲</button>
-
-                <div class="fav-nav-group">
-                    <button type="button" id="favPrevBtn" class="btn btn-outline btn-sm" title="上一张">◀</button>
-                    <span class="gallery-counter" id="favCounter">0 / 0</span>
-                    <button type="button" id="favNextBtn" class="btn btn-outline btn-sm" title="下一张">▶</button>
-                </div>
-            </div>
-
             <!-- 加载状态 -->
             <div id="favLoading" class="gallery-loading" style="display: none;">
                 <div class="loading-spinner"></div>
@@ -512,14 +578,116 @@
                 <p style="font-size: 12px; margin-top: 8px;">使用 Chrome 插件在 Civitai 上右键收藏图片</p>
             </div>
 
-            <!-- 图片展示区 -->
-            <div id="favImageContainer" class="gallery-image-wrapper"></div>
+            <!-- 图片展示区（控制栏悬浮在顶部） -->
+            <div class="fav-image-outer">
+                <!-- 控制栏：悬浮在图片顶部 -->
+                <div class="fav-controls-row">
+                    <button type="button" id="favRefreshBtn" class="icon-btn" title="刷新">🔄</button>
+
+                    <select class="fav-filter-select" id="favFilterSelect">
+                        <option value="all">全部</option>
+                        <option value="pending">待处理</option>
+                        <option value="retry">参数待调整</option>
+                        <option value="processing">待分析</option>
+                        <option value="done">已完成</option>
+                        <option value="fail">复刻失败</option>
+                    </select>
+
+                    <button type="button" id="favRandomBtn" class="fav-random-btn" title="猜你喜欢">🎲</button>
+                    <button type="button" id="favCleanupBtn" class="fav-random-btn" title="清理伪待分析（无生成作品的待分析→待处理）" style="font-size:16px;">🧹</button>
+
+                    <div class="fav-nav-group">
+                        <button type="button" id="favPrevBtn" class="btn btn-outline btn-sm" title="上一张">◀</button>
+                        <span class="gallery-counter" id="favCounter">0 / 0</span>
+                        <button type="button" id="favNextBtn" class="btn btn-outline btn-sm" title="下一张">▶</button>
+                    </div>
+                </div>
+                <div id="favImageContainer" class="gallery-image-wrapper"></div>
+            </div>
+
+            <!-- 自动复刻面板（移到图片下方） -->
+            <div class="ar-panel" id="arPanel" style="margin-top:12px;">
+                <div class="ar-header">
+                    <button type="button" id="arToggleBtn" class="ar-btn-start">🚀 开始自动复刻</button>
+                    <span class="ar-status" id="arStatus">就绪</span>
+                    <span class="ar-log-toggle" id="arLogToggle" onclick="document.getElementById('arLog').style.display=document.getElementById('arLog').style.display==='none'?'block':'none'">📋 日志</span>
+                </div>
+                <div class="ar-stats" id="arStats" style="display:none;">
+                    <span>✅ 完成 <b id="arDone">0</b></span>
+                    <span>⏭️ 跳过 <b id="arSkip">0</b></span>
+                    <span>❌ 失败 <b id="arFail">0</b></span>
+                    <span>📋 待处理 <b id="arPending">0</b></span>
+                    <span title="参数待调整，需手动处理">🔧 待调整 <b id="arRetry">0</b></span>
+                </div>
+                <div class="ar-log" id="arLog"></div>
+            </div>
 
             <!-- 操作按钮 -->
             <div id="favActions" class="fav-actions" style="display: none;">
                 <button type="button" id="favReplicateBtn" class="btn btn-sm fav-replicate-btn">🎨 分析与复刻</button>
+                <button type="button" id="favResetBtn" class="btn btn-outline btn-sm" style="display:none;" title="清除调整标记，重置为普通待处理状态，下次自动复刻时会重新处理（参数待调整的条目不会被自动复刻，需手动重置后才会进入队列）">🔄 重置为待处理</button>
                 <a id="favOpenLink" class="btn btn-outline btn-sm" href="#" target="_blank">↗ 在 Civitai 打开</a>
                 <button type="button" id="favDeleteBtn" class="btn btn-outline btn-sm fav-delete-btn">🗑️ 删除</button>
+            </div>
+        </section>
+
+        <!-- ==================== Admin Tab ==================== -->
+        <section id="admin" class="tab-content">
+            <!-- 子 Tab 导航 -->
+            <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+                <button type="button" class="admin-sub-tab active" data-sub="adminSubIndex" style="padding:6px 16px;border:none;border-radius:8px 8px 0 0;background:var(--primary);color:#fff;font-size:13px;font-weight:500;cursor:pointer;">📋 模型索引</button>
+                <button type="button" class="admin-sub-tab" data-sub="adminSubRegister" style="padding:6px 16px;border:none;border-radius:8px 8px 0 0;background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-weight:500;cursor:pointer;">📦 手动注册</button>
+            </div>
+
+            <!-- 子 Tab 1: 模型索引（原有） -->
+            <div id="adminSubIndex" class="admin-sub-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <button type="button" id="adminRefreshBtn" class="icon-btn" title="刷新">🔄</button>
+                    <input type="text" id="adminSearchInput" placeholder="搜索模型名/ID/文件名..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:13px;outline:none;">
+                    <button type="button" id="adminSearchBtn" class="btn btn-primary" style="padding:8px 16px;white-space:nowrap;">🔍 搜索</button>
+                    <button type="button" id="adminAddBtn" class="btn btn-outline" style="padding:8px 16px;white-space:nowrap;">➕ 新增</button>
+                </div>
+                <div id="adminIndexList" style="color:var(--text-secondary);text-align:center;padding:24px;">
+                    点击 🔍 搜索 或 🔄 刷新加载模型索引
+                </div>
+            </div>
+
+            <!-- 子 Tab 2: 手动注册 -->
+            <div id="adminSubRegister" class="admin-sub-content" style="display:none;">
+                <div style="max-width:560px;">
+                    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">手动下载的模型放入仓库后，填写以下信息完成注册（重命名 + 元数据 + 索引 + 别名映射）。</p>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <label style="font-size:12px;font-weight:500;color:var(--text-secondary);">Civitai 模型页 URL
+                            <input type="text" id="mrCivitaiUrl" placeholder="https://civitai.com/models/159722/aberrationsumi-e" style="width:100%;margin-top:4px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:13px;">
+                        </label>
+                        <label style="font-size:12px;font-weight:500;color:var(--text-secondary);">本地文件名（已放入仓库的文件）
+                            <input type="text" id="mrLocalFilename" placeholder="sumi-e.safetensors" style="width:100%;margin-top:4px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:13px;">
+                        </label>
+                        <label style="font-size:12px;font-weight:500;color:var(--text-secondary);">类型.子类型
+                            <select id="mrTypeSubtype" style="width:100%;margin-top:4px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:13px;">
+                                <option value="lora.xl-style">lora.xl-style</option>
+                                <option value="lora.xl-character">lora.xl-character</option>
+                                <option value="lora.xl-enhance">lora.xl-enhance</option>
+                                <option value="lora.xl-background">lora.xl-background</option>
+                                <option value="lora.xl-pose">lora.xl-pose</option>
+                                <option value="lora.xl-face">lora.xl-face</option>
+                                <option value="lora.xl-slider">lora.xl-slider</option>
+                                <option value="lora.xl-suit">lora.xl-suit</option>
+                                <option value="lora.xl-nsfw">lora.xl-nsfw</option>
+                                <option value="lora.1.5">lora.1.5</option>
+                                <option value="ckpt.xl">ckpt.xl</option>
+                                <option value="ckpt.1.5">ckpt.1.5</option>
+                                <option value="ckpt.flux">ckpt.flux</option>
+                                <option value="embedding._root">embedding._root</option>
+                            </select>
+                        </label>
+                        <label style="font-size:12px;font-weight:500;color:var(--text-secondary);">识别出的失效名称（可选，用于别名映射）
+                            <input type="text" id="mrAliasName" placeholder="version_1533177" style="width:100%;margin-top:4px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:13px;">
+                        </label>
+                        <button type="button" id="mrSubmitBtn" class="btn btn-primary" style="margin-top:4px;padding:10px;">📦 注册模型</button>
+                    </div>
+                    <div id="mrResult" style="display:none;margin-top:14px;padding:12px;border-radius:8px;font-size:13px;line-height:1.6;"></div>
+                </div>
             </div>
         </section>
 
@@ -541,7 +709,8 @@
         setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(40px)'; setTimeout(() => t.remove(), 300); }, 2000);
     }
     </script>
-    <script src="js/app.js"></script>
-    <script src="js/gallery.js"></script>
+    <script src="js/app.js?v=20260218f"></script>
+    <script src="js/gallery.js?v=20260218f"></script>
+    <script src="js/admin.js?v=20260218c"></script>
 </body>
 </html>

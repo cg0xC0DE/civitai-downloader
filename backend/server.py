@@ -230,7 +230,6 @@ def parse_civitai_image(image_url):
 
     image_id = int(match.group(1))
     sess = _requests.Session()
-    sess.trust_env = False
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
     # -------- 参数溯源追踪 --------
@@ -587,11 +586,12 @@ def parse_civitai_image(image_url):
     # -------- D 盘模型检查 --------
     checks = {'checkpoint': None, 'loras': []}
     if checkpoint:
-        checks['checkpoint'] = find_model_on_disk(checkpoint, 'ckpt', alt_names=checkpoint_alt, version_id=checkpoint_version_id)
+        checks['checkpoint'] = find_model_on_disk(checkpoint, 'ckpt', alt_names=checkpoint_alt, version_id=checkpoint_version_id, model_id=checkpoint_model_id)
         checks['checkpoint']['modelVersionId'] = checkpoint_version_id
         checks['checkpoint']['modelId'] = checkpoint_model_id
+        checks['checkpoint']['versionName'] = checkpoint_alt[1] if len(checkpoint_alt) > 1 else ''
     for lora in loras:
-        check = find_model_on_disk(lora['name'], 'lora', alt_names=lora.get('alt_names'), version_id=lora.get('modelVersionId'))
+        check = find_model_on_disk(lora['name'], 'lora', alt_names=lora.get('alt_names'), version_id=lora.get('modelVersionId'), model_id=lora.get('modelId'))
         check['weight'] = lora.get('weight', 1.0)
         check['weight_source'] = lora.get('weight_source', 'original')
         check['requested_name'] = lora['name']
@@ -788,9 +788,11 @@ def wait_for_prompt_ws(ws, prompt_id: str):
 def wait_for_batch_ws(ws, prompt_ids: list, timeout: int = 600):
     """通过 WebSocket 等待多个任务完成（不接收图片数据）"""
     completed = set()
+    errors = {}
     start_time = time.time()
+    prompt_set = set(prompt_ids)
 
-    while len(completed) < len(prompt_ids):
+    while len(completed) + len(errors) < len(prompt_ids):
         if time.time() - start_time > timeout:
             raise TimeoutError(f"等待图片超时 ({timeout}秒)")
 
@@ -803,11 +805,32 @@ def wait_for_batch_ws(ws, prompt_ids: list, timeout: int = 600):
 
         if isinstance(out, str):
             message = json.loads(out)
-            if message['type'] == 'executing':
-                data = message['data']
-                pid = data.get('prompt_id')
-                if pid in prompt_ids and data.get('node') is None:
+            msg_type = message.get('type', '')
+            data = message.get('data', {})
+            pid = data.get('prompt_id')
+
+            if msg_type == 'executing':
+                # node=None 表示该 prompt 的所有节点执行完毕
+                if pid in prompt_set and data.get('node') is None:
                     completed.add(pid)
+
+            elif msg_type == 'execution_error':
+                # ComfyUI 执行出错（LoRA 找不到、节点报错等）
+                if pid in prompt_set:
+                    err_msg = data.get('exception_message', data.get('error', '执行错误'))
+                    node_type = data.get('node_type', '')
+                    errors[pid] = f"{node_type}: {err_msg}" if node_type else err_msg
+                    print(f"[ComfyUI] ⚠️ prompt {pid[:8]} 执行错误: {errors[pid]}")
+
+            elif msg_type == 'execution_interrupted':
+                # 被中断（ComfyUI 重启/手动取消）
+                if pid in prompt_set:
+                    errors[pid] = '执行被中断'
+                    print(f"[ComfyUI] ⚠️ prompt {pid[:8]} 被中断")
+
+    if errors:
+        print(f"[ComfyUI] 批次中 {len(errors)}/{len(prompt_ids)} 个任务失败: {list(errors.values())[:3]}")
+    return completed, errors
 
 
 def fetch_images_from_history(prompt_id: str) -> list:
@@ -875,6 +898,17 @@ _SAMPLER_MAP = {
     'dpm++ 3m sde karras': 'dpmpp_3m_sde',
     'ddim': 'ddim', 'plms': 'plms', 'uni_pc': 'uni_pc', 'unipc': 'uni_pc',
     'lcm': 'lcm',
+    # Civitai/A1111 变体名 → ComfyUI 内部名
+    'euler_ancestral': 'euler_ancestral',
+    'euler ancestral sgm uniform': 'euler_ancestral',
+    'euler_ancestral_sgm_uniform': 'euler_ancestral',
+    'euler a sgm uniform': 'euler_ancestral',
+    'dpm++ 2m sgm uniform': 'dpmpp_2m',
+    'dpm++ 2m sde sgm uniform': 'dpmpp_2m_sde',
+    'dpm++ sde sgm uniform': 'dpmpp_sde',
+    'restart': 'restart',
+    'ipndm': 'ipndm', 'ipndm_v': 'ipndm_v',
+    'deis': 'deis',
 }
 
 def _normalize_sampler(name: str) -> str:
@@ -1039,21 +1073,85 @@ def _resolve_comfyui_lora_name(name: str) -> str:
         if cl_file == name_file:
             return cl
 
-    # 3) 文件名 contains 匹配（处理 renamer 前缀的情况）
-    # 从 "ModelName_VersionName_OrigFile.safetensors" 提取 OrigFile 部分
-    parts = name_file.rsplit('.', 1)
-    stem = parts[0] if parts else name_file
-    # 尝试用最后一个 _ 分隔的部分匹配
-    segments = stem.split('_')
-    if len(segments) >= 3:
-        orig_file = segments[-1]  # 取最后一段作为原始文件名
-        if len(orig_file) >= 4:
-            for cl in comfyui_loras:
-                if orig_file in cl.replace('\\', '/').lower():
-                    return cl
+    # 3) 子目录匹配 + 文件名 contains（双向）
+    name_stem = name_file.rsplit('.', 1)[0] if '.' in name_file else name_file
+    name_subdir = name_norm.rsplit('/', 1)[0] if '/' in name_norm else ''
+    for cl in comfyui_loras:
+        cl_norm = cl.replace('\\', '/').lower()
+        cl_file = cl_norm.rsplit('/', 1)[-1]
+        cl_stem = cl_file.rsplit('.', 1)[0] if '.' in cl_file else cl_file
+        cl_subdir = cl_norm.rsplit('/', 1)[0] if '/' in cl_norm else ''
+        # 同子目录下，文件名互相包含
+        if name_subdir and cl_subdir and name_subdir == cl_subdir:
+            if name_stem in cl_stem or cl_stem in name_stem:
+                return cl
+
+    # 4) 不限子目录，文件名 stem 包含匹配（至少 6 字符避免误匹配）
+    if len(name_stem) >= 6:
+        for cl in comfyui_loras:
+            cl_norm = cl.replace('\\', '/').lower()
+            cl_stem = cl_norm.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+            if name_stem in cl_stem:
+                return cl
 
     print(f"[ComfyUI] ⚠️ LoRA 未在 ComfyUI 列表中找到匹配: {name}")
     return name  # 没找到，原样返回
+
+
+def compute_weight_sweep(lora_checks: list) -> list | None:
+    """
+    根据未知权重 LoRA 的数量，生成权重扫描组合。
+    lora_checks: checks['loras'] 列表（含 weight_source 字段）
+    返回: [{lora_index: weight, ...}, ...] 或 None（无需扫描）
+    lora_index 基于 found=True 的 LoRA 在列表中的顺序。
+    """
+    # 收集 found=True 的 LoRA 中，weight_source=='default' 的索引
+    found_idx = 0
+    unknown_indices = []
+    for lc in lora_checks:
+        if lc.get('found'):
+            if lc.get('weight_source') == 'default':
+                unknown_indices.append(found_idx)
+            found_idx += 1
+
+    if len(unknown_indices) == 1:
+        idx = unknown_indices[0]
+        return [{idx: round(0.1 * w, 1)} for w in range(1, 11)]  # 0.1~1.0, 10组
+    elif len(unknown_indices) == 2:
+        idx1, idx2 = unknown_indices
+        combos = []
+        for w1 in range(1, 6):
+            for w2 in range(1, 6):
+                combos.append({idx1: round(0.2 * w1, 1), idx2: round(0.2 * w2, 1)})
+        return combos  # 0.2~1.0 × 0.2~1.0, 25组
+    return None
+
+
+def _update_lora_weights_in_workflow(workflow: Dict, weight_overrides: dict):
+    """
+    在已设置 LoRA 的工作流中，按 index 覆盖指定 LoRA 的权重。
+    weight_overrides: {lora_index: new_weight, ...}
+    """
+    # Lora Loader Stack (rgthree)
+    stack_nodes = _find_nodes_by_type(workflow, 'Lora Loader Stack (rgthree)')
+    if stack_nodes:
+        global_slot = 0
+        for _, snode in stack_nodes:
+            inp = snode['inputs']
+            slot_keys = sorted([k for k in inp if k.startswith('lora_') and not k.startswith('lora_count')])
+            for s in range(len(slot_keys)):
+                if global_slot in weight_overrides:
+                    idx_str = f"{s+1:02d}"
+                    inp[f"strength_{idx_str}"] = weight_overrides[global_slot]
+                global_slot += 1
+        return
+
+    # LoraLoader (单 LoRA)
+    lora_nodes = _find_nodes_by_type(workflow, 'LoraLoader')
+    if lora_nodes and 0 in weight_overrides:
+        node = lora_nodes[0][1]
+        node['inputs']['strength_model'] = weight_overrides[0]
+        node['inputs']['strength_clip'] = weight_overrides[0]
 
 
 def _set_lora_nodes(workflow: Dict, loras: list):
@@ -1123,14 +1221,15 @@ def _azure_available() -> bool:
         return False
 
 
-def _save_gen_tracking(batch_id, favorite_id, source_url=''):
+def _save_gen_tracking(batch_id, favorite_id, source_url='', gen_params=None):
     """保存 batch_id → favorite_id 追踪记录（本地 + Azure 双写）"""
     try:
         existing = _load_gen_tracking()
         existing[batch_id] = {
             'favorite_id': favorite_id,
             'source_url': source_url,
-            'created_at': time.strftime('%Y-%m-%dT%H:%M:%S')
+            'created_at': time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'gen_params': gen_params or {},
         }
         text = json.dumps(existing, ensure_ascii=False, indent=2)
 
@@ -1237,11 +1336,8 @@ def run_comfyui_workflow(
         # Checkpoint
         ckpt_nodes = _find_nodes_by_type(workflow, 'CheckpointLoaderSimple')
         if ckpt_nodes:
-            # ComfyUI checkpoint 列表是扁平文件名（无子目录前缀）
+            # ComfyUI checkpoint 列表包含子目录前缀（如 'xl\model.safetensors'）
             ckpt_name = checkpoint.replace('/', '\\')
-            # 去掉子目录前缀，只保留文件名
-            if '\\' in ckpt_name:
-                ckpt_name = ckpt_name.rsplit('\\', 1)[-1]
 
             # 验证 checkpoint 在 ComfyUI 模型列表中（防止重启后模型尚未加载完）
             _ckpt_found = False
@@ -1302,8 +1398,12 @@ def run_comfyui_workflow(
         # EmptyLatentImage 尺寸
         size_nodes = _find_nodes_by_type(workflow, 'EmptyLatentImage')
         if size_nodes:
+            print(f"[DEBUG] EmptyLatentImage BEFORE: {size_nodes[0][1]['inputs']}")
             size_nodes[0][1]['inputs']['width'] = width
             size_nodes[0][1]['inputs']['height'] = height
+            print(f"[DEBUG] EmptyLatentImage AFTER: width={width}, height={height}")
+        else:
+            print(f"[DEBUG] ⚠️ No EmptyLatentImage node found in workflow!")
 
         # Upscale denoise: 将 denoise 值注入到非主 KSampler 节点（精绘 pass）
         if upscale_denoise and len(sampler_nodes) > 1:
@@ -1356,12 +1456,33 @@ def run_comfyui_workflow(
         sampler_nodes = _find_nodes_by_type(workflow, 'KSampler')
         size_nodes = _find_nodes_by_type(workflow, 'EmptyLatentImage')
 
-        # 保存用户指定的原始 seed（第 1 张保留原始 seed，后续随机）
-        _original_seed = sampler_nodes[0][1]['inputs'].get('seed') if sampler_nodes else None
+        # 判断是否为"无 seed"模式（seed 缺失时随机 3 张）
+        _no_seed = (seed is None or seed == -1)
+
+        # 保存用户指定的原始 seed（无 seed 模式下视为 None，每张都随机）
+        _original_seed = None if _no_seed else (sampler_nodes[0][1]['inputs'].get('seed') if sampler_nodes else None)
+
+        if _no_seed:
+            print(f"[ComfyUI] 无 seed，将随机生成 3 张")
 
         if variations:
-            # ===== 控制变量法模式 =====
+            # ===== 控制变量法模式（含权重扫描） =====
             total = len(variations)
+
+            # 判断是否为纯权重扫描批次（所有变体都含 lora_weights，控制变量要求同一 seed）
+            _is_weight_sweep = all(var.get('params', {}).get('lora_weights') for var in variations)
+
+            # 确定本批次统一 seed：
+            #   - 权重扫描：所有变体共用同一 seed（控制变量，只改权重）
+            #     · 有原始 seed → 用原始 seed
+            #     · 无 seed → 随机一个，整批共用
+            #   - 非权重扫描（采样器/尺寸变体）：_no_seed 时各自随机，有 seed 时用原始 seed
+            if _is_weight_sweep:
+                _sweep_seed = _original_seed if not _no_seed else _random.randint(0, 2**32 - 1)
+                print(f"[ComfyUI] 权重扫描模式，统一 seed={_sweep_seed}，共 {total} 个权重组合")
+            else:
+                _sweep_seed = None  # 非权重扫描，逐张决定
+
             for idx, var in enumerate(variations):
                 vp = var.get('params', {})
                 label = var.get('label', f'变体{idx+1}')
@@ -1373,17 +1494,26 @@ def run_comfyui_workflow(
                         s_inp['sampler_name'] = _normalize_sampler(vp['sampler'])
                     if 'scheduler' in vp and vp['scheduler']:
                         s_inp['scheduler'] = vp['scheduler']
-                    # seed: 第 1 张保留原始，后续随机
-                    if idx == 0 and _original_seed is not None:
-                        s_inp['seed'] = _original_seed
-                    else:
+                    # seed 策略：
+                    #   权重扫描 → 整批统一 seed（控制变量）
+                    #   采样器/尺寸变体 → _no_seed 时每张随机，有 seed 时全用原始 seed
+                    if _is_weight_sweep:
+                        s_inp['seed'] = _sweep_seed
+                    elif _no_seed:
                         s_inp['seed'] = _random.randint(0, 2**32 - 1)
+                    else:
+                        s_inp['seed'] = _original_seed
 
                 bw = vp.get('width', width)
                 bh = vp.get('height', height)
                 if size_nodes:
                     size_nodes[0][1]['inputs']['width'] = bw
                     size_nodes[0][1]['inputs']['height'] = bh
+
+                # LoRA 权重覆盖（权重扫描用）
+                lora_wt = vp.get('lora_weights')
+                if lora_wt and isinstance(lora_wt, dict):
+                    _update_lora_weights_in_workflow(workflow, {int(k): v for k, v in lora_wt.items()})
 
                 wf_copy = _copy.deepcopy(workflow)
                 result = queue_prompt(wf_copy, client_id)
@@ -1398,23 +1528,28 @@ def run_comfyui_workflow(
                 print(f"[ComfyUI] 批次 {batch_id} [{label}] 已提交: {result['prompt_id']} ({bw}x{bh})")
         else:
             # ===== 传统批量模式 =====
-            _XL_LANDSCAPE = [(1152, 896), (1216, 832), (1344, 768), (1536, 640)]
-            _XL_PORTRAIT  = [(896, 1152), (832, 1216), (768, 1344), (640, 1536)]
-
-            if vary_sizes and batch_size <= 4:
-                if width > height:
-                    batch_sizes_list = _XL_LANDSCAPE[:batch_size]
-                else:
-                    batch_sizes_list = _XL_PORTRAIT[:batch_size]
+            if _no_seed:
+                # 无 seed：固定尺寸，随机 3 个 seed
+                actual_batch = 3
+                batch_sizes_list = [(width, height)] * actual_batch
             else:
-                batch_sizes_list = [(width, height)] * batch_size
-
-            for idx in range(batch_size):
-                if sampler_nodes:
-                    if idx == 0 and _original_seed is not None:
-                        sampler_nodes[0][1]['inputs']['seed'] = _original_seed
+                actual_batch = batch_size
+                _XL_LANDSCAPE = [(1152, 896), (1216, 832), (1344, 768), (1536, 640)]
+                _XL_PORTRAIT  = [(896, 1152), (832, 1216), (768, 1344), (640, 1536)]
+                if vary_sizes and batch_size <= 4:
+                    if width > height:
+                        batch_sizes_list = _XL_LANDSCAPE[:batch_size]
                     else:
+                        batch_sizes_list = _XL_PORTRAIT[:batch_size]
+                else:
+                    batch_sizes_list = [(width, height)] * batch_size
+
+            for idx in range(actual_batch):
+                if sampler_nodes:
+                    if _no_seed or idx > 0:
                         sampler_nodes[0][1]['inputs']['seed'] = _random.randint(0, 2**32 - 1)
+                    else:
+                        sampler_nodes[0][1]['inputs']['seed'] = _original_seed
                 bw, bh = batch_sizes_list[idx]
                 if size_nodes:
                     size_nodes[0][1]['inputs']['width'] = bw
@@ -1429,7 +1564,7 @@ def run_comfyui_workflow(
                     break
                 prompt_ids.append(result['prompt_id'])
                 variation_labels.append(f'第{idx+1}张')
-                print(f"[ComfyUI] 批次 {batch_id} 第{idx+1}/{batch_size}个已提交: {result['prompt_id']} ({bw}x{bh})")
+                print(f"[ComfyUI] 批次 {batch_id} 第{idx+1}/{actual_batch}个已提交: {result['prompt_id']} ({bw}x{bh})")
 
         # 注册生成任务
         with _gen_lock:
@@ -1451,11 +1586,12 @@ def run_comfyui_workflow(
         def _wait_and_save_batch():
             try:
                 # WS 只等完成信号，不接收图片二进制
-                wait_for_batch_ws(ws, prompt_ids)
+                completed_ids, error_ids = wait_for_batch_ws(ws, prompt_ids)
                 ws.close()
 
-                # 通过 history API + /view 获取带 workflow 元数据的 PNG
-                all_images = fetch_images_batch(prompt_ids)
+                # 只对成功完成的 prompt 获取图片（跳过执行出错的）
+                fetch_ids = list(completed_ids) if completed_ids else []
+                all_images = fetch_images_batch(fetch_ids) if fetch_ids else {}
 
                 os.makedirs(OUTPUT_DIR, exist_ok=True)
                 saved_paths = []
@@ -1466,7 +1602,7 @@ def run_comfyui_workflow(
                 azure_container = 'civitaidl'
                 today = time.strftime('%Y-%m-%d')
                 
-                for pid in prompt_ids:
+                for pid in fetch_ids:
                     imgs = all_images.get(pid, [])
                     for i, img_data in enumerate(imgs):
                         fname = f"{batch_id}_{pid[:8]}_{i}.png"
@@ -1489,20 +1625,32 @@ def run_comfyui_workflow(
                         except Exception as azure_err:
                             print(f"[Azure] ⚠️ 上传失败: {azure_err}")
 
+                error_summary = '; '.join(set(error_ids.values())) if error_ids else ''
+                final_status = 'success' if total_count > 0 else ('error' if error_ids else 'success')
+                msg = f'批次完成，共 {total_count} 张图片已保存'
+                if error_ids:
+                    msg += f'，{len(error_ids)} 个任务失败: {error_summary[:120]}'
                 with _gen_lock:
                     _gen_tasks[batch_id].update({
-                        'status': 'success',
-                        'completed': len(prompt_ids),
+                        'status': final_status,
+                        'completed': len(completed_ids),
                         'images_count': total_count,
                         'saved_paths': saved_paths,
                         'azure_urls': azure_urls,
-                        'message': f'批次完成，共 {total_count} 张图片已保存（本地{"✓" if azure_urls else "✗"}，Azure{"✓" if azure_urls else "✗"}）'
+                        'errors': error_ids,
+                        'message': msg,
                     })
 
                 # 写入追踪记录（batch_id → favorite_id 映射）
                 if favorite_id:
+                    _gp = {
+                        'checkpoint': checkpoint, 'loras': loras or [],
+                        'prompt': positive_prompt, 'negative_prompt': negative_prompt,
+                        'width': width, 'height': height, 'steps': steps,
+                        'cfg': cfg, 'sampler': sampler, 'scheduler': scheduler, 'seed': seed,
+                    }
                     try:
-                        _save_gen_tracking(batch_id, favorite_id, source_url or '')
+                        _save_gen_tracking(batch_id, favorite_id, source_url or '', gen_params=_gp)
                     except Exception as track_err:
                         print(f"[Tracking] ⚠️ 写入追踪记录失败: {track_err}")
                     # 注：不再在生图完成时标记 done，done 仅由美学分析完成后设置
@@ -1516,6 +1664,19 @@ def run_comfyui_workflow(
                         'status': 'error',
                         'message': f'生成失败: {str(ex)}'
                     })
+
+        # 立即写入追踪记录（让 cleanup 能识别正在生成的任务）
+        if favorite_id:
+            _gp_early = {
+                'checkpoint': checkpoint, 'loras': loras or [],
+                'prompt': positive_prompt, 'negative_prompt': negative_prompt,
+                'width': width, 'height': height, 'steps': steps,
+                'cfg': cfg, 'sampler': sampler, 'scheduler': scheduler, 'seed': seed,
+            }
+            try:
+                _save_gen_tracking(batch_id, favorite_id, source_url or '', gen_params=_gp_early)
+            except Exception as _te:
+                print(f"[Tracking] ⚠️ 提交时写入追踪失败: {_te}")
 
         threading.Thread(target=_wait_and_save_batch, daemon=True).start()
 
@@ -1692,6 +1853,43 @@ class APIHandler(BaseHTTPRequestHandler):
         elif path == '/api/azure/delete':
             self.send_json({'error': 'Use POST method'}, 405)
 
+        elif path == '/api/admin/model-index':
+            # 返回完整模型索引（Admin 用）
+            from util import model_index
+            query = parse_qs(parsed.query)
+            search = query.get('q', [''])[0].lower()
+            items = model_index.get_all()
+            # 附加磁盘存在性检查
+            for item in items:
+                for ver in item.get('versions', []):
+                    ver['exists'] = os.path.isfile(ver.get('path', ''))
+            if search:
+                items = [m for m in items if search in m.get('name', '').lower()
+                         or search in str(m.get('model_id', ''))
+                         or any(search in v.get('filename', '').lower() for v in m.get('versions', []))]
+            self.send_json({'status': 'ok', 'items': items, 'total': len(items)})
+
+        elif path == '/api/admin/disk-files':
+            # 扫描磁盘上的模型文件（用于 Admin 手工映射选择文件）
+            query = parse_qs(parsed.query)
+            main_type = query.get('type', ['ckpt'])[0]
+            if main_type not in ('ckpt', 'lora', 'embedding'):
+                self.send_json({'status': 'error', 'message': 'type must be ckpt, lora or embedding'}, 400)
+                return
+            from config import get_base_dir, MODEL_EXTENSIONS
+            base = get_base_dir(main_type)
+            results = []
+            if os.path.exists(base):
+                for sub in sorted(os.listdir(base)):
+                    sub_path = os.path.join(base, sub)
+                    if os.path.isdir(sub_path):
+                        for f in sorted(os.listdir(sub_path)):
+                            if f.lower().endswith(MODEL_EXTENSIONS):
+                                fp = os.path.join(sub_path, f)
+                                results.append({'subtype': sub, 'filename': f, 'path': fp,
+                                                'size_mb': round(os.path.getsize(fp) / 1048576)})
+            self.send_json({'status': 'ok', 'type': main_type, 'files': results, 'count': len(results)})
+
         elif path == '/api/sync':
             try:
                 from data_sync import sync_all
@@ -1699,6 +1897,17 @@ class APIHandler(BaseHTTPRequestHandler):
                 self.send_json({'status': 'ok', **result})
             except Exception as e:
                 self.send_json({'status': 'error', 'message': str(e)}, 500)
+
+        elif path.startswith('/api/discard-log/check'):
+            # 检查某 fav_id 的废弃记录（供生图 tab 分析后查询）
+            from discard_log import get_entries
+            query = parse_qs(parsed.query)
+            fav_id = query.get('fav_id', [''])[0]
+            if not fav_id:
+                self.send_json({'status': 'error', 'message': '缺少 fav_id'}, 400)
+                return
+            entries = get_entries(fav_id)
+            self.send_json({'status': 'ok', 'fav_id': fav_id, 'entries': entries, 'count': len(entries)})
 
         elif path == '/api/favorite/list':
             # 读取收藏队列并返回列表（含 image_id）
@@ -1734,7 +1943,6 @@ class APIHandler(BaseHTTPRequestHandler):
                 import requests as _requests
                 from config import CIVITAI_API_TOKEN
                 sess = _requests.Session()
-                sess.trust_env = False
                 params = {'input': json.dumps({'json': {'id': int(image_id)}})}
                 if CIVITAI_API_TOKEN:
                     params['token'] = CIVITAI_API_TOKEN
@@ -1766,6 +1974,10 @@ class APIHandler(BaseHTTPRequestHandler):
                 self.send_json(result)
             except Exception as e:
                 self.send_json({'status': 'error', 'message': str(e)}, 500)
+
+        elif path == '/api/auto-replicate/status':
+            import auto_replicate
+            self.send_json({'status': 'ok', **auto_replicate.get_status()})
 
         else:
             self.send_json({'error': 'Not Found'}, 404)
@@ -1863,6 +2075,11 @@ class APIHandler(BaseHTTPRequestHandler):
         
         elif path == '/api/workflow/run':
             # 运行 ComfyUI 工作流
+            print(f"[DEBUG] workflow/run received: width={data.get('width')}, height={data.get('height')}")
+            if data.get('variations'):
+                for vi, vv in enumerate(data['variations']):
+                    vp = vv.get('params', {})
+                    print(f"[DEBUG]   variation[{vi}] '{vv.get('label')}': width={vp.get('width')}, height={vp.get('height')}")
             result = run_comfyui_workflow(
                 workflow_name=data.get('workflow', 'nolora'),
                 checkpoint=data.get('checkpoint', ''),
@@ -1963,7 +2180,7 @@ class APIHandler(BaseHTTPRequestHandler):
                             'message': f'分析完成: {blueprint.get("work_title", "?")}',
                         })
                     print(f"[Aesthetic] 任务 {task_id} 完成")
-                    # 如果关联了收藏条目，标记为 done
+                    # 如果关联了收藏条目，标记为 done 并清除废弃记录
                     if _fav_id:
                         try:
                             from favorite_images import mark_done
@@ -1971,6 +2188,13 @@ class APIHandler(BaseHTTPRequestHandler):
                             print(f"[Aesthetic] 收藏 {_fav_id} 已标记为 done")
                         except Exception as fav_err:
                             print(f"[Aesthetic] 更新收藏状态失败: {fav_err}")
+                        try:
+                            from discard_log import clear_fav
+                            cleared = clear_fav(_fav_id)
+                            if cleared.get('cleared', 0) > 0:
+                                print(f"[Aesthetic] 已清除 {_fav_id} 的 {cleared['cleared']} 条废弃记录")
+                        except Exception as dl_err:
+                            print(f"[Aesthetic] 清除废弃记录失败: {dl_err}")
                 except Exception as ex:
                     import traceback
                     traceback.print_exc()
@@ -2018,13 +2242,15 @@ class APIHandler(BaseHTTPRequestHandler):
             from favorite_images import update_status
             item_id = data.get('id', '')
             new_status = data.get('status', '')
+            fail_reason = data.get('fail_reason', '') or ''
+            retry_reason = data.get('retry_reason', '') or ''
             if not item_id or not new_status:
                 self.send_json({'status': 'error', 'message': '缺少 id 或 status 参数'}, 400)
                 return
             if new_status not in ('pending', 'processing', 'done', 'fail'):
                 self.send_json({'status': 'error', 'message': '无效的 status 值'}, 400)
                 return
-            result = update_status(item_id, new_status)
+            result = update_status(item_id, new_status, fail_reason=fail_reason or None, retry_reason=retry_reason or None)
             status_code = 200 if result['status'] == 'ok' else 404
             self.send_json(result, status_code)
 
@@ -2045,8 +2271,311 @@ class APIHandler(BaseHTTPRequestHandler):
             result = cleanup_done()
             self.send_json(result)
 
+        elif path == '/api/discard-log/add':
+            # 记录一条废弃生成参数（blob 删除且非标记失败时调用）
+            from discard_log import add_entry
+            fav_id = data.get('fav_id', '')
+            params = data.get('params', {})
+            if not fav_id or not params:
+                self.send_json({'status': 'error', 'message': '缺少 fav_id 或 params'}, 400)
+                return
+            result = add_entry(fav_id, params)
+            self.send_json(result)
+
+        elif path == '/api/discard-log/clear':
+            # 清除某 fav_id 的废弃记录（美学分析完成后调用）
+            from discard_log import clear_fav
+            fav_id = data.get('fav_id', '')
+            if not fav_id:
+                self.send_json({'status': 'error', 'message': '缺少 fav_id'}, 400)
+                return
+            result = clear_fav(fav_id)
+            self.send_json(result)
+
+        elif path == '/api/auto-replicate/start':
+            import auto_replicate
+            result = auto_replicate.start()
+            self.send_json(result)
+
+        elif path == '/api/auto-replicate/stop':
+            import auto_replicate
+            result = auto_replicate.stop()
+            self.send_json(result)
+
+        elif path == '/api/favorites/cleanup-processing':
+            # 清理伪待分析：processing 状态但无对应生成作品 → 改回 pending
+            from favorite_images import list_all, update_status as _fav_update
+            cleanup_log = []
+
+            # 1. 从 gen_tracking 收集有追踪记录的 favorite_id
+            tracking = _load_gen_tracking()
+            tracked_fav_ids = set()
+            for v in tracking.values():
+                fid = v.get('favorite_id', '')
+                if fid:
+                    tracked_fav_ids.add(fid)
+            cleanup_log.append(f"gen_tracking 中有 {len(tracked_fav_ids)} 个收藏有生成记录")
+
+            # 2. 从 _gen_tasks 收集正在生成中的 favorite_id（尚未写入 tracking 的）
+            inflight_fav_ids = set()
+            with _gen_lock:
+                for task in _gen_tasks.values():
+                    fid = task.get('favorite_id', '')
+                    if fid and task.get('status') in ('running', 'submitted'):
+                        inflight_fav_ids.add(fid)
+            cleanup_log.append(f"当前正在生成中的收藏: {len(inflight_fav_ids)} 个")
+
+            # 合并：有追踪 + 正在生成 = 不应清理
+            protected_ids = tracked_fav_ids | inflight_fav_ids
+
+            entries = list_all()
+            processing_entries = [e for e in entries if e.get('status') == 'processing']
+            cleanup_log.append(f"processing 状态的收藏共 {len(processing_entries)} 条")
+
+            reverted = []
+            kept = []
+            for e in processing_entries:
+                eid = e['id']
+                if eid in protected_ids:
+                    kept.append(eid)
+                else:
+                    _fav_update(eid, 'pending')
+                    reverted.append(eid)
+
+            cleanup_log.append(f"保留（有生成记录/正在生成）: {len(kept)} 条")
+            cleanup_log.append(f"已清理（无生成记录）: {len(reverted)} 条")
+
+            self.send_json({
+                'status': 'ok',
+                'reverted': len(reverted),
+                'kept': len(kept),
+                'total_processing': len(processing_entries),
+                'message': f'已将 {len(reverted)} 条伪处理中改回待处理（保留 {len(kept)} 条有生成记录的）',
+                'log': cleanup_log,
+            })
+
+        elif path == '/api/admin/manual-register':
+            # 手动注册：用户已手工下载模型，提供 c 站 URL + 本地文件名 + 失效别名
+            import re as _re
+            from util import model_index
+            from civitaidl import CivitaiDownloader
+            from config import LORA_BASE_DIR, CKPT_BASE_DIR, EMBEDDING_BASE_DIR, resolve_type_subtype
+
+            civitai_url = data.get('civitai_url', '').strip()
+            local_filename = data.get('local_filename', '').strip()
+            type_subtype = data.get('type_subtype', '').strip()  # e.g. lora.xl-style
+            alias_name = data.get('alias_name', '').strip()  # e.g. version_1533177
+
+            if not civitai_url or not local_filename or not type_subtype:
+                self.send_json({'status': 'error', 'message': '缺少 civitai_url / local_filename / type_subtype'}, 400)
+                return
+
+            # 1. 解析目标目录
+            resolved = resolve_type_subtype(type_subtype)
+            if not resolved:
+                self.send_json({'status': 'error', 'message': f'未知类型: {type_subtype}'}, 400)
+                return
+            main_type, subtype, target_dir = resolved
+
+            # 2. 检查本地文件是否存在
+            local_path = os.path.join(target_dir, local_filename)
+            if not os.path.isfile(local_path):
+                # 也尝试在目标目录下搜索
+                found_file = None
+                if os.path.isdir(target_dir):
+                    for f in os.listdir(target_dir):
+                        if f.lower() == local_filename.lower():
+                            found_file = f
+                            break
+                if found_file:
+                    local_path = os.path.join(target_dir, found_file)
+                    local_filename = found_file
+                else:
+                    self.send_json({'status': 'error', 'message': f'文件不存在: {local_path}'}, 400)
+                    return
+
+            # 3. 从 Civitai URL 获取模型信息
+            try:
+                dl = CivitaiDownloader()
+                parse_result = dl.parse_url(civitai_url)
+                if parse_result['status'] != 'ok':
+                    self.send_json({'status': 'error', 'message': f'URL 解析失败: {parse_result.get("message")}'}, 400)
+                    return
+                model_info = dl.get_model_info(parse_result['model_id'], parse_result.get('version_id'))
+                if model_info['status'] != 'ok':
+                    self.send_json({'status': 'error', 'message': f'获取模型信息失败: {model_info.get("message")}'})
+                    return
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': f'Civitai API 错误: {e}'})
+                return
+
+            api_title = model_info.get('title', 'Unknown')
+            api_version_name = model_info.get('version_name', 'v1')
+            api_file_name = model_info.get('file_name', '')
+            api_model_id = str(model_info.get('model_id', parse_result['model_id']))
+            api_version_id = str(model_info.get('version_id', ''))
+            api_base_model = model_info.get('base_model', '')
+            api_trained_words = model_info.get('trained_words', [])
+
+            # 4. 标准重命名: {title}_{version}_{apiFileName}.ext
+            model_ext = os.path.splitext(local_filename)[1]
+            file_stem = api_file_name
+            if file_stem.lower().endswith(model_ext.lower()):
+                file_stem = file_stem[:-len(model_ext)]
+
+            def _clean(name):
+                return _re.sub(r'[<>:"/\\|?*]', '_', name).strip() if name else ''
+
+            new_base = _clean(f"{api_title}_{api_version_name}_{file_stem}")
+            new_filename = f"{new_base}{model_ext}"
+            new_path = os.path.join(target_dir, new_filename)
+
+            renamed = False
+            if os.path.abspath(local_path) != os.path.abspath(new_path):
+                if os.path.exists(new_path):
+                    # 目标已存在，不覆盖，使用原文件名
+                    new_filename = local_filename
+                    new_path = local_path
+                else:
+                    try:
+                        os.rename(local_path, new_path)
+                        renamed = True
+                    except Exception as e:
+                        # 重命名失败，使用原文件名
+                        new_filename = local_filename
+                        new_path = local_path
+
+            # 5. 写 .txt 元数据
+            txt_path = os.path.join(target_dir, f"{os.path.splitext(new_filename)[0]}.txt")
+            try:
+                from datetime import datetime
+                txt_content = (
+                    f"URL: https://civitai.com/models/{api_model_id}?versionId={api_version_id}\n\n"
+                    f"Title: {api_title}\n\n"
+                    f"Base Model: {api_base_model}\n\n"
+                    f"Version: {api_version_name}\n\n"
+                    f"File: {api_file_name}\n\n"
+                    f"Registered: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                )
+                if alias_name:
+                    txt_content += f"\nAlias: {alias_name}\n"
+                with open(txt_path, 'w', encoding='utf-8') as f:
+                    f.write(txt_content)
+            except Exception:
+                pass
+
+            # 6. 注册模型索引（真实 version_id）
+            abs_path = os.path.abspath(new_path)
+            model_index.upsert(
+                model_id=api_model_id, model_name=api_title,
+                version_id=api_version_id, version_name=api_version_name,
+                filename=new_filename, path=abs_path,
+                trigger_words=api_trained_words,
+            )
+
+            # 7. 注册别名 version_id（让旧图引用能找到此文件）
+            alias_vid = ''
+            if alias_name:
+                vid_match = _re.search(r'(\d+)', alias_name)
+                if vid_match:
+                    alias_vid = vid_match.group(1)
+                    model_index.upsert(
+                        model_id=api_model_id, model_name=api_title,
+                        version_id=alias_vid, version_name=f"alias:{alias_name}",
+                        filename=new_filename, path=abs_path,
+                        trigger_words=api_trained_words,
+                    )
+
+            # 8. 刷新模型缓存
+            try:
+                model_cache.refresh_all()
+            except Exception:
+                pass
+
+            self.send_json({
+                'status': 'ok',
+                'message': f'注册成功: {api_title} / {api_version_name}',
+                'renamed': renamed,
+                'new_filename': new_filename,
+                'model_id': api_model_id,
+                'version_id': api_version_id,
+                'alias_version_id': alias_vid,
+                'trained_words': api_trained_words,
+                'base_model': api_base_model,
+            })
+
+        elif path == '/api/admin/model-index/upsert':
+            # 新增或更新模型索引条目
+            from util import model_index
+            model_id = str(data.get('model_id', '')).strip()
+            model_name = data.get('model_name', '').strip()
+            version_id = str(data.get('version_id', '')).strip()
+            version_name = data.get('version_name', '').strip()
+            filename = data.get('filename', '').strip()
+            filepath = data.get('path', '').strip()
+            trigger_words = data.get('trigger_words', [])
+            if not model_id or not version_id:
+                self.send_json({'status': 'error', 'message': '缺少 model_id 或 version_id'}, 400)
+                return
+            if not filepath:
+                self.send_json({'status': 'error', 'message': '缺少文件路径 path'}, 400)
+                return
+            model_index.upsert(
+                model_id=model_id, model_name=model_name,
+                version_id=version_id, version_name=version_name,
+                filename=filename or os.path.basename(filepath),
+                path=filepath, trigger_words=trigger_words
+            )
+            self.send_json({'status': 'ok', 'message': f'已保存: {model_name} / {version_name}'})
+
+        elif path == '/api/admin/model-index/delete':
+            # 删除模型索引中的某个版本
+            from util import model_index
+            model_id = str(data.get('model_id', '')).strip()
+            version_id = str(data.get('version_id', '')).strip()
+            if not model_id or not version_id:
+                self.send_json({'status': 'error', 'message': '缺少 model_id 或 version_id'}, 400)
+                return
+            model_index.remove_version(model_id, version_id)
+            self.send_json({'status': 'ok', 'message': f'已删除版本 {version_id}'})
+
+        elif path == '/api/prompt/edit':
+            # AI 编辑提示词：根据用户指令精确修改 prompt
+            prompt = data.get('prompt', '')
+            instruction = data.get('instruction', '')
+            if not prompt or not instruction:
+                self.send_json({'status': 'error', 'message': '缺少 prompt 或 instruction 参数'}, 400)
+                return
+            try:
+                from llm.llm_client import chat
+                system_msg = (
+                    "You are an expert Stable Diffusion prompt editor with deep knowledge of "
+                    "danbooru, e621, and other popular SD tag systems.\n\n"
+                    "RULES:\n"
+                    "1. Follow the user's editing instruction precisely. Only modify what is requested.\n"
+                    "2. DO NOT alter, reorder, add, or remove any tags outside the scope of the instruction.\n"
+                    "3. Preserve the original structure, order, comma-separated format, and (weight:1.2) syntax exactly.\n"
+                    "4. ALL output tags MUST be in English using standard danbooru/SD tag conventions "
+                    "(e.g. snake_case like 'long_hair', 'aqua_eyes', 'hatsune_miku').\n"
+                    "5. If the instruction mentions a character name (e.g. 初音未来, Hatsune Miku), "
+                    "replace it with the correct danbooru character tag AND add key visual traits "
+                    "(hair color/style, eye color, iconic outfit/accessories) as separate tags.\n"
+                    "6. If there are non-English tags (Chinese/Japanese/Korean) in the existing prompt "
+                    "that fall within the scope of the instruction, convert them to proper danbooru English tags.\n"
+                    "7. Output ONLY the edited prompt text. No explanations, no quotes, no markdown, no commentary."
+                )
+                user_msg = f"=== CURRENT PROMPT ===\n{prompt}\n\n=== INSTRUCTION ===\n{instruction}"
+                edited = chat(
+                    [{"role": "system", "content": system_msg},
+                     {"role": "user", "content": user_msg}],
+                    temperature=0.3, max_tokens=2048
+                )
+                self.send_json({'status': 'ok', 'edited_prompt': edited.strip()})
+            except Exception as e:
+                self.send_json({'status': 'error', 'message': str(e)}, 500)
+
         elif path == '/api/azure/delete':
-            # 删除指定的 blob
+            # 删除指定的 blob（同时删除本地 OUTPUT_DIR 中的同名文件）
             blob_path = data.get('path', '')
             
             if not blob_path:
@@ -2068,10 +2597,32 @@ class APIHandler(BaseHTTPRequestHandler):
                     subfolder = None
                     filename = blob_path
                 success = blob.delete(subfolder, filename)
+
+                # 同步删除本地 OUTPUT_DIR 中的同名文件
+                local_deleted = False
+                local_error = ''
+                if filename:
+                    local_path = os.path.join(OUTPUT_DIR, filename)
+                    if os.path.isfile(local_path):
+                        try:
+                            os.remove(local_path)
+                            local_deleted = True
+                            print(f"[Delete] 本地文件已删除: {local_path}")
+                        except Exception as le:
+                            local_error = str(le)
+                            print(f"[Delete] ⚠️ 本地文件删除失败: {le}")
+
                 if success:
-                    self.send_json({'success': True, 'message': f'已删除: {blob_path}'})
+                    msg = f'已删除: {blob_path}'
+                    if local_deleted:
+                        msg += '（含本地文件）'
+                    elif local_error:
+                        msg += f'（本地文件删除失败: {local_error}）'
+                    self.send_json({'success': True, 'message': msg})
                 else:
-                    self.send_json({'success': False, 'error': '文件不存在或删除失败'}, 404)
+                    # Azure 删除失败，但本地文件可能已删除，仍告知结果
+                    self.send_json({'success': False, 'error': '文件不存在或删除失败',
+                                    'local_deleted': local_deleted}, 404)
             except Exception as e:
                 self.send_json({'success': False, 'error': str(e)}, 500)
         
