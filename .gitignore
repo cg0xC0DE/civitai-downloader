@@ -25,10 +25,22 @@ downloads_civitai/
 # Generated images
 backend/output/
 
-# Cache
-*.json
-!package.json
+# Runtime state / personal data（不提交到开源仓库）
+backend/cache/**
+!backend/cache/.gitkeep
+!backend/cache/**/.gitkeep
+
+# Local diagnostics / temp artifacts
+*.log
+*_log.txt
+comfyui_error*.txt
+frontend_log.txt
+aesthetic_test_*.json
+tmp_*.py
 
 # Credentials
+backend/credential.py
+backend/llm/credential.py
+backend/azure_blob/credentials.py
 credential.py
 credentials.py
