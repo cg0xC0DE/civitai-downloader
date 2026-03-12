@@ -158,7 +158,7 @@ _TRACK_BLOB_FILE = 'gen_tracking.json'
 
 
 def _merge_tracking(local_data: dict, azure_data: dict) -> dict:
-    """按 batch_id (dict key) 合并，冲突取最新 created_at"""
+    """按 batch_id 合并；并对有图记录按 favorite_id 去重（保留最新 created_at）。"""
     merged = dict(azure_data)
     for k, v in local_data.items():
         if k not in merged:
@@ -168,6 +168,37 @@ def _merge_tracking(local_data: dict, azure_data: dict) -> dict:
             azure_ts = merged[k].get('created_at', '')
             if local_ts >= azure_ts:
                 merged[k] = v
+
+    # 防止历史重复记录从 Azure 回灌：同一 favorite_id 若存在多个“有图” batch，只保留最新的。
+    fav_keep_bid = {}
+    for bid, entry in merged.items():
+        fid = entry.get('favorite_id', '')
+        has_images = bool(entry.get('blob_urls') or entry.get('local_paths'))
+        if not fid or not has_images:
+            continue
+
+        if fid not in fav_keep_bid:
+            fav_keep_bid[fid] = bid
+            continue
+
+        old_bid = fav_keep_bid[fid]
+        old_ts = merged.get(old_bid, {}).get('created_at', '')
+        new_ts = entry.get('created_at', '')
+        if new_ts >= old_ts:
+            fav_keep_bid[fid] = bid
+
+    drop_bids = []
+    for bid, entry in merged.items():
+        fid = entry.get('favorite_id', '')
+        has_images = bool(entry.get('blob_urls') or entry.get('local_paths'))
+        if fid and has_images and fav_keep_bid.get(fid) != bid:
+            drop_bids.append(bid)
+
+    if drop_bids:
+        for bid in drop_bids:
+            merged.pop(bid, None)
+        print(f"[Sync] 追踪去重: 移除 {len(drop_bids)} 条重复有图记录")
+
     return merged
 
 

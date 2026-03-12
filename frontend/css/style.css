@@ -432,6 +432,33 @@ body {
     margin-top: 8px;
 }
 
+/* Draw: 按文件名继承（紧凑行） */
+.draw-inherit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.draw-inherit-row label {
+    margin-bottom: 0;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.draw-inherit-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.draw-inherit-btn {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 92px;
+    padding: 8px 14px;
+    border-radius: 10px;
+}
+
 .loading-spinner {
     width: 20px;
     height: 20px;
@@ -675,5 +702,18 @@ body {
     .sliders {
         flex-direction: column;
         gap: 12px;
+    }
+
+    .draw-inherit-row {
+        flex-wrap: wrap;
+    }
+
+    .draw-inherit-row label {
+        width: 100%;
+    }
+
+    .draw-inherit-btn {
+        min-width: 76px;
+        padding: 8px 12px;
     }
 }

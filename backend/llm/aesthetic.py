@@ -6,7 +6,7 @@
   1. 读取图片 PNG 元数据（ComfyUI workflow）→ 提取生成参数
   2. 从 model_index 收集所有模型的触发词
   3. 组装 LLM prompt（图片 + 参数 + 触发词 + 用户主观描述）
-  4. 调用 GPT-4o Vision → 返回结构化 JSON
+  4. 调用 GPT-5.2 Vision → 返回结构化 JSON
   5. 保存到 aesthetic_blueprints.json
 
 用法：
@@ -17,6 +17,7 @@
 import os
 import sys
 import json
+import re
 import struct
 import zlib
 import urllib.request
@@ -30,6 +31,19 @@ _LOCAL_PATH = os.path.join(_BACKEND_DIR, 'cache', 'aesthetic_blueprints.json')
 _BLOB_CONTAINER = 'civitaidl'
 _BLOB_SUBFOLDER = 'data'
 _BLOB_FILENAME = 'aesthetic_blueprints.json'
+_AESTHETIC_MODEL = 'gpt-5.2'
+_NSFW_MASK_TOKEN = 'XXXXXX'
+
+_NSFW_HINT_WORDS = {
+    'nsfw', 'adult', 'explicit', 'erotic', 'sexual', 'fetish',
+    'hentai', 'ecchi', 'ero', 'lewd',
+    'nudity', 'nude', 'naked', 'topless', 'bottomless',
+    'underwear', 'panty', 'panties', 'thong',
+    'crotch', 'cameltoe',
+    'breast', 'breasts', 'boob', 'boobs', 'nipple', 'nipples', 'areola',
+    'vagina', 'genital', 'pussy', 'pubic',
+    '露出', '下体', '羞耻', '羞辱', '羞耻play', '淫', '内裤', '裸', '全裸', 'エロ'
+}
 
 
 def _azure_available() -> bool:
@@ -323,13 +337,103 @@ _SYSTEM_PROMPT = """你是一位 AI 绘画美学分析师。你的任务是分�
 
 4. **output_prompt_with_model（完整重建提示词）**：在 output_prompt_plain 基础上，附加模型、LoRA、Sampler 等完整参数信息，格式参考示例。
 
-5. **其他字段**：work_title（4-8个中文字的诗意标题）、base_combo（模型组合简称）、image_type（anime/2.5d/realistic/concept 等）、tags（5-8个英文标签）、vibe（一句中文氛围描述）。
+5. **LoRA 影响识别与反推补偿词（重点）**：
+   - 很多风格、角色、服饰、动作、姿态、背景、环境、材质效果，可能主要来自 LoRA，而非通用提示词本身。
+   - 你必须判断每个显著视觉特征是否“强依赖 LoRA”。
+   - 若强依赖 LoRA，请在 `lora_inferred_additional_prompts` 中返回一组“跨平台可迁移”的附加提示词（英文短语优先），用于在缺失该 LoRA 时尽量复现效果。
+   - 这些附加词应是语义化描述，而不是简单重复 LoRA 文件名；例如 LoRA 名包含 DavinciStyle，应反推出如：renaissance oil painting, da vinci style sfumato, warm chiaroscuro lighting 等。
+   - 若某个特征并非 LoRA 主导，不要硬加。
+
+6. **其他字段**：work_title（4-8个中文字的诗意标题）、base_combo（模型组合简称）、image_type（anime/2.5d/realistic/concept 等）、tags（5-8个英文标签）、vibe（一句中文氛围描述）。
+
+7. **NSFW 提示词遮罩规则（必须执行）**：
+   - 如果你输出的提示词（plain_text / output_prompt_plain / output_prompt_with_model）包含 NSFW 或敏感性行为描述，不要直接输出高危词本体。
+   - 必须对相关词语做“局部遮罩”：把词语改为 `XXXXXX词语XXXXXX`（词语前后都加六个 X）。
+   - 只遮罩敏感词本身，不要给整段文本统一加前缀。
+   - 非 NSFW 内容不要遮罩。
 
 ## 输出格式
 请严格输出 JSON 对象，包含以下字段：
-work_title, plain_text, why_good, output_prompt_plain, output_prompt_with_model, base_combo, image_type, tags, vibe
+work_title, plain_text, why_good, output_prompt_plain, output_prompt_with_model, lora_inferred_additional_prompts, lora_dependency_notes, base_combo, image_type, tags, vibe
+
+其中：
+- lora_inferred_additional_prompts: string[]，长度 0~12，每项为可直接拼接到提示词中的短语。
+- lora_dependency_notes: string，简要说明哪些效果可能主要来自 LoRA、你如何反推。
 
 不要输出 JSON 以外的任何内容。"""
+
+
+def _contains_nsfw_signal(text: str) -> bool:
+    s = str(text or '').strip().lower()
+    if not s:
+        return False
+    return any(k in s for k in _NSFW_HINT_WORDS)
+
+
+def _needs_nsfw_mask(blueprint: dict, gen_params: dict, user_why_good: str = '') -> bool:
+    for k in ('plain_text', 'output_prompt_plain', 'output_prompt_with_model'):
+        s = str(blueprint.get(k, '') or '').strip()
+        if _NSFW_MASK_TOKEN in s:
+            return True
+
+    check_texts = [
+        gen_params.get('positive_prompt', ''),
+        gen_params.get('negative_prompt', ''),
+        blueprint.get('plain_text', ''),
+        blueprint.get('output_prompt_plain', ''),
+        blueprint.get('output_prompt_with_model', ''),
+        blueprint.get('why_good', ''),
+        user_why_good,
+        ' '.join(blueprint.get('tags', []) if isinstance(blueprint.get('tags', []), list) else []),
+        blueprint.get('lora_dependency_notes', ''),
+    ]
+    return any(_contains_nsfw_signal(x) for x in check_texts)
+
+
+def _is_ascii_word(s: str) -> bool:
+    return bool(s) and all(('a' <= ch.lower() <= 'z') or ('0' <= ch <= '9') or ch == '_' for ch in s)
+
+
+def _mask_nsfw_terms(text: str) -> str:
+    s = str(text or '').strip()
+    if not s:
+        return s
+
+    # 先去掉模型可能输出的不规范遮罩，再按统一规则重做
+    s = s.replace(_NSFW_MASK_TOKEN, '')
+
+    words = sorted(_NSFW_HINT_WORDS, key=len, reverse=True)
+    for w in words:
+        if not w:
+            continue
+        esc = re.escape(w)
+        if _is_ascii_word(w):
+            # 英文词按词边界匹配，避免误伤普通单词片段
+            pattern = re.compile(rf'(?i)(?<!{_NSFW_MASK_TOKEN})\b{esc}\b(?!{_NSFW_MASK_TOKEN})')
+        else:
+            # 中日韩词语按子串匹配
+            pattern = re.compile(rf'(?i)(?<!{_NSFW_MASK_TOKEN}){esc}(?!{_NSFW_MASK_TOKEN})')
+        s = pattern.sub(lambda m: f'{_NSFW_MASK_TOKEN}{m.group(0)}{_NSFW_MASK_TOKEN}', s)
+    return s
+
+
+def _apply_nsfw_prompt_mask(blueprint: dict, gen_params: dict, user_why_good: str = '') -> dict:
+    if not isinstance(blueprint, dict):
+        return blueprint
+    if not _needs_nsfw_mask(blueprint, gen_params, user_why_good=user_why_good):
+        blueprint['nsfw_masked'] = False
+        return blueprint
+
+    masked_any = False
+    for k in ('plain_text', 'output_prompt_plain', 'output_prompt_with_model'):
+        if k in blueprint:
+            old = str(blueprint.get(k, '') or '')
+            new = _mask_nsfw_terms(old)
+            blueprint[k] = new
+            if new != old:
+                masked_any = True
+    blueprint['nsfw_masked'] = masked_any
+    return blueprint
 
 
 def _build_user_message(gen_params: dict, trigger_words: dict,
@@ -368,6 +472,49 @@ def _build_user_message(gen_params: dict, trigger_words: dict,
     return '\n'.join(parts)
 
 
+def _fallback_blueprint(image_source, gen_params: dict, reason: str = '') -> dict:
+    """当 LLM 返回不可解析内容时的兜底结构。"""
+    pos = str(gen_params.get('positive_prompt', '') or '')
+    neg = str(gen_params.get('negative_prompt', '') or '')
+    ckpt = str(gen_params.get('checkpoint', '') or '')
+
+    lora_desc = []
+    for l in gen_params.get('loras', []) or []:
+        if not isinstance(l, dict):
+            continue
+        n = str(l.get('name', '') or '').strip()
+        if not n:
+            continue
+        w = l.get('weight', 1.0)
+        lora_desc.append(f"{n} ({w})")
+
+    with_model = '\n'.join([
+        f"Checkpoint: {ckpt or 'unknown'}",
+        f"LoRA: {'; '.join(lora_desc) if lora_desc else 'none'}",
+        f"Sampler: {gen_params.get('sampler', 'unknown')} | Steps: {gen_params.get('steps', '?')} | CFG: {gen_params.get('cfg', '?')}",
+        f"Size: {gen_params.get('width', '?')}x{gen_params.get('height', '?')} | Seed: {gen_params.get('seed', '?')}",
+        f"Positive prompt: {pos}",
+        f"Negative prompt: {neg}",
+    ])
+
+    return {
+        'work_title': '分析降级结果',
+        'plain_text': pos,
+        'why_good': 'LLM 未返回可解析 JSON，已返回基于参数的降级结果。',
+        'output_prompt_plain': pos,
+        'output_prompt_with_model': with_model,
+        'lora_inferred_additional_prompts': [],
+        'lora_dependency_notes': f'fallback: {reason}'.strip(),
+        'base_combo': os.path.basename(ckpt) if ckpt else 'unknown',
+        'image_type': 'unknown',
+        'tags': [],
+        'vibe': '',
+        'image_source': image_source if isinstance(image_source, str) else '',
+        'base_model': ckpt,
+        'lora_list': lora_desc,
+    }
+
+
 # ============================================================
 # 第 5 步：主分析函数
 # ============================================================
@@ -402,26 +549,45 @@ def analyze(image_source, user_why_good: str = '',
     messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
 
     # 4. 调用 LLM（带图片 + 强制 JSON）
-    print("[Aesthetic] 调用 GPT-4o 分析中...")
+    print(f"[Aesthetic] 调用 {_AESTHETIC_MODEL} 分析中...")
     raw_reply = chat_with_image_json(
         messages=messages,
         image=image_source,
         user_text=user_text,
+        model=_AESTHETIC_MODEL,
         max_tokens=1500,
         temperature=0.3,
     )
 
     # 5. 解析 JSON
+    blueprint = None
+    parse_reason = ''
     try:
-        blueprint = json.loads(raw_reply)
-    except json.JSONDecodeError:
-        # 尝试提取 JSON 块
-        import re
-        m = re.search(r'\{[\s\S]*\}', raw_reply)
-        if m:
-            blueprint = json.loads(m.group())
+        if isinstance(raw_reply, dict):
+            blueprint = raw_reply
+        elif isinstance(raw_reply, str):
+            txt = raw_reply.strip()
+            if txt:
+                blueprint = json.loads(txt)
         else:
-            raise ValueError(f"LLM 返回内容无法解析为 JSON: {raw_reply[:200]}")
+            parse_reason = f'unsupported reply type: {type(raw_reply)}'
+    except Exception as e:
+        parse_reason = str(e)
+
+    if blueprint is None and isinstance(raw_reply, str):
+        # 尝试提取 JSON 块
+        try:
+            import re
+            m = re.search(r'\{[\s\S]*\}', raw_reply)
+            if m:
+                blueprint = json.loads(m.group())
+        except Exception as e:
+            parse_reason = parse_reason or str(e)
+
+    if blueprint is None:
+        preview = (raw_reply[:200] if isinstance(raw_reply, str) else str(raw_reply)[:200])
+        parse_reason = parse_reason or f'empty/non-json reply: {preview}'
+        blueprint = _fallback_blueprint(image_source, gen_params, reason=parse_reason)
 
     # 6. 补全非 LLM 负责的字段
     blueprint['image_source'] = image_source if isinstance(image_source, str) else ''
@@ -436,6 +602,17 @@ def analyze(image_source, user_why_good: str = '',
         else:
             lora_entries.append(name)
     blueprint['lora_list'] = lora_entries
+
+    # 7. 规范化 LoRA 反推字段，避免上游返回结构不稳定
+    inferred = blueprint.get('lora_inferred_additional_prompts', [])
+    if not isinstance(inferred, list):
+        inferred = []
+    inferred = [str(x).strip() for x in inferred if str(x).strip()]
+    blueprint['lora_inferred_additional_prompts'] = inferred[:12]
+    blueprint['lora_dependency_notes'] = str(blueprint.get('lora_dependency_notes', '') or '').strip()
+
+    # 8. NSFW 提示词遮罩（服务端兜底，避免模型漏加前缀）
+    blueprint = _apply_nsfw_prompt_mask(blueprint, gen_params, user_why_good=user_why_good)
 
     print(f"[Aesthetic] 分析完成: {blueprint.get('work_title', '?')}")
     return blueprint

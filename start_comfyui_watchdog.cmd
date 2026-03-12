@@ -33,7 +33,7 @@ timeout /t 1 /nobreak >nul
 
 echo "[Watchdog] [%date% %time%] Starting ComfyUI ..."
 pushd "%COMFYUI_DIR%"
-.\python_embeded\python.exe -s ComfyUI\main.py --windows-standalone-build --disable-auto-launch
+.\python_embeded\python.exe -s ComfyUI\main.py --windows-standalone-build --disable-auto-launch --disable-cuda-malloc
 popd
 
 echo.

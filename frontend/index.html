@@ -383,6 +383,14 @@
                             <button type="button" class="btn-clear" id="clearImageUrl" title="清空" style="position:absolute; right:8px; top:50%; transform:translateY(-50%);">✖</button>
                         </div>
                     </div>
+                    <div class="form-group draw-inherit-row">
+                        <label for="drawInheritFilename">按文件名继承</label>
+                        <input type="text" id="drawInheritFilename" class="draw-inherit-input" placeholder="例如：0609de15_46c4034e_0.png"
+                            autocapitalize="off" autocorrect="off" spellcheck="false">
+                        <button type="button" id="drawInheritFilenameBtn" class="btn btn-outline btn-sm draw-inherit-btn">
+                            装载
+                        </button>
+                    </div>
                     <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                         <label style="margin-bottom:0; white-space:nowrap; min-width:fit-content;">工作流</label>
                         <select id="autoWorkflowSelect" style="flex:1; margin-bottom:0;">
@@ -480,6 +488,11 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label>额外 LoRA（可选，多行）</label>
+                        <textarea id="manualExtraLoras" rows="3" placeholder="每行一个，格式：subtype/filename.safetensors@0.8"></textarea>
+                    </div>
+
                     <!-- 提示词 -->
                     <div class="form-group">
                         <label>正向提示词</label>
@@ -506,6 +519,19 @@
                         <input type="hidden" id="height" value="1024">
                     </div>
 
+                    <div class="form-group">
+                        <label>生成参数</label>
+                        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+                            <input type="number" id="manualSteps" min="1" max="150" step="1" value="20" placeholder="Steps">
+                            <input type="number" id="manualCfg" min="1" max="30" step="0.5" value="7" placeholder="CFG">
+                            <input type="text" id="manualSampler" value="dpmpp_2m" placeholder="Sampler">
+                            <input type="text" id="manualScheduler" value="" placeholder="Scheduler（可空）">
+                            <input type="number" id="manualSeed" min="-1" step="1" value="-1" placeholder="Seed（-1随机）">
+                            <input type="number" id="manualBatchSize" min="1" max="16" step="1" value="1" placeholder="Batch Size">
+                            <input type="number" id="manualClipSkip" min="-5" max="0" step="1" value="0" placeholder="Clip Skip（可空）" style="grid-column:span 2;">
+                        </div>
+                    </div>
+
                     <!-- 生成按钮 -->
                     <button type="submit" class="btn btn-primary btn-large" id="manualGenerateBtn">
                         <span class="btn-text">🎨 开始生成</span>
@@ -528,29 +554,33 @@
 
         <!-- ==================== Gallery Tab ==================== -->
         <section id="gallery" class="tab-content">
-            <!-- 加载状态 -->
-            <div id="galleryLoading" class="gallery-loading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>加载中...</p>
-            </div>
-
-            <!-- 空状态 -->
-            <div id="galleryEmptyState" class="gallery-empty" style="display: none;">
-                <div class="gallery-empty-icon">🖼️</div>
-                <p>暂无图片</p>
-                <p style="font-size: 12px; margin-top: 8px;">生成图片后会自动显示在这里</p>
-            </div>
-
             <!-- 图片展示区（控制栏悬浮在顶部） -->
             <div class="gallery-image-outer">
                 <!-- 控制栏：悬浮在图片顶部 -->
                 <div class="gallery-controls">
                     <button type="button" id="galleryRefreshBtn" class="icon-btn" title="刷新">🔄</button>
+                    <select id="galleryFilterSelect" class="fav-filter-select" title="筛选状态">
+                        <option value="pending_review">⏳ 复刻待评估</option>
+                        <option value="perfect">⭐ 完美复刻</option>
+                        <option value="done">✅ 已完成</option>
+                        <option value="all">📋 全部</option>
+                    </select>
                     <div class="gallery-nav" style="align-items:center;">
                         <button type="button" id="galleryPrevBtn" class="btn btn-outline btn-sm" disabled title="上一张">◀</button>
                         <span class="gallery-counter" id="galleryCounter">0 / 0</span>
                         <button type="button" id="galleryNextBtn" class="btn btn-outline btn-sm" disabled title="下一张">▶</button>
                     </div>
+                </div>
+                <!-- 加载状态（图片框内） -->
+                <div id="galleryLoading" class="gallery-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>加载中...</p>
+                </div>
+                <!-- 空状态（图片框内） -->
+                <div id="galleryEmptyState" class="gallery-empty" style="display: none;">
+                    <div class="gallery-empty-icon">🖼️</div>
+                    <p>暂无图片</p>
+                    <p style="font-size: 12px; margin-top: 8px;">生成图片后会自动显示在这里</p>
                 </div>
                 <div id="galleryImageContainer" class="gallery-image-wrapper">
                     <!-- 图片将在这里显示 -->
@@ -565,19 +595,6 @@
 
         <!-- ==================== Favorites Tab ==================== -->
         <section id="favorites" class="tab-content">
-            <!-- 加载状态 -->
-            <div id="favLoading" class="gallery-loading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>加载中...</p>
-            </div>
-
-            <!-- 空状态 -->
-            <div id="favEmptyState" class="gallery-empty" style="display: none;">
-                <div class="gallery-empty-icon">⭐</div>
-                <p>暂无收藏</p>
-                <p style="font-size: 12px; margin-top: 8px;">使用 Chrome 插件在 Civitai 上右键收藏图片</p>
-            </div>
-
             <!-- 图片展示区（控制栏悬浮在顶部） -->
             <div class="fav-image-outer">
                 <!-- 控制栏：悬浮在图片顶部 -->
@@ -587,7 +604,7 @@
                     <select class="fav-filter-select" id="favFilterSelect">
                         <option value="all">全部</option>
                         <option value="pending">待处理</option>
-                        <option value="retry">参数待调整</option>
+                        <option value="retry">待调整</option>
                         <option value="processing">待分析</option>
                         <option value="done">已完成</option>
                         <option value="fail">复刻失败</option>
@@ -602,13 +619,37 @@
                         <button type="button" id="favNextBtn" class="btn btn-outline btn-sm" title="下一张">▶</button>
                     </div>
                 </div>
+                <!-- 加载状态（图片框内） -->
+                <div id="favLoading" class="gallery-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>加载中...</p>
+                </div>
+                <!-- 空状态（图片框内） -->
+                <div id="favEmptyState" class="gallery-empty" style="display: none;">
+                    <div class="gallery-empty-icon">⭐</div>
+                    <p>暂无收藏</p>
+                    <p style="font-size: 12px; margin-top: 8px;">使用 Chrome 插件在 Civitai 上右键收藏图片</p>
+                </div>
                 <div id="favImageContainer" class="gallery-image-wrapper"></div>
             </div>
 
-            <!-- 自动复刻面板（移到图片下方） -->
+            <!-- 操作按钮（始终紧跟图片框下方） -->
+            <div id="favActions" class="fav-actions" style="display: none;">
+                <button type="button" id="favReplicateBtn" class="btn btn-sm fav-replicate-btn">🎨 分析与复刻</button>
+                <button type="button" id="favMarkFailBtn" class="btn btn-sm" style="background:#dc2626;color:#fff;border:none;">❌ 标记无法复刻</button>
+                <button type="button" id="favResetBtn" class="btn btn-outline btn-sm" style="display:none;" title="清除调整标记，重置为普通待处理状态，下次自动复刻时会重新处理（待调整的条目不会被自动复刻，需手动重置后才会进入队列）">🔄 重置为待处理</button>
+                <a id="favOpenLink" class="btn btn-outline btn-sm" href="#" target="_blank">↗ 在 Civitai 打开</a>
+                <button type="button" id="favDeleteBtn" class="btn btn-outline btn-sm fav-delete-btn">🗑️ 删除</button>
+            </div>
+
+            <!-- 自动复刻面板 -->
             <div class="ar-panel" id="arPanel" style="margin-top:12px;">
                 <div class="ar-header">
                     <button type="button" id="arToggleBtn" class="ar-btn-start">🚀 开始自动复刻</button>
+                    <select id="arModeSelect" title="选取模式" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:12px;cursor:pointer;">
+                        <option value="sequential">📋 顺序</option>
+                        <option value="shuffle">🔀 随机</option>
+                    </select>
                     <span class="ar-status" id="arStatus">就绪</span>
                     <span class="ar-log-toggle" id="arLogToggle" onclick="document.getElementById('arLog').style.display=document.getElementById('arLog').style.display==='none'?'block':'none'">📋 日志</span>
                 </div>
@@ -617,17 +658,29 @@
                     <span>⏭️ 跳过 <b id="arSkip">0</b></span>
                     <span>❌ 失败 <b id="arFail">0</b></span>
                     <span>📋 待处理 <b id="arPending">0</b></span>
-                    <span title="参数待调整，需手动处理">🔧 待调整 <b id="arRetry">0</b></span>
+                    <span title="待调整，需手动处理">🔧 待调整 <b id="arRetry">0</b></span>
+                    <span id="arDlQueueWrap" title="后台下载队列" style="display:none;">⬇️ 下载中 <b id="arDlQueue">0</b></span>
                 </div>
                 <div class="ar-log" id="arLog"></div>
+                <!-- 下载列表（折叠） -->
+                <div id="arDlListWrap" style="display:none;border-top:1px solid var(--border);">
+                    <details ontoggle="document.getElementById('arDlArrow').style.transform=this.open?'rotate(90deg)':''">
+                        <summary style="padding:6px 12px;font-size:11px;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:4px;color:var(--text-secondary);">
+                            <span style="transition:transform .2s;display:inline-block;" id="arDlArrow">▶</span> 📦 模型下载队列 (<b id="arDlQueue2">0</b>)
+                        </summary>
+                        <div id="arDlList" style="max-height:120px;overflow-y:auto;padding:0 12px 8px;font-size:11px;color:var(--text-secondary);"></div>
+                    </details>
+                </div>
             </div>
 
-            <!-- 操作按钮 -->
-            <div id="favActions" class="fav-actions" style="display: none;">
-                <button type="button" id="favReplicateBtn" class="btn btn-sm fav-replicate-btn">🎨 分析与复刻</button>
-                <button type="button" id="favResetBtn" class="btn btn-outline btn-sm" style="display:none;" title="清除调整标记，重置为普通待处理状态，下次自动复刻时会重新处理（参数待调整的条目不会被自动复刻，需手动重置后才会进入队列）">🔄 重置为待处理</button>
-                <a id="favOpenLink" class="btn btn-outline btn-sm" href="#" target="_blank">↗ 在 Civitai 打开</a>
-                <button type="button" id="favDeleteBtn" class="btn btn-outline btn-sm fav-delete-btn">🗑️ 删除</button>
+            <!-- 待调整细分面板 -->
+            <div id="retryPanel" style="display:none;margin-top:12px;">
+                <details style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;" ontoggle="document.getElementById('retryCatArrow').style.transform=this.open?'rotate(90deg)':''">
+                    <summary style="padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:6px;">
+                        <span style="transition:transform .2s;display:inline-block;" id="retryCatArrow">▶</span> 📊 待调整分类统计
+                    </summary>
+                    <div id="retryCats" style="display:flex;flex-direction:column;gap:6px;font-size:12px;padding:0 16px 14px;"></div>
+                </details>
             </div>
         </section>
 
@@ -709,8 +762,8 @@
         setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(40px)'; setTimeout(() => t.remove(), 300); }, 2000);
     }
     </script>
-    <script src="js/app.js?v=20260218f"></script>
-    <script src="js/gallery.js?v=20260218f"></script>
+    <script src="js/app.js?v=20260222e"></script>
+    <script src="js/gallery.js?v=20260222d"></script>
     <script src="js/admin.js?v=20260218c"></script>
 </body>
 </html>

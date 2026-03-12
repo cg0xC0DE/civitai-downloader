@@ -14,26 +14,104 @@ echo.
 echo "[Phase 1] Checking system dependencies..."
 echo.
 
+:CHECK_UV
+set "HAS_UV="
+set "PYTHON_EXE="
+set "PYTHON_ARGS="
+set "PY_VER="
+
+uv --version >nul 2>&1
+if not errorlevel 1 set "HAS_UV=1"
+
+if not defined HAS_UV (
+    "%USERPROFILE%\.local\bin\uv.exe" --version >nul 2>&1
+    if not errorlevel 1 (
+        set "HAS_UV=1"
+        set "PATH=%USERPROFILE%\.local\bin;%PATH%"
+    )
+)
+
+if defined HAS_UV (
+    echo "[OK] uv detected."
+    for /f "delims=" %%p in ('uv python find 3.12 2^>nul') do set "PYTHON_EXE=%%p"
+    if not defined PYTHON_EXE (
+        echo "[INFO] Python 3.12 not found, installing via uv..."
+        uv python install 3.12
+        for /f "delims=" %%p in ('uv python find 3.12 2^>nul') do set "PYTHON_EXE=%%p"
+    )
+    if defined PYTHON_EXE (
+        for /f "delims=" %%v in ('"!PYTHON_EXE!" -c "import sys; print(sys.version.split()[0])"') do set "PY_VER=%%v"
+        echo "[OK] Python !PY_VER! detected via uv."
+    ) else (
+        echo "[ERROR] Failed to install Python 3.12 via uv."
+        exit /b 1
+    )
+    goto PHASE1_DONE
+)
+
+:: Fallback: detect Python without uv
 :CHECK_PYTHON
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo "[ERROR] Python is not detected. Please install Python 3.10+ and ensure it is in PATH."
-    echo "        Download: https://www.python.org/downloads/"
+for /f "delims=" %%p in ('where python 2^>nul') do (
+    if not defined PYTHON_EXE (
+        echo %%p | find /i "\WindowsApps\" >nul
+        if errorlevel 1 (
+            "%%p" --version >nul 2>&1
+            if not errorlevel 1 set "PYTHON_EXE=%%p"
+        )
+    )
+)
+
+if not defined PYTHON_EXE (
+    python --version >nul 2>&1
+    if not errorlevel 1 set "PYTHON_EXE=python"
+)
+
+if not defined PYTHON_EXE (
+    py -3 --version >nul 2>&1
+    if not errorlevel 1 (
+        set "PYTHON_EXE=py"
+        set "PYTHON_ARGS=-3"
+    )
+)
+
+if not defined PYTHON_EXE (
+    py --version >nul 2>&1
+    if not errorlevel 1 set "PYTHON_EXE=py"
+)
+
+if not defined PYTHON_EXE (
+    python3 --version >nul 2>&1
+    if not errorlevel 1 set "PYTHON_EXE=python3"
+)
+
+if not defined PYTHON_EXE (
+    echo "[ERROR] Python is not detected. Please install uv (https://docs.astral.sh/uv/) or Python 3.10+."
+    echo "        uv:     powershell -c \"irm https://astral.sh/uv/install.ps1 | iex\""
+    echo "        Python: https://www.python.org/downloads/"
     set /p _="After installing, press ENTER to re-check..."
+    goto CHECK_UV
+)
+
+for /f "delims=" %%v in ('"%PYTHON_EXE%" %PYTHON_ARGS% -c ^"import sys; print(sys.version.split()[0])^"') do set "PY_VER=%%v"
+"%PYTHON_EXE%" %PYTHON_ARGS% -c "import sys; raise SystemExit(0 if sys.version_info[:2]>=(3,10) else 1)" >nul 2>&1
+if errorlevel 1 (
+    echo "[ERROR] Python %PY_VER% detected, but Python 3.10+ is required."
+    set /p _="After upgrading, press ENTER to re-check..."
     goto CHECK_PYTHON
 )
-for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do echo "[OK] Python %%v detected."
+echo "[OK] Python %PY_VER% detected via: %PYTHON_EXE% %PYTHON_ARGS%."
 
 :CHECK_PIP
-pip --version >nul 2>&1
+"%PYTHON_EXE%" %PYTHON_ARGS% -m pip --version >nul 2>&1
 if errorlevel 1 (
     echo "[ERROR] pip is not detected. Please ensure pip is installed with Python."
-    echo "        Try: python -m ensurepip --upgrade"
+    echo "        Try: %PYTHON_EXE% %PYTHON_ARGS% -m ensurepip --upgrade"
     set /p _="After installing, press ENTER to re-check..."
     goto CHECK_PIP
 )
 echo "[OK] pip detected."
 
+:PHASE1_DONE
 echo.
 echo "[Phase 1] All dependencies satisfied."
 echo.
@@ -49,7 +127,11 @@ echo.
 :: Create backend virtual environment
 if exist "backend\venv" goto SKIP_VENV
 echo "[INFO] Creating Python virtual environment..."
-python -m venv backend\venv
+if defined HAS_UV (
+    uv venv --python 3.12 backend\venv
+) else (
+    "%PYTHON_EXE%" %PYTHON_ARGS% -m venv backend\venv
+)
 if errorlevel 1 (
     echo "[ERROR] Failed to create virtual environment."
     exit /b 1
@@ -65,7 +147,11 @@ call backend\venv\Scripts\activate.bat
 
 :: Install Python dependencies
 echo "[INFO] Installing Python dependencies..."
-pip install -r backend\requirements.txt
+if defined HAS_UV (
+    uv pip install -r backend\requirements.txt --python backend\venv\Scripts\python.exe
+) else (
+    python -m pip install -r backend\requirements.txt
+)
 if errorlevel 1 (
     echo "[ERROR] Failed to install Python dependencies."
     exit /b 1

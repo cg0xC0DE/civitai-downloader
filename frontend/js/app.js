@@ -283,6 +283,21 @@ class CivitaiApp {
         imageUrlInput.addEventListener('input', updateClearBtn);
         updateClearBtn(); // 初始化状态
 
+        // 按文件名装载到 Draw（复用“继承”参数）
+        const inheritFilenameInput = document.getElementById('drawInheritFilename');
+        const inheritFilenameBtn = document.getElementById('drawInheritFilenameBtn');
+        if (inheritFilenameBtn) {
+            inheritFilenameBtn.addEventListener('click', () => this.inheritByFilename());
+        }
+        if (inheritFilenameInput) {
+            inheritFilenameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.inheritByFilename();
+                }
+            });
+        }
+
         // 工作流切换时显示/隐藏精绘参数
         const wfSelect = document.getElementById('autoWorkflowSelect');
         const upscaleBox = document.getElementById('upscaleParams');
@@ -399,8 +414,9 @@ class CivitaiApp {
                     </select>
                 </div>`;
         }
+        const ckptResolvedName = ckptCheck?.found ? `${ckptCheck.subtype}/${ckptCheck.filename}` : '';
 
-        // LoRA 列表（权重可编辑）
+        // LoRA 列表（可启用/禁用 + 名称/权重可编辑）
         let lorasHtml = '';
         if (data.loras && data.loras.length > 0) {
             lorasHtml = data.checks.loras.map((lc, idx) => {
@@ -413,7 +429,19 @@ class CivitaiApp {
                     st = `<span class="check-fail">❌ 未找到</span>`;
                 }
                 const wSrc = lc.weight_source === 'default' ? ' <span title="权重未知，默认1.0" style="color:#f59e0b;">⚠️</span>' : '';
-                return `<div class="parse-item"><span class="parse-label">${_badge('lora_weights')} LoRA: ${lc.requested_name} <input type="number" class="parse-edit parse-edit-weight" data-pe-field="lora_weight_${idx}" value="${lc.weight}" step="0.05" min="0" max="3">${wSrc}</span><span class="parse-value">${st}</span></div>`;
+                const defaultName = lc.found ? `${lc.subtype}/${lc.filename}` : (lc.requested_name || '');
+                const enabled = lc.found ? 'checked' : '';
+                return `<div class="parse-item"><span class="parse-label">${_badge('lora_weights')} LoRA: ${this.escapeHtml(lc.requested_name || `lora_${idx + 1}`)}</span><span class="parse-value">${st}</span></div>
+                    <div class="parse-item" style="margin-top:-4px;">
+                        <span class="parse-label" style="font-size:12px;color:var(--text-secondary);">↳ 参数</span>
+                        <span class="parse-value" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+                                <input type="checkbox" data-pe-field="lora_enable_${idx}" ${enabled} style="accent-color:#7c3aed;">启用
+                            </label>
+                            <input type="text" class="parse-edit parse-edit-text" data-pe-field="lora_name_${idx}" value="${this.escapeAttr(defaultName)}" placeholder="subtype/filename.safetensors" style="min-width:280px;max-width:520px;">
+                            <input type="number" class="parse-edit parse-edit-weight" data-pe-field="lora_weight_${idx}" value="${lc.weight}" step="0.05" min="0" max="3">${wSrc}
+                        </span>
+                    </div>`;
             }).join('');
         }
 
@@ -464,14 +492,22 @@ class CivitaiApp {
                     </div>
                 </div>` : ''}
                 <div class="parse-item"><span class="parse-label">${_badge('checkpoint')} Checkpoint</span><span class="parse-value">${data.checkpoint || '未知'}${ckptCheck?.versionName ? ` <span style="color:var(--text-secondary);font-size:11px;">${this.escapeHtml(ckptCheck.versionName)}</span>` : ''}${ckptCheck?.modelVersionId ? ` <span style="color:var(--text-secondary);font-size:10px;opacity:0.6;">vid:${ckptCheck.modelVersionId}</span>` : ''}</span></div>
+                <div class="parse-item"><span class="parse-label">Checkpoint 覆盖</span><span class="parse-value"><input type="text" class="parse-edit parse-edit-text" data-pe-field="checkpoint" value="${this.escapeAttr(ckptResolvedName)}" placeholder="如 xl/model.safetensors（留空可随机 XL）" style="min-width:320px;max-width:520px;"></span></div>
                 <div class="parse-item"><span class="parse-label">本地仓库</span><span class="parse-value">${ckptStatus}</span></div>
                 ${lorasHtml}
+                <div class="parse-item"><span class="parse-label">额外 LoRA（可选）</span><span class="parse-value"><textarea class="parse-edit-prompt" data-pe-field="extra_loras" style="min-height:48px;max-height:160px;" placeholder="每行一个，格式：subtype/filename.safetensors@0.8\n示例：xl-style/MyStyle.safetensors@0.7"></textarea></span></div>
                 ${embHtml}
                 <div class="parse-item"><span class="parse-label">${_badge('sampler')} 采样器</span><span class="parse-value"><input type="text" class="parse-edit parse-edit-text" data-pe-field="sampler" value="${this.escapeAttr(data.sampler || 'dpmpp_2m')}" style="width:100px;"> / <input type="text" class="parse-edit parse-edit-text" data-pe-field="scheduler" value="${this.escapeAttr(data.scheduler || '')}" style="width:80px;" placeholder="scheduler"></span></div>
                 <div class="parse-item"><span class="parse-label">${_badge('steps')} 步数</span><span class="parse-value"><input type="number" class="parse-edit parse-edit-num" data-pe-field="steps" value="${data.steps || 20}" min="1" max="150"></span></div>
                 <div class="parse-item"><span class="parse-label">${_badge('cfg')} CFG</span><span class="parse-value"><input type="number" class="parse-edit parse-edit-num" data-pe-field="cfg" value="${data.cfg || 7}" step="0.5" min="1" max="30"></span></div>
                 <div class="parse-item"><span class="parse-label">${_badge('size')} 尺寸${sizeNote}</span><span class="parse-value"><span class="parse-size-group"><input type="number" class="parse-edit parse-edit-size" data-pe-field="width" value="${data.width || 1024}" step="64" min="64" max="4096"> × <input type="number" class="parse-edit parse-edit-size" data-pe-field="height" value="${data.height || 1024}" step="64" min="64" max="4096"></span></span></div>
-                <div class="parse-item"><span class="parse-label">${_badge('seed')} Seed</span><span class="parse-value"><input type="number" class="parse-edit" data-pe-field="seed" value="${data.seed >= 0 ? data.seed : -1}" style="width:130px;text-align:center;" min="-1"></span></div>
+                <div class="parse-item"><span class="parse-label">${_badge('seed')} Seed</span><span class="parse-value" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <input type="number" class="parse-edit" data-pe-field="seed" value="${data.seed >= 0 ? data.seed : -1}" style="width:120px;text-align:center;" min="-1">
+                    <label style="display:flex;align-items:center;gap:3px;font-size:12px;cursor:pointer;white-space:nowrap;"><input type="checkbox" id="seedRandomCheck" ${data.seed < 0 ? 'checked' : ''} style="accent-color:#7c3aed;"> 随机</label>
+                    <select id="seedRandomCount" style="padding:2px 6px;border-radius:6px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:12px;width:56px;">
+                        <option value="1">×1</option><option value="2">×2</option><option value="3" selected>×3</option><option value="4">×4</option><option value="5">×5</option>
+                    </select>
+                </span></div>
                 ${data.clip_skip != null ? `<div class="parse-item"><span class="parse-label">${_badge('clip_skip')} Clip Skip</span><span class="parse-value"><input type="number" class="parse-edit parse-edit-num" data-pe-field="clip_skip" value="${data.clip_skip}" min="-5" max="0"></span></div>` : ''}
                 ${data.prompt_reverse_tagged ? `
                 <div style="background:#06b6d422;border:1px solid #06b6d4;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13px;">
@@ -524,8 +560,8 @@ class CivitaiApp {
             });
         });
 
-        // 只要 checkpoint 可用就允许生成（缺失的 LoRA 会自动跳过）
-        autoBtn.disabled = !(data.checks?.checkpoint?.found || document.getElementById('ckptFallbackSelect'));
+        // 解析成功后始终允许生成：checkpoint 为空时后端会随机回退 XL
+        autoBtn.disabled = false;
 
         // 如果 checkpoint 未找到，异步加载本地模型列表填充下拉框
         if (!ckptCheck?.found) {
@@ -546,9 +582,6 @@ class CivitaiApp {
             }
             sel.innerHTML = '<option value="">-- 请选择基模 --</option>' +
                 ckpts.map(c => `<option value="${this.escapeAttr(c)}">${this.escapeHtml(c)}</option>`).join('');
-            sel.addEventListener('change', () => {
-                autoBtn.disabled = !sel.value;
-            });
         } catch {
             sel.innerHTML = '<option value="">-- 加载失败 --</option>';
         }
@@ -633,56 +666,71 @@ class CivitaiApp {
 
     async autoGenerate() {
         if (!this.parsedData) return;
-        const _ckptSel = document.getElementById('ckptFallbackSelect');
-        const _hasCkpt = this.parsedData.checks?.checkpoint?.found || (_ckptSel && _ckptSel.value);
-        if (!_hasCkpt) return;
+        const _hasParsedCkpt = !!this.parsedData.checks?.checkpoint?.found;
 
         const btn = document.getElementById('autoGenerateBtn');
         this.setBtnLoading(btn, true);
 
         const d = this.parsedData;
         const sourceUrl = document.getElementById('imageUrl').value.trim();
-        const ckpt = d.checks.checkpoint;
-        // 如果用户从下拉框选择了 checkpoint，覆盖
+        const ckpt = d.checks?.checkpoint || {};
         const ckptFallback = document.getElementById('ckptFallbackSelect');
-        // 构建 LoRA 列表（从 DOM 读取可能被用户修改的权重）
-        const loraList = (d.checks.loras || [])
-            .filter(lc => lc.found)
-            .map((lc, idx) => {
-                const editedWeight = parseFloat(this._peVal(`lora_weight_${idx}`));
-                return { name: `${lc.subtype}/${lc.filename}`, weight: isNaN(editedWeight) ? (lc.weight || 1.0) : editedWeight };
-            });
+        const loraList = this._collectAutoLoras(d);
 
         // 从可编辑 DOM 字段读取（用户可能已手工修改）
         const _pv = (field, fallback) => { const v = this._peVal(field); return v !== null && v !== '' ? v : fallback; };
-        const seed = parseInt(_pv('seed', -1));
+        const parsedCkptName = ckpt.found ? `${ckpt.subtype}/${ckpt.filename}` : '';
+        const ckptEdited = String(_pv('checkpoint', parsedCkptName || '') || '').trim();
+        const selectedFallback = (ckptFallback && ckptFallback.value) ? ckptFallback.value : '';
+        const finalCheckpoint = ckptEdited || selectedFallback || '';
 
-        const payload = {
-            workflow: document.getElementById('autoWorkflowSelect').value || 'nolora',
-            checkpoint: ckpt.found ? `${ckpt.subtype}/${ckpt.filename}` : (ckptFallback?.value || ''),
-            prompt: _pv('prompt', d.prompt),
-            negative_prompt: _pv('negative_prompt', d.negative_prompt || 'low quality, worst quality'),
-            width: parseInt(_pv('width', d.width)), height: parseInt(_pv('height', d.height)),
-            steps: parseInt(_pv('steps', d.steps || 20)), cfg: parseFloat(_pv('cfg', d.cfg || 7)),
-            sampler: _pv('sampler', d.sampler || 'dpmpp_2m'),
-            scheduler: _pv('scheduler', d.scheduler || ''),
-            seed: seed > 0 ? seed : null,
-            loras: loraList.length > 0 ? loraList : undefined,
-            variations: d.variations ? d.variations.map(v => ({
+        if (!_hasParsedCkpt && !finalCheckpoint) {
+            showToast('未解析到 CKPT，将随机使用 6 个 XL 基模生成');
+        }
+        const seedRaw = parseInt(_pv('seed', -1));
+        const seedRandomCheck = document.getElementById('seedRandomCheck');
+        const seedRandomCountSel = document.getElementById('seedRandomCount');
+        const isRandomSeed = seedRandomCheck ? seedRandomCheck.checked : (seedRaw < 0);
+        const seedRandomCount = isRandomSeed ? parseInt(seedRandomCountSel?.value || '3') : 1;
+        const seed = isRandomSeed ? null : (seedRaw > 0 ? seedRaw : null);
+        const parsedVariations = Array.isArray(d.variations) ? d.variations : [];
+        // parse 结果会默认带 1 个“基准”variation；该场景应走 batch_size，避免吞掉随机种子张数
+        const effectiveVariations = parsedVariations.length > 1
+            ? parsedVariations.map(v => ({
                 ...v,
                 params: {
                     ...v.params,
                     width: parseInt(_pv('width', d.width)),
                     height: parseInt(_pv('height', d.height)),
                 }
-            })) : null,
+            }))
+            : null;
+
+        const payload = {
+            workflow: document.getElementById('autoWorkflowSelect').value || 'nolora',
+            checkpoint: finalCheckpoint,
+            prompt: _pv('prompt', d.prompt),
+            negative_prompt: _pv('negative_prompt', d.negative_prompt || 'low quality, worst quality'),
+            width: parseInt(_pv('width', d.width)), height: parseInt(_pv('height', d.height)),
+            steps: parseInt(_pv('steps', d.steps || 20)), cfg: parseFloat(_pv('cfg', d.cfg || 7)),
+            sampler: _pv('sampler', d.sampler || 'dpmpp_2m'),
+            scheduler: _pv('scheduler', d.scheduler || ''),
+            seed: seed,
+            batch_size: seedRandomCount,
+            clip_skip: (() => { const cs = parseInt(_pv('clip_skip', '')); return isNaN(cs) ? null : (cs > 0 ? -cs : cs); })(),
+            loras: loraList.length > 0 ? loraList : undefined,
+            variations: effectiveVariations,
             favorite_id: window._activeFavoriteId || '',
             source_url: sourceUrl
         };
 
         // ---- LoRA 权重扫描 ----
         const sweepOn = document.getElementById('weightSweepCheck')?.checked;
-        if (sweepOn && d.checks?.loras) {
+        const loraCustomized = this._isAutoLoraCustomized(d);
+        if (sweepOn && loraCustomized) {
+            console.log('[WeightSweep] 检测到手工调整 LoRA（启用/名称/额外），跳过自动权重扫描');
+        }
+        if (sweepOn && !loraCustomized && d.checks?.loras) {
             const unknownIdx = [];
             let foundIdx = 0;
             for (const lc of d.checks.loras) {
@@ -847,10 +895,77 @@ class CivitaiApp {
         }
     }
 
+    _parseLoraLines(rawText) {
+        const result = [];
+        const lines = String(rawText || '').split(/\r?\n/);
+        for (const line of lines) {
+            const s = line.trim();
+            if (!s || s.startsWith('#')) continue;
+            let name = s;
+            let weight = 1.0;
+            const at = s.lastIndexOf('@');
+            if (at > 0 && at < s.length - 1) {
+                const maybeName = s.slice(0, at).trim();
+                const maybeWeight = parseFloat(s.slice(at + 1).trim());
+                if (maybeName) name = maybeName;
+                if (!isNaN(maybeWeight)) weight = maybeWeight;
+            }
+            if (!name) continue;
+            result.push({ name: name.replace(/\\/g, '/'), weight });
+        }
+        return result;
+    }
+
+    _collectAutoLoras(parsedData) {
+        const checks = parsedData?.checks?.loras || [];
+        const loras = [];
+
+        checks.forEach((lc, idx) => {
+            const enableEl = document.querySelector(`[data-pe-field="lora_enable_${idx}"]`);
+            const enabled = enableEl ? !!enableEl.checked : !!lc.found;
+            if (!enabled) return;
+
+            const defaultName = lc.found ? `${lc.subtype}/${lc.filename}` : (lc.requested_name || '');
+            const editedName = String(this._peVal(`lora_name_${idx}`) || defaultName || '').trim();
+            if (!editedName) return;
+
+            const editedWeight = parseFloat(this._peVal(`lora_weight_${idx}`));
+            loras.push({
+                name: editedName.replace(/\\/g, '/'),
+                weight: isNaN(editedWeight) ? (lc.weight || 1.0) : editedWeight,
+            });
+        });
+
+        const extra = this._parseLoraLines(this._peVal('extra_loras'));
+        return [...loras, ...extra];
+    }
+
+    _isAutoLoraCustomized(parsedData) {
+        const checks = parsedData?.checks?.loras || [];
+        for (let idx = 0; idx < checks.length; idx++) {
+            const lc = checks[idx];
+            const enableEl = document.querySelector(`[data-pe-field="lora_enable_${idx}"]`);
+            const enabled = enableEl ? !!enableEl.checked : !!lc.found;
+            const defaultEnabled = !!lc.found;
+            if (enabled !== defaultEnabled) return true;
+
+            const defaultName = lc.found ? `${lc.subtype}/${lc.filename}` : (lc.requested_name || '');
+            const editedName = String(this._peVal(`lora_name_${idx}`) || defaultName || '').trim();
+            if (editedName !== defaultName) return true;
+        }
+
+        return !!String(this._peVal('extra_loras') || '').trim();
+    }
+
     async manualGenerate(e) {
         e.preventDefault();
         const btn = document.getElementById('manualGenerateBtn');
         this.setBtnLoading(btn, true);
+
+        const seedRaw = parseInt(document.getElementById('manualSeed').value, 10);
+        const seed = Number.isFinite(seedRaw) && seedRaw >= 0 ? seedRaw : null;
+        const clipRaw = parseInt(document.getElementById('manualClipSkip').value, 10);
+        const clipSkip = Number.isFinite(clipRaw) ? (clipRaw > 0 ? -clipRaw : clipRaw) : null;
 
         const payload = {
             workflow: document.getElementById('workflowSelect').value || 'nolora',
@@ -859,17 +974,32 @@ class CivitaiApp {
             negative_prompt: document.getElementById('negativePrompt').value || 'low quality, worst quality',
             width: parseInt(document.getElementById('width').value),
             height: parseInt(document.getElementById('height').value),
-            steps: 20, cfg: 7.0, sampler: 'dpmpp_2m'
+            steps: parseInt(document.getElementById('manualSteps').value, 10) || 20,
+            cfg: parseFloat(document.getElementById('manualCfg').value) || 7.0,
+            sampler: document.getElementById('manualSampler').value.trim() || 'dpmpp_2m',
+            scheduler: document.getElementById('manualScheduler').value.trim(),
+            seed: seed,
+            batch_size: Math.max(1, parseInt(document.getElementById('manualBatchSize').value, 10) || 1),
+            clip_skip: clipSkip,
         };
 
+        const loras = [];
         if (document.getElementById('useLora').checked) {
             const loraVal = document.getElementById('loraFile').value;
             if (loraVal) {
-                payload.loras = [{
+                loras.push({
                     name: loraVal,
                     weight: parseFloat(document.getElementById('loraStrength').value)
-                }];
+                });
             }
+        }
+
+        const extraLoras = this._parseLoraLines(document.getElementById('manualExtraLoras').value);
+        if (extraLoras.length > 0) {
+            loras.push(...extraLoras);
+        }
+        if (loras.length > 0) {
+            payload.loras = loras;
         }
 
         try {
@@ -914,8 +1044,14 @@ class CivitaiApp {
                 if (data.status === 'running') {
                     // 更新进度显示
                     const body = document.querySelector(`#${tid} .result-body`);
-                    if (body && data.completed !== undefined) {
-                        body.innerHTML = `<p>批次: ${promptId} | 已完成 ${data.completed}/${data.batch_size} | <span class="loading-spinner"></span> 等待中</p>`;
+                    if (body) {
+                        const completed = (typeof data.completed === 'number') ? data.completed : 0;
+                        const total = (typeof data.batch_size === 'number' && data.batch_size > 0) ? data.batch_size : '?';
+                        const qText = (typeof data.queue_position === 'number' && data.queue_position > 0)
+                            ? ` | 排队第 ${data.queue_position + 1}`
+                            : '';
+                        const msg = data.message || '等待中';
+                        body.innerHTML = `<p>批次: ${promptId}${qText} | 已完成 ${completed}/${total} | <span class="loading-spinner"></span> ${this.escapeHtml(msg)}</p>`;
                     }
                     setTimeout(poll, 2000);
                     return;
@@ -941,7 +1077,12 @@ class CivitaiApp {
             header.querySelector('.result-icon').textContent = '✅';
             header.querySelector('.result-title').textContent = `生成成功 (${result.images_count}张)`;
             const taskId = result.batch_id || result.prompt_id || '';
-            body.innerHTML = `<p>批次: ${taskId} | 图片已保存到 backend/output/</p>`;
+            const perfectBtnId = `perfectBtn_${taskId}`;
+            body.innerHTML = `
+                <p>批次: ${taskId} | 图片已保存到 backend/output/</p>
+                ${taskId ? `<button id="${perfectBtnId}" class="btn btn-outline btn-sm" style="margin-top:6px;color:#f59e0b;border-color:#f59e0b;"
+                    onclick="window._markPerfectBatch('${taskId}', '${perfectBtnId}')">⭐ 完美复刻</button>` : ''}
+            `;
             // 记录到生成历史
             this.addGenHistory(sourceUrl, true, result.images_count, taskId);
         } else {
@@ -1101,6 +1242,7 @@ class CivitaiApp {
             const item = this._favItems[this._favIndex];
             if (item) this.goToDrawWithUrl(item.url, item.id);
         });
+        document.getElementById('favMarkFailBtn').addEventListener('click', () => this.favMarkAsUnreproducible());
         document.getElementById('favDeleteBtn').addEventListener('click', () => this.favDeleteCurrent());
         document.getElementById('favResetBtn').addEventListener('click', () => this.favResetToPending());
 
@@ -1130,10 +1272,20 @@ class CivitaiApp {
 
     async arToggle() {
         const btn = document.getElementById('arToggleBtn');
+        const modeSelect = document.getElementById('arModeSelect');
         btn.disabled = true;
         try {
-            const endpoint = this._arRunning ? '/api/auto-replicate/stop' : '/api/auto-replicate/start';
-            const res = await this.apiFetch(`${this.api}${endpoint}`, { method: 'POST' });
+            let res;
+            if (this._arRunning) {
+                res = await this.apiFetch(`${this.api}/api/auto-replicate/stop`, { method: 'POST' });
+            } else {
+                const shuffle = modeSelect ? modeSelect.value === 'shuffle' : false;
+                res = await this.apiFetch(`${this.api}/api/auto-replicate/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shuffle })
+                });
+            }
             const data = await res.json();
             if (data.status === 'ok') {
                 this._arRunning = !this._arRunning;
@@ -1151,12 +1303,15 @@ class CivitaiApp {
 
     _arUpdateBtn() {
         const btn = document.getElementById('arToggleBtn');
+        const modeSelect = document.getElementById('arModeSelect');
         if (this._arRunning) {
             btn.textContent = '⏹ 停止自动复刻';
             btn.classList.add('running');
+            if (modeSelect) modeSelect.disabled = true;
         } else {
             btn.textContent = '🚀 开始自动复刻';
             btn.classList.remove('running');
+            if (modeSelect) modeSelect.disabled = false;
         }
     }
 
@@ -1177,6 +1332,12 @@ class CivitaiApp {
             this._arRunning = running;
             this._arUpdateBtn();
 
+            // 同步模式 select（运行中时反映后端实际模式）
+            const modeSelect = document.getElementById('arModeSelect');
+            if (modeSelect && running && data.shuffle !== undefined) {
+                modeSelect.value = data.shuffle ? 'shuffle' : 'sequential';
+            }
+
             // 统计
             const stats = document.getElementById('arStats');
             if (running || data.processed || data.skipped || data.failed || data.total_pending || data.total_retry) {
@@ -1187,6 +1348,29 @@ class CivitaiApp {
                 document.getElementById('arPending').textContent = data.total_pending || 0;
                 const retryEl = document.getElementById('arRetry');
                 if (retryEl) retryEl.textContent = data.total_retry || 0;
+                const dlWrap = document.getElementById('arDlQueueWrap');
+                const dlEl = document.getElementById('arDlQueue');
+                const dlListWrap = document.getElementById('arDlListWrap');
+                const dlListEl = document.getElementById('arDlList');
+                const dlQueue2 = document.getElementById('arDlQueue2');
+                const dlItems = data.dl_list || [];
+                const dlCount = dlItems.length;
+                if (dlWrap) dlWrap.style.display = dlCount > 0 ? '' : 'none';
+                if (dlEl) dlEl.textContent = dlCount;
+                if (dlQueue2) dlQueue2.textContent = dlCount;
+                if (dlListWrap) dlListWrap.style.display = dlCount > 0 ? '' : 'none';
+                if (dlListEl && dlCount > 0) {
+                    // 排序：active 的排最前
+                    const sorted = [...dlItems].sort((a, b) => (b.active ? 1 : 0) - (a.active ? 1 : 0));
+                    dlListEl.innerHTML = sorted.map(d => {
+                        const kindIcon = d.kind === 'checkpoint' ? '🏷️' : '🔗';
+                        const activeMark = d.active
+                            ? '<span style="color:#22c55e;font-weight:700;margin-right:2px;">● </span>'
+                            : '<span style="color:var(--text-secondary);margin-right:2px;">○ </span>';
+                        const style = d.active ? 'padding:3px 0;color:var(--text-primary);font-weight:500;' : 'padding:2px 0;';
+                        return `<div style="${style}">${activeMark}${kindIcon} ${this.escapeHtml(d.name || d.key)}</div>`;
+                    }).join('');
+                }
             }
 
             // 阶段状态
@@ -1253,13 +1437,27 @@ class CivitaiApp {
         if (f === 'all') {
             this._favItems = [...this._favAllItems];
         } else if (f === 'retry') {
-            // 参数待调整： pending 且有 retry_reason 字段
+            // 待调整： pending 且有 retry_reason 字段
             this._favItems = this._favAllItems.filter(i => (i.status || 'pending') === 'pending' && i.retry_reason);
+        } else if (f === 'pending') {
+            // 待处理：排除有 retry_reason 的（那些属于待调整）
+            this._favItems = this._favAllItems.filter(i => (i.status || 'pending') === 'pending' && !i.retry_reason);
         } else {
             this._favItems = this._favAllItems.filter(i => (i.status || 'pending') === f);
         }
         this._favIndex = 0;
         this._updateFavFilterCounts();
+
+        // 待调整细分面板
+        const retryPanel = document.getElementById('retryPanel');
+        if (retryPanel) {
+            if (f === 'retry') {
+                retryPanel.style.display = '';
+                this._updateRetryPanel();
+            } else {
+                retryPanel.style.display = 'none';
+            }
+        }
 
         const empty = document.getElementById('favEmptyState');
         if (this._favItems.length === 0) {
@@ -1275,18 +1473,170 @@ class CivitaiApp {
 
     _updateFavFilterCounts() {
         const counts = { all: this._favAllItems.length, pending: 0, retry: 0, processing: 0, done: 0, fail: 0 };
-        const labels = { all: '全部', pending: '待处理', retry: '参数待调整', processing: '待分析', done: '已完成', fail: '复刻失败' };
+        const labels = { all: '全部', pending: '待处理', retry: '待调整', processing: '待分析', done: '已完成', fail: '复刻失败' };
         this._favAllItems.forEach(i => {
             const s = i.status || 'pending';
-            if (counts[s] !== undefined) counts[s]++;
-            // retry 是 pending 的子集，单独计数
-            if (s === 'pending' && i.retry_reason) counts.retry++;
+            if (s === 'pending' && i.retry_reason) {
+                counts.retry++;
+            } else if (counts[s] !== undefined) {
+                counts[s]++;
+            }
         });
         const sel = document.getElementById('favFilterSelect');
         Array.from(sel.options).forEach(opt => {
             const s = opt.value;
             opt.textContent = `${labels[s]} ${counts[s] || 0}`;
         });
+    }
+
+    _updateRetryPanel() {
+        const container = document.getElementById('retryCats');
+        if (!container) return;
+        // 分类统计
+        const cats = {};
+        const retryItems = this._favAllItems.filter(i => (i.status || 'pending') === 'pending' && i.retry_reason);
+        retryItems.forEach(i => {
+            const r = i.retry_reason;
+            let cat = '其他';
+            if (r.startsWith('等待模型下载')) cat = '等待模型下载';
+            else if (r.startsWith('模型下载失败')) cat = '模型下载失败';
+            else if (r.startsWith('下载后仍缺模型')) cat = '下载后仍缺模型';
+            else if (r.startsWith('ComfyUI 拒绝')) cat = 'ComfyUI 拒绝';
+            else if (r === '参数需调整，重新生成') cat = '手动标记待调整';
+            else if (r.startsWith('解析失败')) cat = '解析失败';
+            else if (r.startsWith('自动复刻异常')) cat = '自动复刻异常';
+            if (!cats[cat]) cats[cat] = { count: 0, ids: [] };
+            cats[cat].count++;
+            cats[cat].ids.push(i.id);
+        });
+        const icons = {
+            '等待模型下载': '⬇️', '模型下载失败': '❌', '下载后仍缺模型': '⚠️',
+            'ComfyUI 拒绝': '🚫', '手动标记待调整': '🔧', '解析失败': '📛',
+            '自动复刻异常': '💥', '其他': '❓'
+        };
+        const order = ['等待模型下载', '模型下载失败', '下载后仍缺模型', 'ComfyUI 拒绝', '手动标记待调整', '解析失败', '自动复刻异常', '其他'];
+        let html = '';
+        for (const cat of order) {
+            if (!cats[cat]) continue;
+            const icon = icons[cat] || '❓';
+            const n = cats[cat].count;
+            let actions = '';
+            const btnStyle = 'padding:2px 10px;font-size:11px;';
+            if (cat === '等待模型下载') {
+                actions = `<button class="btn btn-outline btn-sm" style="${btnStyle}" onclick="app._retryBulkRecheckModels('${cat}')">🔄 重新判定</button>` +
+                    `<button class="btn btn-sm" style="${btnStyle}" onclick="app._retryBulkDownload('${cat}')">📥 一键下载</button>`;
+            } else if (cat === '模型下载失败' || cat === '下载后仍缺模型') {
+                actions = `<button class="btn btn-sm" style="${btnStyle}" onclick="app._retryBulkDownload('${cat}')">📥 一键下载</button>`;
+            } else if (cat === '手动标记待调整' || cat === 'ComfyUI 拒绝' || cat === '解析失败' || cat === '自动复刻异常') {
+                actions = `<button class="btn btn-outline btn-sm" style="${btnStyle}" onclick="app._retryBulkReset('${cat}')">🔄 全部重置</button>`;
+            }
+            // 筛选此类按钮
+            const filterBtn = `<button class="btn btn-outline btn-sm" style="${btnStyle}" onclick="app._filterRetryByCat('${cat}')">🔍 筛选</button>`;
+            html += `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-primary);border-radius:6px;">
+                <span>${icon}</span><span style="font-weight:500;">${cat}</span>
+                <span style="color:var(--text-secondary);">${n} 条</span>
+                <span style="margin-left:auto;display:flex;gap:4px;">${filterBtn}${actions}</span></div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    async _retryBulkDownload(cat) {
+        // 收集该分类下所有 fav_id，调用后端批量解析+下载
+        const retryItems = this._favAllItems.filter(i => {
+            if ((i.status || 'pending') !== 'pending' || !i.retry_reason) return false;
+            return i.retry_reason.startsWith(cat === '模型下载失败' ? '模型下载失败' : cat === '下载后仍缺模型' ? '下载后仍缺模型' : '等待模型下载');
+        });
+        if (!retryItems.length) return;
+        if (!confirm(`将对 ${retryItems.length} 条收藏重新解析并下载缺失模型，继续？`)) return;
+        try {
+            const res = await this.apiFetch(`${this.api}/api/favorite/bulk-redownload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fav_ids: retryItems.map(i => i.id) })
+            });
+            const r = await res.json();
+            this.showToast(r.message || `已提交 ${retryItems.length} 条到下载队列`);
+        } catch (e) {
+            this.showToast('批量下载失败: ' + e.message, 'error');
+        }
+    }
+
+    async _retryBulkRecheckModels(cat) {
+        if (cat !== '等待模型下载') return;
+        const retryItems = this._favAllItems.filter(i =>
+            (i.status || 'pending') === 'pending' && i.retry_reason && i.retry_reason.startsWith('等待模型下载')
+        );
+        if (!retryItems.length) return;
+        if (!confirm(`将对 ${retryItems.length} 条「等待模型下载」收藏重新判定模型可用性，继续？`)) return;
+        try {
+            const res = await this.apiFetch(`${this.api}/api/favorite/bulk-recheck-models`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fav_ids: retryItems.map(i => i.id) })
+            });
+            const r = await res.json();
+            this.showToast(r.message || `已提交 ${retryItems.length} 条到后台重新判定`);
+            // 后台线程异步执行，延迟刷新一次列表
+            setTimeout(() => this.loadFavorites(), 4000);
+        } catch (e) {
+            this.showToast('批量重新判定失败: ' + e.message, 'error');
+        }
+    }
+
+    async _retryBulkReset(cat) {
+        const catPrefixMap = {
+            '手动标记待调整': r => r === '参数需调整，重新生成',
+            'ComfyUI 拒绝': r => r.startsWith('ComfyUI 拒绝'),
+            '解析失败': r => r.startsWith('解析失败'),
+            '自动复刻异常': r => r.startsWith('自动复刻异常'),
+        };
+        const matchFn = catPrefixMap[cat] || (() => false);
+        const retryItems = this._favAllItems.filter(i =>
+            (i.status || 'pending') === 'pending' && i.retry_reason && matchFn(i.retry_reason)
+        );
+        if (!retryItems.length) return;
+        if (!confirm(`将 ${retryItems.length} 条「${cat}」全部重置为待处理，自动复刻将重新处理，继续？`)) return;
+        try {
+            const res = await this.apiFetch(`${this.api}/api/favorite/bulk-reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fav_ids: retryItems.map(i => i.id) })
+            });
+            const r = await res.json();
+            retryItems.forEach(i => { delete i.retry_reason; });
+            this._applyFavFilter();
+            this.showToast(r.message || `已重置 ${retryItems.length} 条`);
+        } catch (e) {
+            this.showToast('批量重置失败: ' + e.message, 'error');
+        }
+    }
+
+    _filterRetryByCat(cat) {
+        const catPrefixMap = {
+            '等待模型下载': r => r.startsWith('等待模型下载'),
+            '模型下载失败': r => r.startsWith('模型下载失败'),
+            '下载后仍缺模型': r => r.startsWith('下载后仍缺模型'),
+            'ComfyUI 拒绝': r => r.startsWith('ComfyUI 拒绝'),
+            '手动标记待调整': r => r === '参数需调整，重新生成',
+            '解析失败': r => r.startsWith('解析失败'),
+            '自动复刻异常': r => r.startsWith('自动复刻异常'),
+        };
+        let matchFn = catPrefixMap[cat];
+        if (cat === '其他') {
+            const knownMatchers = Object.values(catPrefixMap);
+            matchFn = r => !knownMatchers.some(fn => fn(r));
+        }
+        if (!matchFn) matchFn = () => true;
+        this._favItems = this._favAllItems.filter(i =>
+            (i.status || 'pending') === 'pending' && i.retry_reason && matchFn(i.retry_reason)
+        );
+        this._favIndex = 0;
+        this.favUpdateCounter();
+        if (this._favItems.length > 0) {
+            this.favRenderCurrent();
+        } else {
+            document.getElementById('favImageContainer').innerHTML = '';
+        }
     }
 
     async loadFavorites() {
@@ -1382,31 +1732,58 @@ class CivitaiApp {
             } catch { /* ignore */ }
         }
 
-        // 重置按钮：fail 或 参数待调整(pending+retry_reason) 时显示
+        // 重置按钮：fail 或 待调整(pending+retry_reason) 时显示
         const isRetry = (item.status === 'pending' || !item.status) && item.retry_reason;
         document.getElementById('favResetBtn').style.display = (item.status === 'fail' || isRetry) ? '' : 'none';
 
-        // 状态 banner
+        // 状态浮层（绝对定位覆盖在图片底部）
         let failReasonHtml = '';
         if (item.status === 'fail' && item.fail_reason) {
-            failReasonHtml = `<div style="margin-top:8px;padding:8px 12px;background:#dc262622;border:1px solid #dc262655;border-radius:8px;font-size:12px;color:#f87171;line-height:1.5;">
+            failReasonHtml = `<div style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:rgba(220,38,38,0.85);backdrop-filter:blur(4px);font-size:12px;color:#fecaca;line-height:1.5;border-radius:0 0 8px 8px;">
                    <span style="font-weight:600;">❌ 失败原因：</span>${this.escapeHtml(item.fail_reason)}
                </div>`;
         } else if (item.status === 'fail') {
-            failReasonHtml = `<div style="margin-top:8px;padding:6px 12px;background:#dc262614;border-radius:8px;font-size:12px;color:#9ca3af;">❌ 已标记失败（未记录原因）</div>`;
+            failReasonHtml = `<div style="position:absolute;bottom:0;left:0;right:0;padding:6px 12px;background:rgba(220,38,38,0.75);backdrop-filter:blur(4px);font-size:12px;color:#fecaca;border-radius:0 0 8px 8px;">❌ 已标记失败（未记录原因）</div>`;
         } else if (isRetry) {
-            failReasonHtml = `<div style="margin-top:8px;padding:8px 12px;background:#0891b222;border:1px solid #0891b255;border-radius:8px;font-size:12px;color:#67e8f9;line-height:1.5;">
-                   <span style="font-weight:600;">🔧 参数待调整：</span>${this.escapeHtml(item.retry_reason)}
+            failReasonHtml = `<div style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:rgba(8,145,178,0.85);backdrop-filter:blur(4px);font-size:12px;color:#cffafe;line-height:1.5;border-radius:0 0 8px 8px;">
+                   <span style="font-weight:600;">🔧 待调整：</span>${this.escapeHtml(item.retry_reason)}
                </div>`;
         }
 
         if (thumbUrl) {
-            container.innerHTML = `<img src="${thumbUrl}" alt="#${imageId}" class="gallery-image"
-                onerror="this.parentElement.innerHTML='<div style=\\'text-align:center;padding:40px;color:var(--text-secondary)\\'>图片加载失败</div>'">${failReasonHtml}`;
+            container.innerHTML = `<div style="display:flex;justify-content:center;"><div style="position:relative;display:inline-block;"><img src="${thumbUrl}" alt="#${imageId}" class="gallery-image" style="display:block;max-width:100%;max-height:70vh;"
+                onerror="this.parentElement.innerHTML='<div style=\\'text-align:center;padding:40px;color:var(--text-secondary)\\'>图片加载失败</div>'">${failReasonHtml}</div></div>`;
             actions.style.display = 'flex';
         } else {
-            container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);">无法获取缩略图</div>${failReasonHtml}`;
+            container.innerHTML = `<div style="position:relative;text-align:center;padding:40px;color:var(--text-secondary);">无法获取缩略图${failReasonHtml}</div>`;
             actions.style.display = 'flex';
+        }
+
+        // 预取前后 5 张的缩略图（后台静默，不阻塞当前渲染）
+        this._prefavAround(this._favIndex, 5);
+    }
+
+    _prefavAround(centerIdx, radius = 5) {
+        const start = Math.max(0, centerIdx - radius);
+        const end = Math.min(this._favItems.length - 1, centerIdx + radius);
+        for (let i = start; i <= end; i++) {
+            if (i === centerIdx) continue;
+            const item = this._favItems[i];
+            if (!item || !item.image_id) continue;
+            const id = item.image_id;
+            if (this._favThumbCache[id]) continue; // 已缓存
+            // 后台静默预取，不 await
+            this.apiFetch(`${this.api}/api/image/thumb?id=${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'ok' && data.thumb_url) {
+                        this._favThumbCache[id] = data.thumb_url;
+                        // 预加载图片到浏览器缓存
+                        const img = new Image();
+                        img.src = data.thumb_url;
+                    }
+                })
+                .catch(() => {});
         }
     }
 
@@ -1454,55 +1831,193 @@ class CivitaiApp {
         }
     }
 
-    async favResetToPending() {
+    favResetToPending() {
         const item = this._favItems[this._favIndex];
         if (!item || !item.id) return;
 
-        const btn = document.getElementById('favResetBtn');
-        btn.disabled = true;
-        btn.textContent = '重置中...';
+        const oldIdx = this._favIndex;
 
-        try {
-            const res = await this.apiFetch(`${this.api}/api/favorite/update-status`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: item.id, status: 'pending' })
-            });
-            const data = await res.json();
-            if (data.status === 'ok') {
-                // 更新内存中的状态
-                item.status = 'pending';
-                delete item.fail_reason;
-                const allItem = this._favAllItems.find(i => i.id === item.id);
-                if (allItem) { allItem.status = 'pending'; delete allItem.fail_reason; }
-                this._updateFavFilterCounts();
-                // 若当前筛选是 fail，该条已不符合，移出视图
-                if (this._favFilter === 'fail') {
-                    this._favItems.splice(this._favIndex, 1);
-                    if (this._favIndex >= this._favItems.length) {
-                        this._favIndex = Math.max(0, this._favItems.length - 1);
-                    }
-                    if (this._favItems.length === 0) {
-                        document.getElementById('favImageContainer').innerHTML = '';
-                        document.getElementById('favActions').style.display = 'none';
-                        document.getElementById('favEmptyState').style.display = 'block';
-                        this.favUpdateCounter();
-                    } else {
-                        this.favRenderCurrent();
-                    }
-                } else {
-                    this.favRenderCurrent();
-                }
-                showToast('已重置为待处理', 'success');
-            } else {
-                showToast(data.message || '重置失败', 'error');
-            }
-        } catch (err) {
-            showToast('请求失败: ' + err.message, 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = '🔄 重置为待处理';
+        // 1) 先本地乐观更新（不阻塞 UI）
+        item.status = 'pending';
+        delete item.fail_reason;
+        delete item.retry_reason;
+        const allItem = this._favAllItems.find(i => i.id === item.id);
+        if (allItem) {
+            allItem.status = 'pending';
+            delete allItem.fail_reason;
+            delete allItem.retry_reason;
         }
+
+        // 2) 立即切下一个
+        if (this._favFilter === 'fail' || this._favFilter === 'retry') {
+            // 当前筛选下已不符合，移出可见列表
+            this._favItems.splice(oldIdx, 1);
+            if (this._favIndex >= this._favItems.length) {
+                this._favIndex = Math.max(0, this._favItems.length - 1);
+            }
+        } else if (this._favItems.length > 1) {
+            // 仍在当前筛选内（如 all），主动跳到下一条
+            this._favIndex = (oldIdx + 1) % this._favItems.length;
+        }
+
+        this._updateFavFilterCounts();
+        if (this._favItems.length === 0) {
+            document.getElementById('favImageContainer').innerHTML = '';
+            document.getElementById('favActions').style.display = 'none';
+            document.getElementById('favEmptyState').style.display = 'block';
+            this.favUpdateCounter();
+        } else {
+            this.favRenderCurrent();
+        }
+
+        // 3) 后台异步写入，返回后再提示
+        this.apiFetch(`${this.api}/api/favorite/update-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: item.id, status: 'pending' })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    showToast('已重置为待处理', 'success');
+                } else {
+                    showToast(data.message || '重置失败', 'error');
+                }
+            })
+            .catch(err => {
+                showToast('请求失败: ' + err.message, 'error');
+            });
+    }
+
+    async favMarkAsUnreproducible() {
+        const item = this._favItems[this._favIndex];
+        if (!item || !item.id) return;
+
+        const failReason = await this._pickFavFailReason();
+        if (failReason === null) return; // 用户取消
+
+        const oldIdx = this._favIndex;
+
+        // 1) 先本地乐观更新（不阻塞 UI）
+        item.status = 'fail';
+        delete item.retry_reason;
+        if (failReason) item.fail_reason = failReason;
+        else delete item.fail_reason;
+
+        const allItem = this._favAllItems.find(i => i.id === item.id);
+        if (allItem) {
+            allItem.status = 'fail';
+            delete allItem.retry_reason;
+            if (failReason) allItem.fail_reason = failReason;
+            else delete allItem.fail_reason;
+        }
+
+        // 2) 在不包含 fail 的筛选中移除当前项
+        if (this._favFilter !== 'all' && this._favFilter !== 'fail') {
+            this._favItems.splice(oldIdx, 1);
+            if (this._favIndex >= this._favItems.length) {
+                this._favIndex = Math.max(0, this._favItems.length - 1);
+            }
+        }
+
+        this._updateFavFilterCounts();
+        if (this._favItems.length === 0) {
+            document.getElementById('favImageContainer').innerHTML = '';
+            document.getElementById('favActions').style.display = 'none';
+            document.getElementById('favEmptyState').style.display = 'block';
+            this.favUpdateCounter();
+        } else {
+            this.favRenderCurrent();
+        }
+
+        // 3) 后台异步写入
+        this.apiFetch(`${this.api}/api/favorite/update-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: item.id,
+                status: 'fail',
+                fail_reason: failReason || undefined,
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    showToast(failReason ? `已标记无法复刻：${failReason}` : '已标记无法复刻', 'success');
+                } else {
+                    showToast(data.message || '标记失败', 'error');
+                }
+            })
+            .catch(err => {
+                showToast('请求失败: ' + err.message, 'error');
+            });
+    }
+
+    _pickFavFailReason() {
+        return new Promise(resolve => {
+            const old = document.getElementById('favFailReasonModal');
+            if (old) old.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'favFailReasonModal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;';
+            modal.innerHTML = `
+                <div style="background:#1e1e2e;border-radius:12px;padding:24px;width:90%;max-width:420px;color:#e0e0e0;">
+                    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">❌ 标记无法复刻</div>
+                    <div style="font-size:12px;color:#9ca3af;margin-bottom:14px;">请选择一个失败原因，便于后续排查和归类</div>
+                    <div style="display:flex;flex-direction:column;gap:7px;" id="favFailReasonBtns">
+                        <button class="fav-fail-reason-btn btn btn-outline btn-sm" data-reason="权重穷举步进无满意结果" style="text-align:left;padding:9px 12px;">📊 权重穷举步进无满意结果</button>
+                        <button class="fav-fail-reason-btn btn btn-outline btn-sm" data-reason="模型找不到或已下架" style="text-align:left;padding:9px 12px;">🔍 模型找不到或已下架</button>
+                        <button class="fav-fail-reason-btn btn btn-outline btn-sm" data-reason="生成质量太差，不值得保留" style="text-align:left;padding:9px 12px;">🎨 生成质量太差，不值得保留</button>
+                        <button class="fav-fail-reason-btn btn btn-outline btn-sm" data-reason="提示词解析失败或参数缺失" style="text-align:left;padding:9px 12px;">📝 提示词解析失败或参数缺失</button>
+                        <button class="fav-fail-reason-btn btn btn-outline btn-sm" data-reason="原图风格无法复刻" style="text-align:left;padding:9px 12px;">🖼️ 原图风格无法复刻</button>
+                        <button class="fav-fail-reason-btn btn btn-outline btn-sm" data-reason="ComfyUI 工作流报错" style="text-align:left;padding:9px 12px;">⚙️ ComfyUI 工作流报错</button>
+                        <div style="display:flex;gap:8px;align-items:center;margin-top:2px;">
+                            <input id="favFailReasonCustom" type="text" placeholder="其他原因（自定义）..."
+                                style="flex:1;padding:8px 10px;border:1px solid #444;border-radius:8px;background:#2a2a3e;color:#e0e0e0;font-size:13px;">
+                            <button id="favFailReasonCustomBtn" class="btn btn-sm" style="background:#6b7280;color:#fff;border:none;padding:8px 12px;white-space:nowrap;">确认</button>
+                        </div>
+                    </div>
+                    <button id="favFailReasonCancel" class="btn btn-outline btn-sm" style="width:100%;margin-top:12px;padding:8px;">取消</button>
+                </div>`;
+            document.body.appendChild(modal);
+
+            const cleanup = () => modal.remove();
+
+            modal.querySelectorAll('.fav-fail-reason-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    cleanup();
+                    resolve(btn.dataset.reason || '');
+                });
+            });
+
+            const submitCustom = () => {
+                const input = document.getElementById('favFailReasonCustom');
+                const val = (input && input.value || '').trim();
+                if (!val) {
+                    showToast('请先输入自定义原因', 'error');
+                    return;
+                }
+                cleanup();
+                resolve(val);
+            };
+
+            document.getElementById('favFailReasonCustomBtn').addEventListener('click', submitCustom);
+            document.getElementById('favFailReasonCustom').addEventListener('keydown', e => {
+                if (e.key === 'Enter') submitCustom();
+            });
+
+            document.getElementById('favFailReasonCancel').addEventListener('click', () => {
+                cleanup();
+                resolve(null);
+            });
+            modal.addEventListener('click', e => {
+                if (e.target === modal) {
+                    cleanup();
+                    resolve(null);
+                }
+            });
+        });
     }
 
     goToDrawWithUrl(civitaiUrl, favoriteId) {
@@ -1526,6 +2041,239 @@ class CivitaiApp {
 
         // 记录当前操作的收藏 ID，不改变状态（状态由生成提交时才变更）
         window._activeFavoriteId = favoriteId || null;
+    }
+
+    async inheritByFilename() {
+        const input = document.getElementById('drawInheritFilename');
+        const btn = document.getElementById('drawInheritFilenameBtn');
+        const filenameRaw = (input && input.value || '').trim();
+        const filename = this._imageKeyFromRef(filenameRaw);
+
+        if (!filename) {
+            showToast('请先输入生成文件名', 'error');
+            input?.focus();
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '装载中...';
+        }
+
+        try {
+            let data = null;
+            let primaryErr = '';
+
+            try {
+                const res = await this.apiFetch(`${this.api}/api/gen-tracking/by-filename?filename=${encodeURIComponent(filename)}`, {
+                    headers: { 'ngrok-skip-browser-warning': '1' }
+                });
+                let body = {};
+                try { body = await res.json(); } catch { body = {}; }
+                if (res.ok && body.status === 'ok') {
+                    data = body;
+                } else {
+                    primaryErr = body.message || `查询接口不可用（HTTP ${res.status}）`;
+                }
+            } catch (e) {
+                primaryErr = e.message || '按文件名查询失败';
+            }
+
+            // 兼容旧后端：若 by-filename 接口不可用，回退到 list 本地匹配
+            if (!data) {
+                data = await this._findTrackingByFilenameFromList(filename);
+            }
+
+            if (!data || data.status !== 'ok') {
+                throw new Error(primaryErr || `未找到文件名对应记录: ${filename}`);
+            }
+
+            const entry = data.entry || {};
+            const genParams = entry.gen_params || {};
+            const sourceUrl = entry.source_url || '';
+            const favoriteId = entry.favorite_id || '';
+            const hasInheritable = !!(genParams.checkpoint || genParams.prompt);
+
+            if (hasInheritable) {
+                this.inheritFromGallery(genParams, sourceUrl, favoriteId);
+                showToast(`已按文件名装载：${data.filename || filename}`);
+                return;
+            }
+
+            if (sourceUrl) {
+                this.goToDrawWithUrl(sourceUrl, favoriteId);
+                showToast('该文件无继承参数，已切换为来源解析模式', 'warn');
+                return;
+            }
+
+            throw new Error('该文件缺少可装载参数');
+        } catch (err) {
+            showToast(err.message || '装载失败', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '装载';
+            }
+        }
+    }
+
+    _imageKeyFromRef(ref) {
+        if (!ref) return '';
+        try {
+            const clean = String(ref).split('?', 1)[0].split('#', 1)[0].replace(/\\/g, '/');
+            return clean.split('/').pop() || '';
+        } catch {
+            return '';
+        }
+    }
+
+    async _findTrackingByFilenameFromList(filename) {
+        const res = await this.apiFetch(`${this.api}/api/gen-tracking/list`, {
+            headers: { 'ngrok-skip-browser-warning': '1' }
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') return null;
+
+        const tracking = data.tracking || {};
+        for (const [batchId, entry] of Object.entries(tracking)) {
+            const refs = [];
+            refs.push(...(entry.blob_urls || []));
+            refs.push(...(entry.local_paths || []));
+
+            let hit = refs.some((ref) => this._imageKeyFromRef(ref) === filename);
+            if (!hit) {
+                const imageStatuses = entry.image_statuses || {};
+                if (Object.prototype.hasOwnProperty.call(imageStatuses, filename)) {
+                    hit = true;
+                }
+            }
+
+            if (!hit) continue;
+
+            const imageStatuses = entry.image_statuses || {};
+            const statusDefault = entry.status || 'pending_review';
+            return {
+                status: 'ok',
+                batch_id: batchId,
+                filename,
+                entry: {
+                    status: statusDefault,
+                    image_status: imageStatuses[filename] || statusDefault,
+                    source_url: entry.source_url || '',
+                    created_at: entry.created_at || '',
+                    favorite_id: entry.favorite_id || '',
+                    gen_params: entry.gen_params || {},
+                }
+            };
+        }
+
+        return null;
+    }
+
+    inheritFromGallery(genParams, sourceUrl, favoriteId) {
+        const gp = (genParams && typeof genParams === 'object') ? genParams : {};
+        const checkpointRaw = (gp.checkpoint || '').toString().trim();
+
+        if (!checkpointRaw && !gp.prompt) {
+            showToast('该作品缺少可继承参数', 'error');
+            return false;
+        }
+
+        // 先切换到绘图 tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('.tab-btn[data-tab="draw"]').classList.add('active');
+        document.getElementById('draw').classList.add('active');
+
+        // 确保处于 auto mode（可编辑参数面板）
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.mode-btn[data-mode="auto"]').classList.add('active');
+        document.querySelectorAll('.draw-mode').forEach(m => m.classList.remove('active'));
+        document.getElementById('autoMode').classList.add('active');
+
+        // 保留来源 URL（便于后续追踪）
+        const input = document.getElementById('imageUrl');
+        if (input) {
+            input.value = (sourceUrl || '').toString();
+            input.dispatchEvent(new Event('input'));
+        }
+
+        const parsedSeed = parseInt(gp.seed);
+        const seedVal = Number.isFinite(parsedSeed) ? parsedSeed : -1;
+
+        const ckptParts = checkpointRaw.split('/');
+        const ckptSubtype = ckptParts.length > 1 ? ckptParts[0] : '';
+        const ckptFilename = ckptParts.length > 1 ? ckptParts.slice(1).join('/') : checkpointRaw;
+
+        const loraChecks = (Array.isArray(gp.loras) ? gp.loras : []).map((l, idx) => {
+            const rawName = (typeof l === 'string' ? l : (l && l.name) ? l.name : '').toString();
+            const p = rawName.split('/');
+            const subtype = p.length > 1 ? p[0] : '';
+            const filename = p.length > 1 ? p.slice(1).join('/') : rawName;
+            const w = parseFloat((l && l.weight) != null ? l.weight : 1.0);
+            return {
+                requested_name: rawName || `lora_${idx + 1}`,
+                subtype: subtype,
+                filename: filename || rawName || `lora_${idx + 1}`,
+                weight: Number.isFinite(w) ? w : 1.0,
+                weight_source: 'original',
+                found: true,
+                modelId: null,
+                modelVersionId: null,
+            };
+        });
+
+        const inherited = {
+            status: 'ok',
+            checkpoint: checkpointRaw,
+            loras: loraChecks.map(x => x.requested_name),
+            checks: {
+                checkpoint: {
+                    found: !!checkpointRaw,
+                    subtype: ckptSubtype,
+                    filename: ckptFilename || checkpointRaw,
+                    modelId: null,
+                    modelVersionId: null,
+                },
+                loras: loraChecks,
+                embeddings: [],
+            },
+            prompt: (gp.prompt || '').toString(),
+            negative_prompt: (gp.negative_prompt || 'low quality, worst quality').toString(),
+            width: parseInt(gp.width) || 1024,
+            height: parseInt(gp.height) || 1024,
+            steps: parseInt(gp.steps) || 20,
+            cfg: parseFloat(gp.cfg) || 7,
+            sampler: (gp.sampler || 'dpmpp_2m').toString(),
+            scheduler: (gp.scheduler || '').toString(),
+            seed: seedVal,
+            variations: null,
+            param_sources: {
+                checkpoint: 'original',
+                lora_weights: 'original',
+                sampler: 'original',
+                steps: 'original',
+                cfg: 'original',
+                size: 'original',
+                seed: 'original',
+                prompt: 'original',
+                negative_prompt: 'original',
+                _summary: {
+                    total: 8,
+                    original: 8,
+                    approximate: 0,
+                    ai_reverse: 0,
+                    default: 0,
+                    missing: 0,
+                },
+            },
+        };
+
+        this.parsedData = inherited;
+        this.showParseResult(inherited);
+        window._activeFavoriteId = favoriteId || null;
+        showToast('已继承到生成页，可直接改参数后重画');
+        return true;
     }
 
     // ===================== Utilities =====================
@@ -1555,3 +2303,30 @@ class CivitaiApp {
 }
 
 document.addEventListener('DOMContentLoaded', () => { window.app = new CivitaiApp(); });
+
+// 绘画 tab 生成结果里的"完美复刻"按钮调用
+window._markPerfectBatch = async function(batchId, btnId) {
+    const btn = document.getElementById(btnId);
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ 标记中...'; }
+    try {
+        if (window.gallery) {
+            await window.gallery.markPerfect(batchId);
+        } else {
+            // gallery 未初始化时直接调 API
+            const api = window.app ? window.app.api : '';
+            const res = await fetch(`${api}/api/gen-tracking/update-status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+                body: JSON.stringify({ batch_id: batchId, status: 'perfect' })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                if (typeof showToast === 'function') showToast('⭐ 已标记为完美复刻');
+            }
+        }
+        if (btn) { btn.textContent = '⭐ 已完美复刻'; btn.style.background = '#f59e0b'; btn.style.color = '#fff'; }
+    } catch (e) {
+        if (btn) { btn.disabled = false; btn.textContent = '⭐ 完美复刻'; }
+        if (typeof showToast === 'function') showToast('标记失败: ' + e.message, 'error');
+    }
+};

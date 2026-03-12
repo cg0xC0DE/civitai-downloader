@@ -36,11 +36,79 @@ class CivitaiDownloader:
     
     def __init__(self):
         self.session = requests.Session()
-        self.session.trust_env = False  # 禁用代理
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         })
     
+    @staticmethod
+    def _pick_best_file(files: list, model_type: str = '') -> dict:
+        """
+        从版本的多个文件中选择最佳模型文件。
+        Civitai 版本页可能同时包含模型文件和训练数据，需要智能筛选。
+        优先级：
+          1. type=Model + SafeTensor 格式
+          2. type=Model + 其他格式
+          3. .safetensors 扩展名（忽略 type 字段）
+          4. 非 zip/非 Training Data 且大小合理的文件
+          5. 兜底：最大的那个文件
+        """
+        _MODEL_EXTS = ('.safetensors', '.ckpt', '.pt', '.pth', '.bin')
+        _SKIP_TYPES = ('training data', 'training', 'config', 'text')
+        is_ckpt = model_type.lower() in ('checkpoint', 'checkpoints')
+
+        # 分桶
+        tier1 = []  # type=Model + SafeTensor
+        tier2 = []  # type=Model + 其他格式
+        tier3 = []  # .safetensors 扩展名
+        tier4 = []  # 非 training data 且非 zip
+
+        for f in files:
+            fname = (f.get('name') or '').lower()
+            ftype = (f.get('type') or '').lower()
+            fmt = (f.get('metadata') or {}).get('format', '').lower()
+            size_kb = f.get('sizeKB', 0) or 0
+
+            # 跳过明确的训练数据
+            if ftype in _SKIP_TYPES:
+                continue
+            # 跳过 zip/rar 等压缩包
+            if fname.endswith(('.zip', '.rar', '.7z', '.tar', '.gz')):
+                continue
+            # 大小校验：checkpoint 应 > 100MB, LoRA 应 > 1MB
+            if is_ckpt and size_kb < 100_000:
+                # checkpoint 不太可能 < 100MB，可能是配套文件
+                tier4.append(f)
+                continue
+            if not is_ckpt and size_kb > 0 and size_kb < 500:
+                # LoRA 不太可能 < 500KB
+                tier4.append(f)
+                continue
+
+            if ftype == 'model' and fmt == 'safetensor':
+                tier1.append(f)
+            elif ftype == 'model':
+                tier2.append(f)
+            elif any(fname.endswith(ext) for ext in _MODEL_EXTS):
+                tier3.append(f)
+            else:
+                tier4.append(f)
+
+        # 每个 tier 内按文件大小降序（优先更大/更完整的版本）
+        for tier in (tier1, tier2, tier3, tier4):
+            if tier:
+                tier.sort(key=lambda x: x.get('sizeKB', 0) or 0, reverse=True)
+                chosen = tier[0]
+                if tier is not tier1:
+                    print(f"[Download] 文件选择: 跳过训练数据/zip，选择 '{chosen.get('name')}' "
+                          f"({chosen.get('sizeKB', 0):.0f} KB, type={chosen.get('type')}, "
+                          f"format={chosen.get('metadata', {}).get('format', '?')})")
+                return chosen
+
+        # 所有文件都被过滤了 → 兜底选最大的
+        fallback = max(files, key=lambda x: x.get('sizeKB', 0) or 0)
+        print(f"[Download] ⚠️ 所有文件均不理想，兜底选最大的: '{fallback.get('name')}'")
+        return fallback
+
     def parse_url(self, url: str) -> dict:
         """
         解析 Civitai URL
@@ -90,12 +158,12 @@ class CivitaiDownloader:
             if not target_version:
                 return {"status": "error", "message": "未找到版本"}
             
-            # 获取文件信息
+            # 获取文件信息（智能选择：优先模型文件，跳过训练数据/zip）
             files = target_version.get("files", [])
             if not files:
                 return {"status": "error", "message": "没有文件"}
             
-            file_info = files[0]
+            file_info = self._pick_best_file(files, data.get('type', ''))
             
             # 合并触发词：API trainedWords + 描述 HTML 中提取
             from util.model_index import extract_trigger_words_from_html, merge_trigger_words
@@ -178,12 +246,24 @@ class CivitaiDownloader:
 
         return {"exists": False, "message": "模型不存在"}
     
+    @staticmethod
+    def _sanitize_filename(name: str) -> str:
+        """清理文件名中 Windows 不支持的字符"""
+        # 替换 Windows 非法字符: < > : " / \ | ? *
+        cleaned = re.sub(r'[<>:"/\\|?*]', '_', name)
+        # 去除控制字符 (0x00-0x1F)
+        cleaned = re.sub(r'[\x00-\x1f]', '', cleaned)
+        # 去除首尾空格和点（Windows 不允许文件名以点或空格结尾）
+        cleaned = cleaned.strip('. ')
+        return cleaned or 'unnamed_model'
+
     def download_file(self, download_url: str, save_path: str, file_name: str, progress_callback=None) -> dict:
         """
         下载文件
         progress_callback(downloaded, total_size) 可选回调
         """
         try:
+            file_name = self._sanitize_filename(file_name)
             os.makedirs(save_path, exist_ok=True)
             
             # 带上 Civitai API Token（部分模型需要认证）

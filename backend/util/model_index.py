@@ -236,6 +236,50 @@ def merge_trigger_words(*sources):
     return list(seen.values())
 
 
+def _norm_path(p):
+    if not p:
+        return ''
+    try:
+        return os.path.normcase(os.path.normpath(os.path.abspath(str(p))))
+    except Exception:
+        return os.path.normcase(os.path.normpath(str(p)))
+
+
+def remove_by_path(path):
+    """按文件路径删除索引中的版本记录（路径大小写/分隔符不敏感）。"""
+    _ensure_loaded()
+    target = _norm_path(path)
+    if not target:
+        return {'removed': 0, 'entries': []}
+
+    removed_entries = []
+    with _lock:
+        for model_id in list(_by_model.keys()):
+            mdata = _by_model.get(model_id) or {}
+            versions = mdata.get('versions', {})
+            for version_id in list(versions.keys()):
+                entry = versions.get(version_id) or {}
+                entry_path = _norm_path(entry.get('path', ''))
+                if entry_path and entry_path == target:
+                    removed_entries.append({
+                        'model_id': str(model_id),
+                        'version_id': str(version_id),
+                        'filename': entry.get('filename', ''),
+                        'path': entry.get('path', ''),
+                    })
+                    del versions[version_id]
+
+            if not versions:
+                del _by_model[model_id]
+
+        if removed_entries:
+            _rebuild_by_version()
+
+    if removed_entries:
+        save()
+    return {'removed': len(removed_entries), 'entries': removed_entries}
+
+
 def remove_version(model_id, version_id):
     """删除一条版本记录"""
     _ensure_loaded()

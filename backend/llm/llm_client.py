@@ -33,20 +33,20 @@ import urllib.error
 # ============ 加载凭证 ============
 
 def _load_credential():
-    """从 credential.py 读取配置，返回 (api_key, api_base, model)"""
+    """从 credential.py 读取配置，返回 (api_key, api_base, model)。OPENAI_MODEL 可省略。"""
     try:
-        from llm.credential import OPENAI_API_KEY, OPENAI_API_BASE, OPENAI_MODEL
+        from llm import credential as cred
     except ImportError:
         # 兼容直接运行时的路径
         _dir = os.path.dirname(__file__)
         if _dir not in sys.path:
             sys.path.insert(0, _dir)
-        from credential import OPENAI_API_KEY, OPENAI_API_BASE, OPENAI_MODEL
+        import credential as cred
 
-    api_key = OPENAI_API_KEY or os.environ.get("OPENAI_API_KEY", "")
-    api_base = (OPENAI_API_BASE or os.environ.get("OPENAI_API_BASE", "")
+    api_key = getattr(cred, "OPENAI_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
+    api_base = (getattr(cred, "OPENAI_API_BASE", "") or os.environ.get("OPENAI_API_BASE", "")
                 or "https://api.openai.com/v1")
-    model = OPENAI_MODEL or os.environ.get("OPENAI_MODEL", "gpt-4o")
+    model = getattr(cred, "OPENAI_MODEL", "") or os.environ.get("OPENAI_MODEL", "gpt-4o")
 
     return api_key, api_base.rstrip("/"), model
 

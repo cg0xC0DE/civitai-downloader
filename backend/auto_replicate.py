@@ -21,6 +21,7 @@ import uuid
 import threading
 import traceback
 import glob
+import queue as _queue_mod
 
 from patrol_mq import publish_event
 from subtype_classifier import get_type_subtype
@@ -51,12 +52,127 @@ _state = {
     "skipped": 0,
     "failed": 0,
     "total_pending": 0,
-    "total_retry": 0,       # pending 但有 retry_reason（参数待调整，不自动处理）
+    "total_retry": 0,       # pending 但有 retry_reason（待调整，不自动处理）
+    "shuffle": False,       # True = 随机挑选，False = 顺序处理
     "log": [],              # 最近 N 条日志
 }
 _LOG_MAX = 50
+
+# 已提交到 ComfyUI 但图片尚未产出的 fav_id（防止重复提交）
+_inflight_fav_ids = set()
+_inflight_lock = threading.Lock()
 _worker_thread = None
 _stop_event = threading.Event()
+
+# ============ 后台下载队列 ============
+# 每个任务: { mm, fav_ids: set, url_hint }
+# fav_ids: 等待该模型的所有收藏 ID（下载完后批量解锁）
+_dl_queue: _queue_mod.Queue = _queue_mod.Queue()
+_dl_seen: set = set()          # 已入队的 version_id（去重）
+_dl_seen_lock = threading.Lock()
+_dl_seen_meta: dict = {}       # key -> {kind, name} 用于前端展示
+_dl_current_key: str = ""      # 当前正在下载的 key
+_dl_worker_thread = None
+_dl_worker_started = False
+
+
+def _enqueue_download(mm: dict, fav_id: str, url_hint: str) -> bool:
+    """
+    将缺失模型加入后台下载队列。
+    返回 True=新任务入队, False=已在队列中（去重）。
+    同一 version_id 只入队一次，但会把 fav_id 追加到等待列表。
+    """
+    global _dl_worker_thread, _dl_worker_started
+    key = str(mm.get("version_id") or mm.get("model_id") or mm.get("name", ""))
+    with _dl_seen_lock:
+        if key in _dl_seen:
+            # 已在队列，只追加 fav_id（通过共享 dict 传递）
+            _dl_pending_fav_ids.setdefault(key, set()).add(fav_id)
+            return False
+        _dl_seen.add(key)
+        _dl_seen_meta[key] = {"kind": mm.get("kind", ""), "name": mm.get("name", "")}
+        _dl_pending_fav_ids[key] = {fav_id}
+
+    _dl_queue.put({"mm": mm, "key": key, "url_hint": url_hint})
+
+    # 确保下载 worker 在运行
+    if not _dl_worker_started:
+        _dl_worker_thread = threading.Thread(target=_dl_worker_loop, daemon=True, name="dl-worker")
+        _dl_worker_thread.start()
+        _dl_worker_started = True
+    return True
+
+
+# fav_id 等待集合：key -> set of fav_id
+_dl_pending_fav_ids: dict = {}
+
+
+def _dl_worker_loop():
+    """后台下载 worker，串行处理下载队列"""
+    global _dl_worker_started
+    _log("[DL] 下载 worker 已启动")
+    try:
+        while True:
+            try:
+                task = _dl_queue.get(timeout=60)
+            except _queue_mod.Empty:
+                # 60 秒无任务，退出（下次有任务时重新启动）
+                break
+
+            key = task["key"]
+            mm = task["mm"]
+            url_hint = task["url_hint"]
+
+            with _dl_seen_lock:
+                global _dl_current_key
+                _dl_current_key = key
+                fav_ids = set(_dl_pending_fav_ids.get(key, set()))
+
+            _log(f"[DL] 开始下载: {mm.get('kind')} '{mm.get('name')}' (等待收藏: {len(fav_ids)} 张)")
+
+            ok = _download_missing_model(mm, next(iter(fav_ids), ""), url_hint)
+
+            with _dl_seen_lock:
+                _dl_current_key = ""
+                _dl_seen.discard(key)
+                _dl_seen_meta.pop(key, None)
+                _dl_pending_fav_ids.pop(key, None)
+
+            if ok:
+                # 下载成功：检查该收藏是否还有其他模型仍在下载队列中
+                # 只有全部模型都下完，才清除 retry_reason 让收藏重新进入队列
+                try:
+                    from favorite_images import list_all, update_status
+                    entries = list_all()
+                    with _dl_seen_lock:
+                        still_pending_keys = set(_dl_seen)  # 当前还在队列中的 key
+                    for fid in fav_ids:
+                        # 检查该 fav_id 是否还在其他下载任务的等待列表里
+                        still_waiting = any(fid in _dl_pending_fav_ids.get(k, set()) for k in still_pending_keys)
+                        if still_waiting:
+                            _log(f"[DL] 收藏 {fid[:16]} 还有其他模型待下载，继续等待")
+                            continue
+                        for e in entries:
+                            if e.get("id") == fid and e.get("status") == "pending":
+                                if "等待模型下载" in e.get("retry_reason", ""):
+                                    update_status(fid, "pending")  # 清除 retry_reason
+                                    _log(f"[DL] 解锁收藏 {fid[:16]}，重新进入队列")
+                                break
+                except Exception as ex:
+                    _log(f"[DL] 解锁收藏失败: {ex}")
+            else:
+                # 下载失败：把 retry_reason 改成失败原因
+                try:
+                    from favorite_images import update_status
+                    for fid in fav_ids:
+                        update_status(fid, "pending", retry_reason=f"模型下载失败: {mm.get('kind')} '{mm.get('name')}'")
+                except Exception:
+                    pass
+
+            _dl_queue.task_done()
+    finally:
+        _dl_worker_started = False
+        _log("[DL] 下载 worker 已退出")
 
 
 def _log(msg: str):
@@ -73,7 +189,13 @@ def _log(msg: str):
 def get_status() -> dict:
     """返回当前状态（线程安全）"""
     with _state_lock:
-        return dict(_state)
+        s = dict(_state)
+    with _dl_seen_lock:
+        s["dl_queue_size"] = _dl_queue.qsize()
+        s["dl_downloading"] = list(_dl_seen)
+        s["dl_current_key"] = _dl_current_key
+        s["dl_list"] = [{"key": k, "active": k == _dl_current_key, **_dl_seen_meta.get(k, {})} for k in _dl_seen]
+    return s
 
 
 def is_running() -> bool:
@@ -81,7 +203,7 @@ def is_running() -> bool:
         return _state["running"]
 
 
-def start():
+def start(shuffle: bool = False):
     """启动自动复刻后台线程"""
     global _worker_thread
     if is_running():
@@ -89,12 +211,13 @@ def start():
 
     _stop_event.clear()
     with _state_lock:
-        _state.update(running=True, phase="starting", processed=0, skipped=0, failed=0, log=[])
+        _state.update(running=True, phase="starting", processed=0, skipped=0, failed=0, shuffle=shuffle, log=[])
 
     _worker_thread = threading.Thread(target=_run_loop, daemon=True, name="auto-replicate")
     _worker_thread.start()
-    _log("自动复刻已启动")
-    return {"status": "ok", "message": "已启动"}
+    mode = "随机" if shuffle else "顺序"
+    _log(f"自动复刻已启动（{mode}模式）")
+    return {"status": "ok", "message": f"已启动（{mode}模式）"}
 
 
 def stop():
@@ -110,6 +233,7 @@ def stop():
 
 def _run_loop():
     """后台主循环"""
+    import random as _random
     try:
         from favorite_images import list_all, update_status
         from server import parse_civitai_image, run_comfyui_workflow
@@ -117,12 +241,15 @@ def _run_loop():
         while not _stop_event.is_set():
             # 取一条 pending（排除 retry_reason 条目，这类需要用户手动调参后才能重新处理）
             entries = list_all()
-            pending = [e for e in entries if e.get("status") == "pending" and not e.get("retry_reason")]
+            with _inflight_lock:
+                _inflight_snapshot = set(_inflight_fav_ids)
+            pending = [e for e in entries if e.get("status") == "pending" and not e.get("retry_reason") and e.get("id") not in _inflight_snapshot]
             retry_count = sum(1 for e in entries if e.get("status") == "pending" and e.get("retry_reason"))
 
             with _state_lock:
                 _state["total_pending"] = len(pending)
                 _state["total_retry"] = retry_count
+                shuffle = _state["shuffle"]
 
             if not pending:
                 _log("队列为空，等待 30 秒...")
@@ -132,7 +259,7 @@ def _run_loop():
                     break
                 continue
 
-            entry = pending[0]
+            entry = _random.choice(pending) if shuffle else pending[0]
             fav_id = entry["id"]
             url = entry["url"]
 
@@ -158,23 +285,29 @@ def _run_loop():
                         _state["skipped"] += 1
                     _log(f"⏭️ 所有组合已废弃，回退 pending 等待人工确认: {url}")
                 elif result == "pending":
-                    # 用户主动停止，回滚为 pending 等待下次
-                    _log(f"⏸️ 停止中，回滚为 pending: {url}")
+                    if reason == "dl_queued":
+                        # 模型已加入后台下载队列，收藏回退等待，继续下一张
+                        with _state_lock:
+                            _state["skipped"] += 1
+                        _log(f"⏳ 模型下载中，跳过继续下一张: {url}")
+                    else:
+                        # 用户主动停止，回滚为 pending 等待下次
+                        _log(f"⏸️ 停止中，回滚为 pending: {url}")
                 elif result == "skip":
-                    # 解析/下载失败 → 带 retry_reason 进入参数待调整，供用户查看原因
+                    # 解析/下载失败 → 带 retry_reason 进入待调整，供用户查看原因
                     update_status(fav_id, "pending", retry_reason=reason or "跳过（解析/下载失败）")
                     with _state_lock:
                         _state["skipped"] += 1
-                    _log(f"⏭️ 跳过（参数待调整）: {url} — {reason}")
+                    _log(f"⏭️ 跳过（待调整）: {url} — {reason}")
                 else:  # "fail"
-                    # 生成提交失败 → 带 retry_reason 进入参数待调整
+                    # 生成提交失败 → 带 retry_reason 进入待调整
                     update_status(fav_id, "pending", retry_reason=reason or "生成提交失败")
                     with _state_lock:
                         _state["failed"] += 1
-                    _log(f"❌ 失败（参数待调整）: {url} — {reason}")
+                    _log(f"❌ 失败（待调整）: {url} — {reason}")
             except Exception as ex:
                 traceback.print_exc()
-                # 未预期异常 → 带 retry_reason 进入参数待调整
+                # 未预期异常 → 带 retry_reason 进入待调整
                 update_status(fav_id, "pending", retry_reason=f"自动复刻异常: {str(ex)[:200]}")
                 with _state_lock:
                     _state["failed"] += 1
@@ -218,8 +351,23 @@ def _process_one(fav_id: str, url: str) -> tuple:
       ("skip",      reason)  — 跳过（解析失败 / 分类不确定 / 下载失败）
       ("fail",      reason)  — 生成提交失败
     """
-    from server import parse_civitai_image, run_comfyui_workflow, _gen_tasks, _gen_lock
+    from server import parse_civitai_image, run_comfyui_workflow, _gen_tasks, _gen_lock, _load_gen_tracking
     from favorite_images import update_status
+
+    # ---- 0. 防重：检查是否已有成功的生成结果 ----
+    try:
+        existing = _load_gen_tracking()
+        has_images = any(
+            (v.get('blob_urls') or v.get('local_paths'))
+            for v in existing.values()
+            if v.get('favorite_id') == fav_id
+        )
+        if has_images:
+            update_status(fav_id, "processing")
+            _log(f"⏭️ 已有生成结果，跳过重复生成: {url}")
+            return "done", ""
+    except Exception as _chk_err:
+        _log(f"⚠️ 防重检查失败（继续处理）: {_chk_err}")
 
     # ---- 1. 解析 ----
     with _state_lock:
@@ -279,45 +427,15 @@ def _process_one(fav_id: str, url: str) -> tuple:
             })
 
     if missing_models:
-        with _state_lock:
-            _state["phase"] = "downloading"
-
+        # 异步下载：把缺失模型加入后台队列，当前收藏标记为 pending 等待，继续处理下一张
+        names = [f"{m.get('kind')} '{m.get('name')}'".strip("'") for m in missing_models]
+        retry_msg = f"等待模型下载: {', '.join(names)}"
         for mm in missing_models:
-            if _stop_event.is_set():
-                return "pending", ""
-
-            ok = _download_missing_model(mm, fav_id, url)
-            if not ok:
-                return "skip", f"模型下载失败: {mm.get('kind', '')} '{mm.get('name', '')}'"
-
-        # 下载完成后重新解析以确认模型都在了
-        _log("重新解析以确认模型...")
-        parse_result = parse_civitai_image(url)
-        if not parse_result.get("all_models_found"):
-            still_missing = parse_result.get("missing_models", [])
-            checks2 = parse_result.get("checks", {})
-            missing_details = []
-            ck2 = checks2.get("checkpoint", {})
-            if ck2 and not ck2.get("found"):
-                missing_details.append(f"  checkpoint: {parse_result.get('checkpoint','?')} (model_id={ck2.get('modelId')}, version_id={ck2.get('modelVersionId')})")
-            for lc2 in checks2.get("loras", []):
-                if not lc2.get("found"):
-                    missing_details.append(f"  lora: {lc2.get('requested_name','?')} (model_id={lc2.get('modelId')}, version_id={lc2.get('modelVersionId')})")
-            for ec2 in checks2.get("embeddings", []):
-                if not ec2.get("found"):
-                    missing_details.append(f"  embedding: {ec2.get('requested_name','?')} (model_id={ec2.get('modelId')}, version_id={ec2.get('modelVersionId')})")
-            publish_event(
-                title=f"下载后仍缺模型: {url}",
-                type="model_still_missing",
-                detail=(
-                    f"原图 URL: {url}"
-                    f"\nfav_id: {fav_id}"
-                    f"\n仍缺失的模型:"
-                    + ("\n" + "\n".join(missing_details) if missing_details else "\n  " + "\n  ".join(still_missing))
-                ),
-                meta={"url": url, "fav_id": fav_id, "missing_models": missing_details or still_missing},
-            )
-            return "skip", f"下载后仍缺模型: {', '.join(missing_details) or str(still_missing)[:100]}"
+            _enqueue_download(mm, fav_id, url)
+        from favorite_images import update_status
+        update_status(fav_id, "pending", retry_reason=retry_msg)
+        _log(f"⏳ 模型已加入下载队列，收藏回退等待: {retry_msg}")
+        return "pending", "dl_queued"
 
     # ---- 3. 提交生成（fire-and-forget，不等待完成） ----
     with _state_lock:
@@ -325,8 +443,10 @@ def _process_one(fav_id: str, url: str) -> tuple:
 
     gen_result, gen_reason = _do_generate(parse_result, fav_id, url)
     if gen_result == "submitted":
-        # 生成已提交，现在才标记为 processing
-        update_status(fav_id, "processing")
+        # 生成已提交到 ComfyUI 队列，但图片尚未产出
+        # 不在此处改状态，保持 pending；图片真正生成完成后由回调改为 processing
+        with _inflight_lock:
+            _inflight_fav_ids.add(fav_id)
         return "submitted", ""
     elif gen_result == "done":
         return "done", ""
@@ -334,6 +454,32 @@ def _process_one(fav_id: str, url: str) -> tuple:
         return "skip", gen_reason
     else:
         return "fail", gen_reason
+
+
+def _fallback_lora_subtype(name: str, base_model: str, tags: list, description: str) -> str | None:
+    """LLM 不可用/不确定时的 LoRA 子分类兜底（仅 XL 系）。"""
+    bm = (base_model or "").lower()
+    text = " ".join([name or "", description or "", " ".join(tags or [])]).lower()
+
+    # 强关键词优先：即便 base_model / API 元数据缺失，也尽量给出可下载子类
+    if any(k in text for k in ("slider", "sliders", "scale")):
+        return "xl-slider"
+    if any(k in text for k in ("character", "azur lane", "genshin", "honkai", "prinz eugen")):
+        return "xl-character"
+
+    is_xl_family = any(k in bm for k in ("xl", "pony", "illustrious", "noobai", "animagine")) or any(
+        k in text for k in ("xl", "pony", "illustrious", "noobai", "animagine")
+    )
+    if not is_xl_family:
+        return None
+
+    if any(k in text for k in ("outfit", "costume", "suit", "clothing", "uniform", "dress")):
+        return "xl-suit"
+    if any(k in text for k in ("style", "aesthetic", "render", "painting")):
+        return "xl-style"
+    if any(k in text for k in ("nsfw", "sex", "nude", "erotic", "hentai", "porn")):
+        return "xl-nsfw"
+    return None
 
 
 def _download_missing_model(mm: dict, fav_id: str, url: str) -> bool:
@@ -387,6 +533,11 @@ def _download_missing_model(mm: dict, fav_id: str, url: str) -> bool:
             _log(f"LLM 分类失败: {e}")
 
         if not sub:
+            sub = _fallback_lora_subtype(name, base_model, tags, description)
+            if sub:
+                _log(f"⚠️ LoRA LLM 分类不确定，使用规则兜底: {name} → {sub}")
+
+        if not sub:
             _log(f"⚠️ LoRA '{name}' 子分类不确定，跳过")
             civitai_model_url = f"https://civitai.com/models/{model_id}" if model_id else "(无 model_id)"
             publish_event(
@@ -422,19 +573,42 @@ def _download_missing_model(mm: dict, fav_id: str, url: str) -> bool:
 
         if result.get("status") == "ok":
             _log(f"✅ 下载完成: {name}")
-            # 刷新模型缓存
+            # 刷新模型缓存，touch 目录使 ComfyUI 重新扫描
             try:
-                from server import model_cache, _restart_comfyui
+                from server import model_cache, _restart_comfyui, _invalidate_comfyui_model_cache
                 model_cache.refresh_all()
-                _restart_comfyui()
-                # 等待 ComfyUI 重启加载
-                _log("等待 ComfyUI 加载新模型...")
-                time.sleep(15)
+                _invalidate_comfyui_model_cache()
+                remaining = _dl_queue.qsize()
+                if remaining > 0:
+                    _log(f"⏳ 下载队列还有 {remaining} 个任务，跳过重启，等全部下完再重启")
+                else:
+                    _log("重启 ComfyUI 加载新模型...")
+                    _restart_comfyui()
             except Exception:
                 pass
             return True
         elif result.get("status") == "exists":
             _log(f"ℹ️ 已存在: {name}")
+            # 旧文件可能已存在于磁盘但未写入 model_index，补一条索引避免重复卡在“缺模型”
+            try:
+                _path = result.get("path")
+                _mid = result.get("model_id")
+                _vid = result.get("version_id")
+                if _path and _mid and _vid:
+                    from util import model_index
+                    _mi = result.get("model_info") or {}
+                    model_index.upsert(
+                        model_id=_mid,
+                        model_name=result.get("title") or _mi.get("title") or name,
+                        version_id=_vid,
+                        version_name=result.get("version_name") or _mi.get("version_name") or "",
+                        filename=result.get("file_name") or result.get("filename") or os.path.basename(_path),
+                        path=os.path.abspath(_path),
+                        trigger_words=_mi.get("trained_words", []),
+                    )
+                    _log(f"ℹ️ 已补建索引: model_id={_mid}, version_id={_vid}")
+            except Exception as _idx_err:
+                _log(f"⚠️ 已存在模型补建索引失败: {_idx_err}")
             return True
         else:
             msg = result.get("message", "未知错误")
@@ -504,13 +678,25 @@ def _do_generate(parse_result: dict, fav_id: str, url: str) -> str:
     提交生成任务（fire-and-forget，不等待完成）。
     返回 "submitted" / "fail" / "skip"
     """
-    from server import run_comfyui_workflow, compute_weight_sweep
+    from server import run_comfyui_workflow, compute_weight_sweep, _pick_random_xl_checkpoints
     import copy as _copy
 
     checks = parse_result.get("checks", {})
-    ckpt = checks.get("checkpoint", {})
+    ckpt = checks.get("checkpoint") or {}
 
-    if not ckpt.get("found"):
+    _parse_checkpoint_raw = str(parse_result.get("checkpoint", "") or "").strip()
+    _fallback_ckpts = []
+    if ckpt.get("found"):
+        _ckpt_sub = ckpt.get('subtype', '')
+        checkpoint_name = f"{_ckpt_sub}/{ckpt['filename']}" if _ckpt_sub else ckpt['filename']
+    elif not _parse_checkpoint_raw:
+        _fallback_ckpts = _pick_random_xl_checkpoints(count=6)
+        if not _fallback_ckpts:
+            _log("⚠️ 未解析到 checkpoint，且无可用 XL 基模可回退，跳过生成")
+            return "skip", "Checkpoint 缺失且无可用 XL 基模"
+        checkpoint_name = _fallback_ckpts[0]
+        _log(f"⚠️ 未解析到 checkpoint，随机回退 XL 基模 {len(_fallback_ckpts)} 个")
+    else:
         _log("⚠️ Checkpoint 未找到，跳过生成")
         return "skip", f"Checkpoint 未找到: {ckpt.get('requested_name', '')}"
 
@@ -522,8 +708,6 @@ def _do_generate(parse_result: dict, fav_id: str, url: str) -> str:
                 "name": f"{lc['subtype']}/{lc['filename']}",
                 "weight": lc.get("weight", 1.0),
             })
-
-    checkpoint_name = f"{ckpt['subtype']}/{ckpt['filename']}"
 
     # ---- 权重扫描：将扫描组合注入 variations ----
     variations = parse_result.get("variations") or [{"label": "基准", "params": {}}]
@@ -539,6 +723,53 @@ def _do_generate(parse_result: dict, fav_id: str, url: str) -> str:
                 merged.append(new_var)
         variations = merged
         _log(f"权重扫描: {len(sweep)}组 × {len(parse_result.get('variations') or [{'_':1}])}变体 = {len(variations)}张")
+
+    # ---- 尺寸未知：注入两种标准竖图尺寸变体 ----
+    ps = parse_result.get("param_sources", {})
+    _size_unknown = ps.get("width") in ("default", "missing") or ps.get("height") in ("default", "missing")
+    if _size_unknown:
+        size_pairs = [(832, 1216), (768, 1344)]
+        expanded = []
+        for var in variations:
+            for sw, sh in size_pairs:
+                new_var = _copy.deepcopy(var)
+                new_var.setdefault("params", {}).update({"width": sw, "height": sh})
+                new_var["label"] = f"{var.get('label', '')} | {sw}×{sh}"
+                expanded.append(new_var)
+        variations = expanded
+        _log(f"尺寸未知，注入 {len(size_pairs)} 种标准尺寸，共 {len(variations)} 个变体")
+
+    # ---- 种子未知：每个变体 ×3 随机种子 ----
+    import random as _rand
+    _seed_unknown = parse_result.get("seed", -1) < 0
+    if _seed_unknown:
+        _SEED_REPEATS = 3
+        expanded = []
+        for var in variations:
+            for si in range(_SEED_REPEATS):
+                new_var = _copy.deepcopy(var)
+                new_var.setdefault("params", {})["seed"] = _rand.randint(0, 2**32 - 1)
+                new_var["label"] = f"{var.get('label', '')} | seed#{si+1}"
+                expanded.append(new_var)
+        variations = expanded
+        _log(f"种子未知，每变体 ×{_SEED_REPEATS} 随机种子，共 {len(variations)} 个变体")
+
+    # ---- checkpoint 缺失：改为随机 6 个 XL 基模（每个基模一张） ----
+    if _fallback_ckpts:
+        _template = _copy.deepcopy((variations or [{"label": "基准", "params": {}}])[0])
+        _tp = _template.get('params') if isinstance(_template.get('params'), dict) else {}
+        _template['params'] = _tp
+        _tp.pop('checkpoint', None)
+        _tp.pop('seed', None)
+
+        _ckpt_vars = []
+        for i, ck_name in enumerate(_fallback_ckpts):
+            nv = _copy.deepcopy(_template)
+            nv.setdefault('params', {})['checkpoint'] = ck_name
+            nv['label'] = f"随机XL#{i+1} | {ck_name.split('/')[-1]}"
+            _ckpt_vars.append(nv)
+        variations = _ckpt_vars
+        _log(f"checkpoint 缺失，已注入随机 XL 基模变体: {len(variations)} 个")
 
     # ---- 废弃记录检查：过滤掉已废弃的参数组合 ----
     try:
@@ -568,6 +799,9 @@ def _do_generate(parse_result: dict, fav_id: str, url: str) -> str:
                     if li in lw:
                         lora['weight'] = lw[li]
             var_params = dict(base_params, loras=var_loras)
+            _var_ckpt = str(vp.get('checkpoint', '')).strip()
+            if _var_ckpt:
+                var_params['checkpoint'] = _var_ckpt
             chk = check_params(fav_id, var_params)
             if chk['found']:
                 skipped_labels.append(var.get('label', f'变体{len(skipped_labels)+1}'))
@@ -623,6 +857,9 @@ def _do_generate(parse_result: dict, fav_id: str, url: str) -> str:
             variations=variations,
             favorite_id=fav_id,
             source_url=url,
+            clip_skip=parse_result.get("clip_skip"),
+            queue_max_pending=2,
+            queue_wait_timeout=1800,
         )
 
         if result.get("status") in ("submitted", "success"):

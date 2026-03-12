@@ -14,6 +14,7 @@ import sys
 import json
 import time
 import uuid
+import secrets
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -27,7 +28,8 @@ import websocket
 sys.path.insert(0, os.path.dirname(__file__))
 
 from config import (
-    SERVER_PORT, WORKFLOW_DIR, COMFYUI_URL, OUTPUT_DIR, CIVITAI_API_BASE,
+    SERVER_PORT, WORKFLOW_DIR, COMFYUI_URL, COMFYUI_PATH, OUTPUT_DIR, CIVITAI_API_BASE,
+    CKPT_BASE_DIR, LORA_BASE_DIR, EMBEDDING_BASE_DIR,
     scan_subtypes, scan_files, find_model_on_disk, find_embedding_on_disk,
 )
 from cache_manager import model_cache
@@ -44,6 +46,12 @@ _download_queue = _queue_mod.Queue()
 # ============== 生成任务跟踪 ==============
 _gen_tasks = {}  # prompt_id -> {status, prompt_id, images_count, saved_paths, message, ...}
 _gen_lock = threading.Lock()
+
+# ============== 绘图提交队列（前端 -> ComfyUI） ==============
+_workflow_submit_tasks = {}  # submit_id -> {status, queue_position, message, prompt_id?, ...}
+_workflow_submit_lock = threading.Lock()
+_workflow_submit_queue = _queue_mod.Queue()
+_workflow_submit_worker_started = False
 
 # ============== 美学分析任务跟踪 ==============
 _aesthetic_tasks = {}  # task_id -> {status, image_url, result, message, ...}
@@ -101,6 +109,41 @@ def _restart_comfyui(wait_ready=True, ready_timeout=120):
         print(f"[ComfyUI] 重启完成，模型已加载 ({elapsed}s)")
     else:
         print(f"[ComfyUI] ⚠️ 等待 {elapsed}s 后仍未就绪，继续执行...")
+
+
+def _invalidate_comfyui_model_cache():
+    """Touch 所有模型目录（含子目录），强制 ComfyUI folder_paths 缓存失效。
+    ComfyUI 的 get_filename_list() 使用 os.path.getmtime() 判断是否需要重新扫描，
+    Windows 上在子目录中添加文件不会更新父目录的 mtime，导致缓存不刷新。
+    同时清除采样器缓存，下次查询时重新获取。
+    """
+    global _comfyui_sampler_cache
+    _comfyui_sampler_cache = None
+    dirs_to_touch = []
+    # 外部模型仓库
+    for d in [CKPT_BASE_DIR, LORA_BASE_DIR, EMBEDDING_BASE_DIR]:
+        if os.path.isdir(d):
+            dirs_to_touch.append(d)
+            for sub in os.listdir(d):
+                sp = os.path.join(d, sub)
+                if os.path.isdir(sp):
+                    dirs_to_touch.append(sp)
+    # ComfyUI 内置模型目录
+    comfy_models = os.path.join(COMFYUI_PATH, 'models')
+    if os.path.isdir(comfy_models):
+        for sub in ['checkpoints', 'loras', 'embeddings', 'vae', 'controlnet', 'upscale_models']:
+            sp = os.path.join(comfy_models, sub)
+            if os.path.isdir(sp):
+                dirs_to_touch.append(sp)
+    touched = 0
+    for d in dirs_to_touch:
+        try:
+            os.utime(d, None)  # 更新 mtime 为当前时间
+            touched += 1
+        except Exception:
+            pass
+    if touched:
+        print(f"[ComfyUI] 已 touch {touched} 个模型目录，强制缓存刷新")
 
 
 def _download_worker():
@@ -182,10 +225,18 @@ def _resolve_model_version(sess, version_id, token):
                         headers={'User-Agent': 'Mozilla/5.0'})
         resp.raise_for_status()
         data = resp.json()
+        # 智能选择模型文件（跳过 training data/zip）
+        _files = data.get('files', [])
+        if _files:
+            from civitaidl import CivitaiDownloader
+            _best = CivitaiDownloader._pick_best_file(_files, data.get('model', {}).get('type', ''))
+            _file_name = _best.get('name', '')
+        else:
+            _file_name = ''
         return {
             'name': data.get('model', {}).get('name', ''),
             'version_name': data.get('name', ''),
-            'file_name': data.get('files', [{}])[0].get('name', '') if data.get('files') else '',
+            'file_name': _file_name,
             'modelId': data.get('modelId') or data.get('model', {}).get('id'),
             'trainedWords': data.get('trainedWords', []),
         }
@@ -204,10 +255,17 @@ def _resolve_model_by_hash(sess, hash_str, token):
                         headers={'User-Agent': 'Mozilla/5.0'})
         resp.raise_for_status()
         data = resp.json()
+        _files = data.get('files', [])
+        if _files:
+            from civitaidl import CivitaiDownloader
+            _best = CivitaiDownloader._pick_best_file(_files, data.get('model', {}).get('type', ''))
+            _file_name = _best.get('name', '')
+        else:
+            _file_name = ''
         return {
             'name': data.get('model', {}).get('name', ''),
             'version_name': data.get('name', ''),
-            'file_name': data.get('files', [{}])[0].get('name', '') if data.get('files') else '',
+            'file_name': _file_name,
             'modelId': data.get('modelId') or data.get('model', {}).get('id'),
             'modelVersionId': data.get('id'),
             'trainedWords': data.get('trainedWords', []),
@@ -286,9 +344,13 @@ def parse_civitai_image(image_url):
     result['base_model'] = _base_model
 
     # clip_skip: 有原始值则用原始值；否则二次元系模型默认 -2
+    # ComfyUI CLIPSetLastLayer 要求负值，正值自动取反
     raw_clip = meta.get('clipSkip')
     if raw_clip is not None:
-        result['clip_skip'] = raw_clip
+        clip_val = int(raw_clip)
+        if clip_val > 0:
+            clip_val = -clip_val
+        result['clip_skip'] = clip_val
         ps['clip_skip'] = 'original'
     else:
         _anime_bases = ('illustrious', 'pony', 'animagine', 'nai', 'novelai', 'anime')
@@ -714,15 +776,23 @@ def parse_civitai_image(image_url):
 _no_proxy_handler = urllib.request.ProxyHandler({})
 _local_opener = urllib.request.build_opener(_no_proxy_handler)
 
-def wait_for_comfyui(timeout=5):
-    """快速检查 ComfyUI 是否就绪（仅用于API快速失败）"""
-    try:
-        req = urllib.request.Request(f'http://{COMFYUI_URL}/api/queue')
-        with _local_opener.open(req, timeout=2) as r:
-            data = json.loads(r.read())
-            return True, data
-    except Exception:
-        return False, None
+def wait_for_comfyui(timeout=5, retry_timeout=0):
+    """检查 ComfyUI 是否就绪。
+    retry_timeout > 0 时，在该时间内持续重试（用于 ComfyUI 重启场景）。
+    retry_timeout = 0 时，仅做一次快速检查（API 快速失败用）。
+    """
+    deadline = time.time() + max(timeout, retry_timeout)
+    while True:
+        try:
+            req = urllib.request.Request(f'http://{COMFYUI_URL}/api/queue')
+            with _local_opener.open(req, timeout=2) as r:
+                data = json.loads(r.read())
+                return True, data
+        except Exception:
+            pass
+        if time.time() >= deadline:
+            return False, None
+        time.sleep(3)
 
 
 def get_comfyui_checkpoints():
@@ -753,24 +823,96 @@ def get_comfyui_checkpoints():
     return list(set(checkpoints))  # 去重
 
 
-def queue_prompt(prompt: Dict, client_id: str) -> Dict:
-    """提交提示词到 ComfyUI"""
+def _pick_random_xl_checkpoints(count: int = 6) -> list:
+    """随机挑选最多 count 个 XL checkpoint（格式: xl/filename）。"""
+    import random as _random
+
+    candidates = []
+    seen = set()
+
+    # 优先使用本地模型仓库里的 ckpt/xl 子目录
+    try:
+        for item in scan_files('ckpt', 'xl'):
+            fn = (item or {}).get('filename', '')
+            if not fn:
+                continue
+            name = f"xl/{fn}".replace('\\', '/')
+            low = name.lower()
+            if low not in seen:
+                seen.add(low)
+                candidates.append(name)
+    except Exception:
+        pass
+
+    # 兜底：从 ComfyUI 列表中筛选带 xl 语义的 checkpoint
+    if not candidates:
+        try:
+            for ck in (get_comfyui_checkpoints() or []):
+                s = str(ck or '').replace('\\', '/').strip()
+                if not s:
+                    continue
+                sl = s.lower()
+                if ('/xl/' in f"/{sl}") or sl.startswith('xl/') or ('sdxl' in sl):
+                    name = s if '/' in s else f"xl/{s}"
+                    low = name.lower()
+                    if low not in seen:
+                        seen.add(low)
+                        candidates.append(name)
+        except Exception:
+            pass
+
+    _random.shuffle(candidates)
+    return candidates[:max(0, int(count or 0))]
+
+
+def queue_prompt(prompt: Dict, client_id: str, wait_ready_timeout: int = 300) -> Dict:
+    """提交提示词到 ComfyUI。
+    遇到连接错误/超时/404（ComfyUI 重启中）时，hang 住等待重新就绪后重试。
+    只有 HTTP 业务错误（如 422 prompt 校验失败）才立即返回错误。
+    """
     p = {"prompt": prompt, "client_id": client_id}
     data = json.dumps(p).encode('utf-8')
-    req = urllib.request.Request(f"http://{COMFYUI_URL}/prompt", data=data)
-    try:
-        with _local_opener.open(req) as response:
-            return json.loads(response.read())
-    except urllib.error.HTTPError as e:
-        body = e.read().decode('utf-8', errors='replace')
+    deadline = time.time() + wait_ready_timeout
+
+    while True:
+        req = urllib.request.Request(f"http://{COMFYUI_URL}/prompt", data=data)
         try:
-            err_data = json.loads(body)
-            detail = err_data.get('error', {}).get('message', '') or err_data.get('node_errors', '')
-        except:
-            detail = body[:500]
-        return {'error': f'ComfyUI rejected prompt ({e.code})', 'detail': str(detail)[:500]}
-    except Exception as e:
-        return {'error': f'ComfyUI connection failed: {e}'}
+            with _local_opener.open(req, timeout=15) as response:
+                return json.loads(response.read())
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                # 404 通常是 ComfyUI 正在重启，路由尚未就绪
+                print(f"[ComfyUI] queue_prompt 收到 404，等待重启...")
+            else:
+                # 其他 HTTP 错误（422 等）是业务错误，立即返回
+                body = e.read().decode('utf-8', errors='replace')
+                try:
+                    err_data = json.loads(body)
+                    err_msg = err_data.get('error', {}).get('message', '')
+                    node_errs = err_data.get('node_errors', {})
+                    # 提取 node_errors 中的具体错误信息
+                    node_detail = ''
+                    if isinstance(node_errs, dict):
+                        parts = []
+                        for nid, nerr in node_errs.items():
+                            cls = nerr.get('class_type', nid)
+                            for er in nerr.get('errors', []):
+                                msg = er.get('message', '')
+                                dtl = er.get('details', '')
+                                parts.append(f"[{cls}] {msg}: {dtl}" if dtl else f"[{cls}] {msg}")
+                        node_detail = '; '.join(parts)
+                    detail = f"{err_msg} | {node_detail}".strip(' |') if (err_msg or node_detail) else body[:500]
+                except Exception:
+                    detail = body[:500]
+                return {'error': f'ComfyUI rejected prompt ({e.code})', 'detail': str(detail)[:2000]}
+        except Exception as e:
+            # 连接错误/超时 → ComfyUI 可能正在重启
+            print(f"[ComfyUI] queue_prompt 连接失败（{e}），等待重启...")
+
+        if time.time() >= deadline:
+            return {'error': f'ComfyUI 长时间不可达（超过 {wait_ready_timeout}s），放弃提交'}
+
+        time.sleep(5)
 
 
 def wait_for_prompt_ws(ws, prompt_id: str):
@@ -783,6 +925,78 @@ def wait_for_prompt_ws(ws, prompt_id: str):
                 data = message['data']
                 if data.get('prompt_id') == prompt_id and data.get('node') is None:
                     break  # 执行完成
+
+
+def _extract_corrupt_safetensors_path(err_msg: str) -> Optional[str]:
+    """从 ComfyUI 错误信息中提取损坏 safetensors 的文件路径。"""
+    text = str(err_msg or '')
+    if not text:
+        return None
+
+    lowered = text.lower()
+    is_corrupt_sig = (
+        'metadataincompletebuffer' in lowered
+        or 'safetensors file is corrupt/incomplete' in lowered
+        or 'error while deserializing header' in lowered
+    )
+    if not is_corrupt_sig:
+        return None
+
+    m = re.search(r'File path:\s*(.+)', text, flags=re.IGNORECASE)
+    if not m:
+        return None
+    file_path = m.group(1).strip().strip('"\'')
+    return file_path or None
+
+
+def _quarantine_corrupt_file(file_path: str) -> Dict:
+    """将损坏模型文件重命名为 .BAD<随机串>，并清理索引中的旧路径。"""
+    src = str(file_path or '').strip()
+    if not src:
+        return {'status': 'skip', 'message': '未提供文件路径'}
+
+    src_abs = os.path.abspath(src)
+    if not os.path.exists(src_abs):
+        return {'status': 'skip', 'message': f'损坏文件不存在（可能已处理）: {src_abs}'}
+
+    # 文件名后缀加 BAD 随机串
+    dst_abs = ''
+    for _ in range(6):
+        rand = secrets.token_hex(5).upper()
+        candidate = f"{src_abs}.BAD{rand}"
+        if not os.path.exists(candidate):
+            dst_abs = candidate
+            break
+    if not dst_abs:
+        return {'status': 'error', 'message': f'无法为坏文件生成唯一 BAD 名称: {src_abs}'}
+
+    os.replace(src_abs, dst_abs)
+
+    removed = {'removed': 0, 'entries': []}
+    try:
+        from util import model_index
+        removed = model_index.remove_by_path(src_abs)
+    except Exception as e:
+        print(f"[CorruptModel] ⚠️ 索引清理失败: {e}")
+
+    return {
+        'status': 'ok',
+        'source_path': src_abs,
+        'bad_path': dst_abs,
+        'index_removed': int((removed or {}).get('removed', 0)),
+        'message': f"检测到坏文件，已隔离: {os.path.basename(dst_abs)}，索引清理 {int((removed or {}).get('removed', 0))} 条"
+    }
+
+
+def _try_quarantine_from_error(err_msg: str) -> Optional[Dict]:
+    """识别并隔离 ComfyUI 报错中的损坏 safetensors 文件。"""
+    path = _extract_corrupt_safetensors_path(err_msg)
+    if not path:
+        return None
+    try:
+        return _quarantine_corrupt_file(path)
+    except Exception as e:
+        return {'status': 'error', 'message': f'坏文件隔离失败: {e}', 'source_path': path}
 
 
 def wait_for_batch_ws(ws, prompt_ids: list, timeout: int = 600):
@@ -819,6 +1033,16 @@ def wait_for_batch_ws(ws, prompt_ids: list, timeout: int = 600):
                 if pid in prompt_set:
                     err_msg = data.get('exception_message', data.get('error', '执行错误'))
                     node_type = data.get('node_type', '')
+                    quarantine_result = _try_quarantine_from_error(err_msg)
+                    if quarantine_result:
+                        qmsg = quarantine_result.get('message', '')
+                        if qmsg:
+                            err_msg = f"{err_msg}\n{qmsg}"
+                        if quarantine_result.get('status') == 'ok':
+                            print(
+                                f"[CorruptModel] 已隔离坏文件: {quarantine_result.get('source_path')}"
+                                f" -> {quarantine_result.get('bad_path')}"
+                            )
                     errors[pid] = f"{node_type}: {err_msg}" if node_type else err_msg
                     print(f"[ComfyUI] ⚠️ prompt {pid[:8]} 执行错误: {errors[pid]}")
 
@@ -831,6 +1055,54 @@ def wait_for_batch_ws(ws, prompt_ids: list, timeout: int = 600):
     if errors:
         print(f"[ComfyUI] 批次中 {len(errors)}/{len(prompt_ids)} 个任务失败: {list(errors.values())[:3]}")
     return completed, errors
+
+
+def _estimate_batch_wait_timeout(prompt_ids: list, per_prompt_sec: int = 45) -> int:
+    """按当前队列深度估算等待超时，避免大队列场景下误判超时。"""
+    base_timeout = 600
+    try:
+        ready, queue_data = wait_for_comfyui(timeout=5)
+        if ready:
+            queue_data = queue_data or {}
+            running = queue_data.get('queue_running', []) or []
+            pending = queue_data.get('queue_pending', []) or []
+            # 保守估计：按当前队列总长度估算（包含本批次）
+            est_prompts = max(len(prompt_ids), len(running) + len(pending))
+        else:
+            est_prompts = len(prompt_ids)
+    except Exception:
+        est_prompts = len(prompt_ids)
+
+    # +10分钟缓冲，最长 12 小时
+    return max(base_timeout, min(12 * 3600, est_prompts * per_prompt_sec + 600))
+
+
+def _wait_for_comfyui_queue_slot(max_pending: int, wait_timeout: int = 1800, poll_interval: int = 3) -> bool:
+    """等待 ComfyUI 队列空位（pending <= max_pending）。"""
+    if max_pending is None or max_pending < 0:
+        return True
+
+    deadline = time.time() + max(wait_timeout, 5)
+    last_log = 0.0
+    while True:
+        ready, queue_data = wait_for_comfyui(timeout=5)
+        pending = len((queue_data or {}).get('queue_pending', []) or []) if ready else None
+        running = len((queue_data or {}).get('queue_running', []) or []) if ready else None
+
+        if ready and pending is not None and pending <= max_pending:
+            return True
+
+        now = time.time()
+        if now - last_log >= 15:
+            if ready:
+                print(f"[ComfyUI] 队列繁忙：pending={pending}, running={running}，等待空位(<= {max_pending})...")
+            else:
+                print("[ComfyUI] 队列状态不可达，等待重试...")
+            last_log = now
+
+        if now >= deadline:
+            return False
+        time.sleep(max(1, poll_interval))
 
 
 def fetch_images_from_history(prompt_id: str) -> list:
@@ -906,20 +1178,103 @@ _SAMPLER_MAP = {
     'dpm++ 2m sgm uniform': 'dpmpp_2m',
     'dpm++ 2m sde sgm uniform': 'dpmpp_2m_sde',
     'dpm++ sde sgm uniform': 'dpmpp_sde',
-    'restart': 'restart',
+    'restart': 'euler',
     'ipndm': 'ipndm', 'ipndm_v': 'ipndm_v',
     'deis': 'deis',
 }
 
-def _normalize_sampler(name: str) -> str:
-    """将 Civitai/WebUI 的 sampler 显示名转为 ComfyUI 内部名"""
+_comfyui_sampler_cache = None  # {"samplers": [...], "schedulers": [...]}
+
+def _get_comfyui_sampler_info() -> dict:
+    """从 ComfyUI /api/object_info/KSampler 获取可用的 sampler 和 scheduler 列表（带缓存）"""
+    global _comfyui_sampler_cache
+    if _comfyui_sampler_cache:
+        return _comfyui_sampler_cache
+    try:
+        req = urllib.request.Request(f'http://{COMFYUI_URL}/api/object_info/KSampler')
+        with _local_opener.open(req, timeout=5) as r:
+            data = json.loads(r.read())
+            ks = data.get('KSampler', {}).get('input', {}).get('required', {})
+            samplers = ks.get('sampler_name', [[]])[0] or []
+            schedulers = ks.get('scheduler', [[]])[0] or []
+            _comfyui_sampler_cache = {"samplers": list(samplers), "schedulers": list(schedulers)}
+            print(f"[ComfyUI] 可用采样器: {len(samplers)} 个, 调度器: {len(schedulers)} 个")
+    except Exception as e:
+        print(f"[ComfyUI] 获取采样器列表失败: {e}，使用硬编码备用列表")
+        # 硬编码 ComfyUI 常见采样器/调度器，保证即使 API 不可用也能做基本验证
+        _comfyui_sampler_cache = {
+            "samplers": [
+                'euler', 'euler_ancestral', 'euler_cfg_pp', 'heun', 'heunpp2',
+                'dpm_2', 'dpm_2_ancestral', 'lms',
+                'dpmpp_2s_ancestral', 'dpmpp_sde', 'dpmpp_sde_gpu',
+                'dpmpp_2m', 'dpmpp_2m_sde', 'dpmpp_2m_sde_gpu',
+                'dpmpp_3m_sde', 'dpmpp_3m_sde_gpu',
+                'ddpm', 'lcm', 'ipndm', 'ipndm_v', 'deis',
+                'ddim', 'uni_pc', 'uni_pc_bh2',
+            ],
+            "schedulers": [
+                'normal', 'karras', 'exponential', 'sgm_uniform',
+                'simple', 'ddim_uniform', 'beta',
+            ],
+        }
+    return _comfyui_sampler_cache
+
+
+def _normalize_sampler(name: str, scheduler_hint: str = '') -> tuple:
+    """将 Civitai/WebUI 的 sampler 显示名转为 ComfyUI 内部名。
+    返回 (sampler_name, scheduler_name)。
+    处理合并名称如 "Euler a_simple" → ("euler_ancestral", "simple")
+    """
     if not name:
-        return 'euler'
+        return ('euler', scheduler_hint or '')
     lower = name.strip().lower()
+
+    # 1) 直接查映射表
     if lower in _SAMPLER_MAP:
-        return _SAMPLER_MAP[lower]
-    # 已经是 ComfyUI 内部名
-    return name
+        return (_SAMPLER_MAP[lower], scheduler_hint or '')
+
+    # 2) 尝试拆分 scheduler 后缀（下划线/空格分隔）
+    #    已知 scheduler 关键字（从 ComfyUI 标准 + 常见变体）
+    _KNOWN_SCHEDULERS = [
+        'sgm_uniform', 'sgm uniform',
+        'exponential', 'karras', 'simple', 'normal', 'ddim_uniform',
+        'beta', 'linear_quadratic', 'kl_optimal',
+    ]
+    for sched in _KNOWN_SCHEDULERS:
+        for sep in ['_', ' ']:
+            suffix = sep + sched
+            if lower.endswith(suffix):
+                sampler_part = lower[:-len(suffix)].strip(' _')
+                if sampler_part in _SAMPLER_MAP:
+                    extracted_sched = scheduler_hint or sched.replace(' ', '_')
+                    print(f"[Sampler] 拆分 '{name}' → sampler='{_SAMPLER_MAP[sampler_part]}', scheduler='{extracted_sched}'")
+                    return (_SAMPLER_MAP[sampler_part], extracted_sched)
+
+    # 3) 查询 ComfyUI 实际可用列表做模糊匹配
+    info = _get_comfyui_sampler_info()
+    avail = info.get("samplers", [])
+    if avail:
+        # 精确匹配（已经是 ComfyUI 内部名）
+        if lower in avail:
+            return (lower, scheduler_hint or '')
+        # 子串匹配：找最长匹配的 sampler
+        best, best_len = None, 0
+        for s in avail:
+            if s in lower and len(s) > best_len:
+                best, best_len = s, len(s)
+        if best:
+            remainder = lower.replace(best, '').strip(' _')
+            sched = scheduler_hint or remainder or ''
+            # 验证 remainder 是否是合法 scheduler
+            avail_sched = info.get("schedulers", [])
+            if sched and avail_sched and sched not in avail_sched:
+                sched = scheduler_hint or ''
+            print(f"[Sampler] 模糊匹配 '{name}' → sampler='{best}', scheduler='{sched}'")
+            return (best, sched)
+
+    # 4) 最终回退
+    print(f"[Sampler] ⚠️ 无法识别采样器 '{name}'，回退到 'euler'")
+    return ('euler', scheduler_hint or '')
 
 
 # ---- object_info 缓存（用于 widget 名称解析） ----
@@ -1047,18 +1402,8 @@ def _find_nodes_by_type(workflow: Dict, class_type: str) -> list:
     return results
 
 
-def _resolve_comfyui_lora_name(name: str) -> str:
-    """
-    将我们的 LoRA 名称与 ComfyUI 实际可用列表做匹配。
-    ComfyUI 验证时要求名称精确匹配（含大小写），这里做模糊匹配。
-    """
-    try:
-        with _local_opener.open(f'http://{COMFYUI_URL}/api/models/loras', timeout=5) as r:
-            comfyui_loras = json.loads(r.read())
-    except Exception:
-        return name  # 查询失败，原样返回
-
-    # 统一分隔符后做比较
+def _match_lora_in_list(name: str, comfyui_loras: list) -> str | None:
+    """在 ComfyUI LoRA 列表中做多级模糊匹配，找到返回 ComfyUI 名称，否则 None"""
     name_norm = name.replace('\\', '/').lower()
 
     # 1) 精确匹配（统一分隔符后）
@@ -1094,8 +1439,34 @@ def _resolve_comfyui_lora_name(name: str) -> str:
             if name_stem in cl_stem:
                 return cl
 
-    print(f"[ComfyUI] ⚠️ LoRA 未在 ComfyUI 列表中找到匹配: {name}")
-    return name  # 没找到，原样返回
+    return None
+
+
+def _resolve_comfyui_lora_name(name: str) -> str:
+    """
+    将我们的 LoRA 名称与 ComfyUI 实际可用列表做匹配。
+    ComfyUI 验证时要求名称精确匹配（含大小写），这里做模糊匹配。
+    若首次查询未命中，会 touch 目录强制刷新后重试一次。
+    """
+    for attempt in range(2):
+        try:
+            with _local_opener.open(f'http://{COMFYUI_URL}/api/models/loras', timeout=5) as r:
+                comfyui_loras = json.loads(r.read())
+        except Exception:
+            return name  # 查询失败，原样返回
+
+        matched = _match_lora_in_list(name, comfyui_loras)
+        if matched:
+            return matched
+
+        if attempt == 0:
+            # 首次未命中 → touch 目录强制 ComfyUI 刷新缓存后重试
+            print(f"[ComfyUI] LoRA '{name}' 未在列表({len(comfyui_loras)}个)中找到，touch 目录后重试...")
+            _invalidate_comfyui_model_cache()
+            time.sleep(1)  # 给 ComfyUI 一点时间完成扫描
+
+    print(f"[ComfyUI] ⚠️ LoRA 未在 ComfyUI 列表中找到匹配: {name} (列表共 {len(comfyui_loras)} 个)")
+    return name  # 最终没找到，原样返回
 
 
 def compute_weight_sweep(lora_checks: list) -> list | None:
@@ -1160,19 +1531,21 @@ def _set_lora_nodes(workflow: Dict, loras: list):
     loras: [{"name": "subtype/filename.safetensors", "weight": 0.8}, ...]
     支持 LoraLoader（单 LoRA）和 Lora Loader Stack (rgthree)（多 LoRA）。
     """
-    if not loras:
-        return
-
-    # 将每个 LoRA 名称与 ComfyUI 实际列表做匹配
+    # 将每个 LoRA 名称与 ComfyUI 实际列表做匹配（跳过非模型格式文件）
+    _VALID_LORA_EXTS = ('.safetensors', '.ckpt', '.pt', '.pth', '.bin')
     normalized = []
-    for l in loras:
-        resolved = _resolve_comfyui_lora_name(l['name'])
+    for l in (loras or []):
+        lname = l['name']
+        if not any(lname.lower().endswith(ext) for ext in _VALID_LORA_EXTS):
+            print(f"[ComfyUI] ⚠️ 跳过非模型格式 LoRA: {lname}")
+            continue
+        resolved = _resolve_comfyui_lora_name(lname)
         normalized.append({
             'name': resolved,
             'weight': float(l.get('weight', 1.0))
         })
-        if resolved != l['name']:
-            print(f"[ComfyUI] LoRA 名称已匹配: {l['name']} → {resolved}")
+        if resolved != lname:
+            print(f"[ComfyUI] LoRA 名称已匹配: {lname} → {resolved}")
 
     # 1) 尝试 Lora Loader Stack (rgthree) —— 支持多 LoRA
     stack_nodes = _find_nodes_by_type(workflow, 'Lora Loader Stack (rgthree)')
@@ -1211,6 +1584,7 @@ def _set_lora_nodes(workflow: Dict, loras: list):
 
 
 _TRACKING_LOCAL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache', 'gen_tracking.json')
+_ALLOWED_TRACKING_STATUSES = {'pending_review', 'perfect', 'done'}
 
 
 def _azure_available() -> bool:
@@ -1221,16 +1595,75 @@ def _azure_available() -> bool:
         return False
 
 
-def _save_gen_tracking(batch_id, favorite_id, source_url='', gen_params=None):
+def _image_key_from_ref(ref: str) -> str:
+    """将 URL/本地路径规范化为图片 key（文件名）。"""
+    if not ref:
+        return ''
+    try:
+        clean = str(ref).split('?', 1)[0].split('#', 1)[0].replace('\\', '/')
+        return clean.rsplit('/', 1)[-1]
+    except Exception:
+        return ''
+
+
+def _ensure_image_statuses(entry: dict) -> dict:
+    """确保条目存在 image_statuses，并为已知图片补齐默认状态。"""
+    status_default = entry.get('status') or 'pending_review'
+    if status_default not in _ALLOWED_TRACKING_STATUSES:
+        status_default = 'pending_review'
+
+    raw = entry.get('image_statuses')
+    normalized = {}
+    if isinstance(raw, dict):
+        for k, v in raw.items():
+            kk = str(k).strip()
+            if kk and v in _ALLOWED_TRACKING_STATUSES:
+                normalized[kk] = v
+
+    refs = []
+    refs.extend(entry.get('blob_urls') or [])
+    refs.extend(entry.get('local_paths') or [])
+    for ref in refs:
+        key = _image_key_from_ref(ref)
+        if key and key not in normalized:
+            normalized[key] = status_default
+
+    entry['image_statuses'] = normalized
+    return normalized
+
+
+def _save_gen_tracking(batch_id, favorite_id, source_url='', gen_params=None, blob_urls=None, local_paths=None):
     """保存 batch_id → favorite_id 追踪记录（本地 + Azure 双写）"""
     try:
         existing = _load_gen_tracking()
-        existing[batch_id] = {
+        entry = existing.get(batch_id, {})
+        old_image_statuses = entry.get('image_statuses') if isinstance(entry.get('image_statuses'), dict) else {}
+        entry.update({
             'favorite_id': favorite_id,
             'source_url': source_url,
-            'created_at': time.strftime('%Y-%m-%dT%H:%M:%S'),
-            'gen_params': gen_params or {},
-        }
+            'created_at': entry.get('created_at') or time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'gen_params': gen_params or entry.get('gen_params', {}),
+            'status': entry.get('status') or 'pending_review',
+        })
+        if blob_urls:
+            entry['blob_urls'] = blob_urls
+        if local_paths:
+            entry['local_paths'] = local_paths
+
+        # 单图状态：新图片默认 pending_review；历史图片保留既有状态
+        image_statuses = _ensure_image_statuses(entry)
+        new_refs = []
+        if blob_urls:
+            new_refs.extend(blob_urls)
+        if local_paths:
+            new_refs.extend(local_paths)
+        for ref in new_refs:
+            key = _image_key_from_ref(ref)
+            if key and key not in old_image_statuses:
+                image_statuses[key] = 'pending_review'
+        entry['image_statuses'] = image_statuses
+
+        existing[batch_id] = entry
         text = json.dumps(existing, ensure_ascii=False, indent=2)
 
         # 始终写本地
@@ -1280,6 +1713,96 @@ def _load_gen_tracking():
     return {}
 
 
+def _update_gen_tracking_status(batch_id: str, status: str, image_key: str = '') -> bool:
+    """更新某个 batch 的 status 字段（本地 + Azure 双写）。
+    status 合法值: pending_review / perfect / done
+    """
+    try:
+        existing = _load_gen_tracking()
+        if batch_id not in existing:
+            return False
+        entry = existing[batch_id]
+        if image_key:
+            image_statuses = _ensure_image_statuses(entry)
+            image_statuses[image_key] = status
+            entry['image_statuses'] = image_statuses
+            print(f"[Tracking] batch={batch_id} image={image_key} status → {status}")
+        else:
+            # 兼容旧调用：批量更新整个 batch 状态
+            entry['status'] = status
+            print(f"[Tracking] batch={batch_id} status → {status}")
+        entry['status_updated_at'] = time.strftime('%Y-%m-%dT%H:%M:%S')
+
+        text = json.dumps(existing, ensure_ascii=False, indent=2)
+        os.makedirs(os.path.dirname(_TRACKING_LOCAL_PATH), exist_ok=True)
+        with open(_TRACKING_LOCAL_PATH, 'w', encoding='utf-8') as f:
+            f.write(text)
+        if _azure_available():
+            try:
+                blob = BlobStorage(container='civitaidl')
+                blob.put_json('data', 'gen_tracking.json', existing)
+            except Exception as e:
+                print(f"[Tracking] Azure 写入失败: {e}")
+        return True
+    except Exception as e:
+        print(f"[Tracking] update_status 失败: {e}")
+        return False
+
+
+def _backfill_blob_urls():
+    """从 Azure 列出所有 blob，按 batch_id 同步到 tracking 的 blob_urls 字段。
+    既回填缺失条目，也清理已删除的脏 URL。"""
+    try:
+        print("[Tracking] 开始同步 blob_urls...")
+        tracking = _load_gen_tracking()
+        if not tracking:
+            print("[Tracking] tracking 为空，跳过")
+            return
+
+        blob = BlobStorage(container='civitaidl')
+        all_urls = blob.list_recent_blobs(prefix='generated/', max_results=10000, return_urls=True)
+
+        # 构建 batch_id → [url, ...] 映射（仅 Azure 上实际存在的 blob）
+        url_map = {}
+        for url in all_urls:
+            fname = url.rsplit('/', 1)[-1] if '/' in url else url
+            bid = fname.split('_')[0]
+            if bid in tracking:
+                url_map.setdefault(bid, []).append(url)
+
+        # 用 Azure 实际数据覆盖所有 tracking 条目的 blob_urls
+        updated = 0
+        for bid in tracking:
+            new_urls = url_map.get(bid, [])
+            old_urls = tracking[bid].get('blob_urls', [])
+            if sorted(new_urls) != sorted(old_urls):
+                tracking[bid]['blob_urls'] = new_urls
+                updated += 1
+
+        if updated > 0:
+            text = json.dumps(tracking, ensure_ascii=False, indent=2)
+            os.makedirs(os.path.dirname(_TRACKING_LOCAL_PATH), exist_ok=True)
+            with open(_TRACKING_LOCAL_PATH, 'w', encoding='utf-8') as f:
+                f.write(text)
+            if _azure_available():
+                try:
+                    b = BlobStorage(container='civitaidl')
+                    b.put_json('data', 'gen_tracking.json', tracking)
+                except Exception:
+                    pass
+            print(f"[Tracking] blob_urls 同步完成: {updated} 个 batch 已更新")
+        else:
+            print("[Tracking] blob_urls 同步完成: 无需更新")
+    except Exception as e:
+        print(f"[Tracking] blob_urls 同步失败: {e}")
+    finally:
+        # 重置标志，允许下次再触发
+        try:
+            APIHandler._backfill_running = False
+        except Exception:
+            pass
+
+
 def run_comfyui_workflow(
     workflow_name: str,
     checkpoint: str,
@@ -1298,7 +1821,10 @@ def run_comfyui_workflow(
     variations: list = None,
     favorite_id: str = None,
     source_url: str = None,
-    upscale_denoise: list = None
+    upscale_denoise: list = None,
+    clip_skip: int = None,
+    queue_max_pending: int = None,
+    queue_wait_timeout: int = 1800
 ) -> Dict:
     """运行 ComfyUI 工作流（支持 UI 导出格式，自动转换为 API 格式）
     variations: 控制变量法参数列表，每个元素 {'label': ..., 'params': {sampler, scheduler, width, height}}
@@ -1308,8 +1834,46 @@ def run_comfyui_workflow(
     """
 
     try:
-        # 1. 检查 ComfyUI 就绪
-        ready, queue_data = wait_for_comfyui()
+        import copy as _copy
+
+        # checkpoint 缺失时：自动随机挑选 6 个 XL 基模
+        def _has_variation_checkpoint(vs):
+            if not isinstance(vs, list):
+                return False
+            for v in vs:
+                if not isinstance(v, dict):
+                    continue
+                vp = v.get('params') or {}
+                if isinstance(vp, dict) and str(vp.get('checkpoint', '')).strip():
+                    return True
+            return False
+
+        _ckpt_missing = not str(checkpoint or '').strip()
+        if _ckpt_missing and not _has_variation_checkpoint(variations):
+            _fallback_ckpts = _pick_random_xl_checkpoints(count=6)
+            if not _fallback_ckpts:
+                return {'status': 'error', 'message': '未解析到 checkpoint，且本地无可用 XL 模型用于随机回退'}
+
+            _base_vars = variations if isinstance(variations, list) and variations else [{'label': '基准', 'params': {}}]
+            _template = _copy.deepcopy(_base_vars[0]) if _base_vars else {'label': '基准', 'params': {}}
+            _template_params = _template.get('params') if isinstance(_template.get('params'), dict) else {}
+            _template['params'] = _template_params
+            _template_params.pop('checkpoint', None)
+            _template_params.pop('seed', None)
+
+            _merged = []
+            for i, ck in enumerate(_fallback_ckpts):
+                nv = _copy.deepcopy(_template)
+                nv.setdefault('params', {})['checkpoint'] = ck
+                nv['label'] = f"随机XL#{i+1} | {ck.split('/')[-1]}"
+                _merged.append(nv)
+
+            variations = _merged
+            checkpoint = _fallback_ckpts[0]
+            print(f"[ComfyUI] 未提供 checkpoint，已随机选择 {len(_fallback_ckpts)} 个 XL 基模")
+
+        # 1. 检查 ComfyUI 就绪（等待最多 300s，兼容重启场景）
+        ready, queue_data = wait_for_comfyui(retry_timeout=300)
         if not ready:
             return {'status': 'error', 'message': 'ComfyUI not ready（无法连接 http://' + COMFYUI_URL + '）'}
 
@@ -1332,28 +1896,45 @@ def run_comfyui_workflow(
         else:
             workflow = _convert_ui_to_api(raw)
 
-        # 4. 设置参数
+        # 4. 强制刷新 ComfyUI 模型缓存（防止新下载的模型不在列表中）
+        _invalidate_comfyui_model_cache()
+
+        # 5. 设置参数
         # Checkpoint
         ckpt_nodes = _find_nodes_by_type(workflow, 'CheckpointLoaderSimple')
-        if ckpt_nodes:
-            # ComfyUI checkpoint 列表包含子目录前缀（如 'xl\model.safetensors'）
-            ckpt_name = checkpoint.replace('/', '\\')
+        _ckpt_resolve_cache = {}
 
-            # 验证 checkpoint 在 ComfyUI 模型列表中（防止重启后模型尚未加载完）
+        def _resolve_ckpt_name(raw_ckpt: str):
+            _raw = str(raw_ckpt or '').strip()
+            if not _raw:
+                return None
+            # 兼容前端/索引异常：去掉前导分隔符，避免出现 "\\model.safetensors"
+            _raw = _raw.lstrip('/\\')
+            _cache_key = _raw.lower().replace('/', '\\')
+            if _cache_key in _ckpt_resolve_cache:
+                return _ckpt_resolve_cache[_cache_key]
+
+            ckpt_name = _raw.replace('/', '\\')
             _ckpt_found = False
+            _ckpt_lower = ckpt_name.lower()
             for _attempt in range(12):  # 最多等 ~60s
                 try:
                     _oi_req = urllib.request.Request(f'http://{COMFYUI_URL}/api/object_info/CheckpointLoaderSimple')
                     with _local_opener.open(_oi_req, timeout=5) as _oi_r:
                         _oi_data = json.loads(_oi_r.read())
                         _avail = _oi_data.get('CheckpointLoaderSimple', {}).get('input', {}).get('required', {}).get('ckpt_name', [[]])[0]
+                        # 精确匹配
                         if ckpt_name in _avail:
                             _ckpt_found = True
                             break
-                        # 也尝试带子目录前缀匹配
-                        if any(n.endswith(ckpt_name) for n in _avail):
-                            ckpt_name = next(n for n in _avail if n.endswith(ckpt_name))
-                            _ckpt_found = True
+                        # 大小写不敏感匹配（兼容 / 与 \\）
+                        for _a in _avail:
+                            _al = str(_a).lower().replace('/', '\\')
+                            if _al == _ckpt_lower or _al.endswith(_ckpt_lower):
+                                ckpt_name = _a
+                                _ckpt_found = True
+                                break
+                        if _ckpt_found:
                             break
                 except Exception:
                     pass
@@ -1361,10 +1942,41 @@ def run_comfyui_workflow(
                     print(f"[ComfyUI] Checkpoint '{ckpt_name}' 未在模型列表中找到，等待 ComfyUI 加载...")
                 time.sleep(5)
 
+            # 路径不匹配时，按文件名兜底匹配（修复索引 subtype 错误场景）
             if not _ckpt_found:
-                print(f"[ComfyUI] ⚠️ Checkpoint '{ckpt_name}' 最终未找到，仍尝试提交")
+                try:
+                    _oi_req = urllib.request.Request(f'http://{COMFYUI_URL}/api/object_info/CheckpointLoaderSimple')
+                    with _local_opener.open(_oi_req, timeout=5) as _oi_r:
+                        _oi_data = json.loads(_oi_r.read())
+                        _avail = _oi_data.get('CheckpointLoaderSimple', {}).get('input', {}).get('required', {}).get('ckpt_name', [[]])[0]
+                except Exception:
+                    _avail = []
 
-            ckpt_nodes[0][1]['inputs']['ckpt_name'] = ckpt_name
+                _base = os.path.basename(_raw.replace('\\', '/')).lower()
+                if _base:
+                    _base_hits = [a for a in _avail if os.path.basename(str(a).replace('\\', '/')).lower() == _base]
+                    if len(_base_hits) == 1:
+                        ckpt_name = _base_hits[0]
+                        _ckpt_found = True
+                    elif len(_base_hits) > 1:
+                        _xl_hits = [a for a in _base_hits if ('\\xl\\' in str(a).lower()) or str(a).lower().startswith('xl\\')]
+                        if len(_xl_hits) == 1:
+                            ckpt_name = _xl_hits[0]
+                            _ckpt_found = True
+
+            if not _ckpt_found:
+                return None
+
+            _ckpt_resolve_cache[_cache_key] = ckpt_name
+            return ckpt_name
+
+        if ckpt_nodes:
+            _base_ckpt_name = _resolve_ckpt_name(checkpoint)
+            if not _base_ckpt_name:
+                _req_ckpt = checkpoint.replace('/', '\\') if checkpoint else ''
+                print(f"[ComfyUI] ❌ Checkpoint '{_req_ckpt}' 在 ComfyUI 模型列表中不存在，中止提交")
+                return {'status': 'error', 'message': f'Checkpoint 不在 ComfyUI 可用列表中: {_req_ckpt}（模型可能未下载或路径不正确）'}
+            ckpt_nodes[0][1]['inputs']['ckpt_name'] = _base_ckpt_name
 
         # KSampler → 同时通过连接关系定位 positive/negative 节点
         sampler_nodes = _find_nodes_by_type(workflow, 'KSampler')
@@ -1373,9 +1985,24 @@ def run_comfyui_workflow(
             s_inputs = sampler_nodes[0][1]['inputs']
             s_inputs['steps'] = steps
             s_inputs['cfg'] = cfg
-            s_inputs['sampler_name'] = _normalize_sampler(sampler)
-            if scheduler:
-                s_inputs['scheduler'] = scheduler
+            # 智能匹配 sampler + scheduler（处理合并名称、验证可用性、自动回退）
+            norm_sampler, extracted_sched = _normalize_sampler(sampler, scheduler)
+            # 最终验证：确保 sampler 在 ComfyUI 可用列表中
+            info = _get_comfyui_sampler_info()
+            avail_samplers = info.get("samplers", [])
+            if avail_samplers and norm_sampler not in avail_samplers:
+                print(f"[ComfyUI] ⚠️ Sampler '{norm_sampler}' 不在可用列表({len(avail_samplers)}个)中，回退到 'euler'")
+                norm_sampler = 'euler'
+            s_inputs['sampler_name'] = norm_sampler
+            # scheduler: 优先用 extracted（从合并名称拆出），否则用传入值
+            final_sched = extracted_sched or scheduler
+            if final_sched:
+                avail_scheds = info.get("schedulers", [])
+                if avail_scheds and final_sched not in avail_scheds:
+                    print(f"[ComfyUI] ⚠️ Scheduler '{final_sched}' 不在可用列表中，使用默认")
+                    final_sched = ''
+            if final_sched:
+                s_inputs['scheduler'] = final_sched
             s_inputs['seed'] = seed if seed else int(uuid.uuid4()) % (2**32)
             # 从 KSampler 的 positive/negative 连接追溯 CLIPTextEncode 节点 ID
             pos_ref = s_inputs.get('positive')
@@ -1391,9 +2018,18 @@ def run_comfyui_workflow(
         if negative_nid and negative_nid in workflow:
             workflow[negative_nid]['inputs']['text'] = negative_prompt
 
-        # LoRA
-        if loras:
-            _set_lora_nodes(workflow, loras)
+        # LoRA（即使 loras 为空也要调用，清空工作流模板中的默认 LoRA slot）
+        _set_lora_nodes(workflow, loras)
+
+        # CLIPSetLastLayer (clip_skip)
+        if clip_skip is not None:
+            # 安全：确保负值
+            if clip_skip > 0:
+                clip_skip = -clip_skip
+            clip_nodes = _find_nodes_by_type(workflow, 'CLIPSetLastLayer')
+            if clip_nodes:
+                clip_nodes[0][1]['inputs']['stop_at_clip_layer'] = clip_skip
+                print(f"[ComfyUI] CLIPSetLastLayer → {clip_skip}")
 
         # EmptyLatentImage 尺寸
         size_nodes = _find_nodes_by_type(workflow, 'EmptyLatentImage')
@@ -1487,17 +2123,33 @@ def run_comfyui_workflow(
                 vp = var.get('params', {})
                 label = var.get('label', f'变体{idx+1}')
 
+                # variation 级 checkpoint 覆盖（用于“随机6个XL基模”）
+                if ckpt_nodes:
+                    _var_ckpt = str(vp.get('checkpoint', '')).strip()
+                    if _var_ckpt:
+                        _resolved_var_ckpt = _resolve_ckpt_name(_var_ckpt)
+                        if not _resolved_var_ckpt:
+                            print(f"[ComfyUI] ⚠️ 变体 '{label}' checkpoint 不可用，跳过: {_var_ckpt}")
+                            continue
+                        ckpt_nodes[0][1]['inputs']['ckpt_name'] = _resolved_var_ckpt
+
                 # 应用该 variation 的参数
                 if sampler_nodes:
                     s_inp = sampler_nodes[0][1]['inputs']
                     if 'sampler' in vp:
-                        s_inp['sampler_name'] = _normalize_sampler(vp['sampler'])
-                    if 'scheduler' in vp and vp['scheduler']:
+                        _vs, _vsc = _normalize_sampler(vp['sampler'], vp.get('scheduler', ''))
+                        s_inp['sampler_name'] = _vs
+                        if _vsc:
+                            s_inp['scheduler'] = _vsc
+                    if 'scheduler' in vp and vp['scheduler'] and 'sampler' not in vp:
                         s_inp['scheduler'] = vp['scheduler']
                     # seed 策略：
+                    #   variation 自带 seed → 直接用（auto_replicate 注入的随机种子）
                     #   权重扫描 → 整批统一 seed（控制变量）
                     #   采样器/尺寸变体 → _no_seed 时每张随机，有 seed 时全用原始 seed
-                    if _is_weight_sweep:
+                    if 'seed' in vp:
+                        s_inp['seed'] = vp['seed']
+                    elif _is_weight_sweep:
                         s_inp['seed'] = _sweep_seed
                     elif _no_seed:
                         s_inp['seed'] = _random.randint(0, 2**32 - 1)
@@ -1516,6 +2168,14 @@ def run_comfyui_workflow(
                     _update_lora_weights_in_workflow(workflow, {int(k): v for k, v in lora_wt.items()})
 
                 wf_copy = _copy.deepcopy(workflow)
+                if queue_max_pending is not None:
+                    got_slot = _wait_for_comfyui_queue_slot(queue_max_pending, wait_timeout=queue_wait_timeout)
+                    if not got_slot:
+                        if idx == 0:
+                            ws.close()
+                            return {'status': 'error', 'message': f'ComfyUI 队列长期拥堵（pending>{queue_max_pending}），取消提交'}
+                        print(f"[ComfyUI] 批次 {batch_id} 提前结束提交：队列长期拥堵")
+                        break
                 result = queue_prompt(wf_copy, client_id)
                 if 'prompt_id' not in result:
                     if idx == 0:
@@ -1555,6 +2215,14 @@ def run_comfyui_workflow(
                     size_nodes[0][1]['inputs']['width'] = bw
                     size_nodes[0][1]['inputs']['height'] = bh
                 wf_copy = _copy.deepcopy(workflow)
+                if queue_max_pending is not None:
+                    got_slot = _wait_for_comfyui_queue_slot(queue_max_pending, wait_timeout=queue_wait_timeout)
+                    if not got_slot:
+                        if idx == 0:
+                            ws.close()
+                            return {'status': 'error', 'message': f'ComfyUI 队列长期拥堵（pending>{queue_max_pending}），取消提交'}
+                        print(f"[ComfyUI] 批次 {batch_id} 提前结束提交：队列长期拥堵")
+                        break
                 result = queue_prompt(wf_copy, client_id)
                 if 'prompt_id' not in result:
                     if idx == 0:
@@ -1565,6 +2233,13 @@ def run_comfyui_workflow(
                 prompt_ids.append(result['prompt_id'])
                 variation_labels.append(f'第{idx+1}张')
                 print(f"[ComfyUI] 批次 {batch_id} 第{idx+1}/{actual_batch}个已提交: {result['prompt_id']} ({bw}x{bh})")
+
+        if not prompt_ids:
+            try:
+                ws.close()
+            except Exception:
+                pass
+            return {'status': 'error', 'message': '没有可提交的任务（checkpoint 可能全部不可用）'}
 
         # 注册生成任务
         with _gen_lock:
@@ -1586,7 +2261,9 @@ def run_comfyui_workflow(
         def _wait_and_save_batch():
             try:
                 # WS 只等完成信号，不接收图片二进制
-                completed_ids, error_ids = wait_for_batch_ws(ws, prompt_ids)
+                wait_timeout = _estimate_batch_wait_timeout(prompt_ids)
+                print(f"[ComfyUI] 批次 {batch_id} 等待超时阈值: {wait_timeout}s（prompts={len(prompt_ids)}）")
+                completed_ids, error_ids = wait_for_batch_ws(ws, prompt_ids, timeout=wait_timeout)
                 ws.close()
 
                 # 只对成功完成的 prompt 获取图片（跳过执行出错的）
@@ -1650,10 +2327,24 @@ def run_comfyui_workflow(
                         'cfg': cfg, 'sampler': sampler, 'scheduler': scheduler, 'seed': seed,
                     }
                     try:
-                        _save_gen_tracking(batch_id, favorite_id, source_url or '', gen_params=_gp)
+                        _save_gen_tracking(batch_id, favorite_id, source_url or '', gen_params=_gp, blob_urls=azure_urls, local_paths=saved_paths)
                     except Exception as track_err:
                         print(f"[Tracking] ⚠️ 写入追踪记录失败: {track_err}")
-                    # 注：不再在生图完成时标记 done，done 仅由美学分析完成后设置
+                    # 图片已真正产出，现在才将收藏标记为 processing（待分析/待评估）
+                    if total_count > 0:
+                        try:
+                            from favorite_images import update_status as _fav_update
+                            _fav_update(favorite_id, "processing")
+                            print(f"[Tracking] 收藏 {favorite_id[:8]} → processing（{total_count} 张图片已产出）")
+                        except Exception as _fav_err:
+                            print(f"[Tracking] ⚠️ 更新收藏状态失败: {_fav_err}")
+                    # 清除 in-flight 标记
+                    try:
+                        from auto_replicate import _inflight_lock, _inflight_fav_ids
+                        with _inflight_lock:
+                            _inflight_fav_ids.discard(favorite_id)
+                    except Exception:
+                        pass
             except Exception as ex:
                 try:
                     ws.close()
@@ -1664,6 +2355,14 @@ def run_comfyui_workflow(
                         'status': 'error',
                         'message': f'生成失败: {str(ex)}'
                     })
+                # 生成失败也要清除 in-flight 标记
+                if favorite_id:
+                    try:
+                        from auto_replicate import _inflight_lock, _inflight_fav_ids
+                        with _inflight_lock:
+                            _inflight_fav_ids.discard(favorite_id)
+                    except Exception:
+                        pass
 
         # 立即写入追踪记录（让 cleanup 能识别正在生成的任务）
         if favorite_id:
@@ -1692,6 +2391,127 @@ def run_comfyui_workflow(
         return {'status': 'error', 'message': f'生成失败: {str(e)}'}
 
 
+def _refresh_workflow_submit_positions_locked():
+    """刷新提交队列中的排队位置（仅在持锁时调用）。"""
+    queued = sorted(
+        ((sid, t) for sid, t in _workflow_submit_tasks.items() if t.get('status') == 'queued'),
+        key=lambda kv: kv[1].get('_enqueue_time', 0),
+    )
+    for idx, (sid, task) in enumerate(queued):
+        task['queue_position'] = idx
+        task['phase'] = '排队中'
+        task['message'] = f'提交队列排队中，前方还有 {idx} 个任务'
+
+
+def _workflow_submit_worker_loop():
+    """串行消费绘图提交队列：每次仅向 ComfyUI 提交一个绘图请求。"""
+    while True:
+        submit_id = _workflow_submit_queue.get()
+        with _workflow_submit_lock:
+            task = _workflow_submit_tasks.get(submit_id)
+            if not task:
+                _refresh_workflow_submit_positions_locked()
+                continue
+            payload = dict(task.get('_payload') or {})
+            task.update({
+                'status': 'submitting',
+                'phase': '提交中',
+                'queue_position': 0,
+                'message': '正在向 ComfyUI 提交任务...',
+                '_submit_start': time.time(),
+            })
+            _refresh_workflow_submit_positions_locked()
+
+        try:
+            # 控制提交节奏：仅在 ComfyUI 可接收时逐条推进
+            payload.setdefault('queue_max_pending', 1)
+            payload.setdefault('queue_wait_timeout', 1800)
+            result = run_comfyui_workflow(**payload)
+        except Exception as ex:
+            result = {'status': 'error', 'message': f'提交失败: {ex}'}
+
+        now_ts = time.time()
+        with _workflow_submit_lock:
+            cur = _workflow_submit_tasks.get(submit_id)
+            if cur:
+                cur.pop('_payload', None)
+                if result.get('status') in ('submitted', 'success') and result.get('prompt_id'):
+                    cur.update({
+                        'status': 'submitted',
+                        'phase': '已提交',
+                        'prompt_id': result.get('prompt_id'),
+                        'batch_size': result.get('batch_size', cur.get('batch_size', 1)),
+                        'message': result.get('message', '已提交到 ComfyUI'),
+                        '_finish_time': now_ts,
+                    })
+                else:
+                    err_msg = result.get('message') or result.get('error') or '提交失败'
+                    cur.update({
+                        'status': 'error',
+                        'phase': '失败',
+                        'message': err_msg,
+                        'error': err_msg,
+                        '_finish_time': now_ts,
+                    })
+
+                # 轻量清理历史失败任务，避免无限增长
+                for sid in list(_workflow_submit_tasks.keys()):
+                    st = _workflow_submit_tasks.get(sid) or {}
+                    ft = st.get('_finish_time', 0)
+                    if st.get('status') == 'error' and ft and (now_ts - ft > 1800):
+                        _workflow_submit_tasks.pop(sid, None)
+
+            _refresh_workflow_submit_positions_locked()
+
+
+def _ensure_workflow_submit_worker():
+    global _workflow_submit_worker_started
+    with _workflow_submit_lock:
+        if _workflow_submit_worker_started:
+            return
+        threading.Thread(target=_workflow_submit_worker_loop, daemon=True, name='workflow-submit-worker').start()
+        _workflow_submit_worker_started = True
+
+
+def _enqueue_workflow_submit(payload: Dict) -> Dict:
+    """将绘图请求加入提交队列，立即返回 submit_id 给前端轮询。"""
+    submit_id = str(uuid.uuid4())[:8]
+    now_ts = time.time()
+
+    if isinstance(payload.get('variations'), list) and payload.get('variations'):
+        estimated_batch = len(payload.get('variations') or [])
+    else:
+        estimated_batch = int(payload.get('batch_size') or 1)
+        if estimated_batch <= 0:
+            estimated_batch = 1
+
+    with _workflow_submit_lock:
+        _workflow_submit_tasks[submit_id] = {
+            'status': 'queued',
+            'submit_id': submit_id,
+            'phase': '排队中',
+            'queue_position': 0,
+            'batch_size': estimated_batch,
+            'message': '已加入提交队列，等待 ComfyUI ready',
+            '_enqueue_time': now_ts,
+            '_payload': dict(payload),
+        }
+        _refresh_workflow_submit_positions_locked()
+        qpos = _workflow_submit_tasks[submit_id].get('queue_position', 0)
+
+    _workflow_submit_queue.put(submit_id)
+    _ensure_workflow_submit_worker()
+
+    return {
+        'status': 'submitted',
+        'queued': True,
+        'prompt_id': submit_id,
+        'batch_size': estimated_batch,
+        'queue_position': qpos,
+        'message': f'已加入提交队列，前方还有 {qpos} 个任务',
+    }
+
+
 # ============== HTTP API ==============
 
 class APIHandler(BaseHTTPRequestHandler):
@@ -1702,11 +2522,14 @@ class APIHandler(BaseHTTPRequestHandler):
     
     def send_json(self, data: Dict, status: int = 200):
         """发送 JSON 响应"""
-        self.send_response(status)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        try:
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass  # 客户端已断开，静默忽略
     
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -1775,14 +2598,61 @@ class APIHandler(BaseHTTPRequestHandler):
             if not prompt_id:
                 self.send_json({'status': 'error', 'message': 'missing prompt_id'}, 400)
                 return
+
+            # 1) 先查真实 ComfyUI 批次任务
             with _gen_lock:
                 task = _gen_tasks.get(prompt_id)
-            if not task:
-                self.send_json({'status': 'error', 'message': 'task not found'}, 404)
-            else:
+            if task:
                 # 不返回内部字段
                 out = {k: v for k, v in task.items() if not k.startswith('_')}
                 self.send_json(out)
+                return
+
+            # 2) 再查前置提交队列任务（submit_id）
+            with _workflow_submit_lock:
+                st = dict(_workflow_submit_tasks.get(prompt_id) or {})
+            if not st:
+                self.send_json({'status': 'error', 'message': 'task not found'}, 404)
+                return
+
+            st_status = st.get('status')
+            if st_status in ('queued', 'submitting'):
+                self.send_json({
+                    'status': 'running',
+                    'prompt_id': prompt_id,
+                    'phase': st.get('phase', '排队中'),
+                    'queue_position': st.get('queue_position', 0),
+                    'batch_size': st.get('batch_size', 1),
+                    'completed': 0,
+                    'message': st.get('message', '等待提交中...'),
+                })
+                return
+
+            if st_status == 'submitted':
+                real_batch_id = st.get('prompt_id', '')
+                if real_batch_id:
+                    with _gen_lock:
+                        real_task = _gen_tasks.get(real_batch_id)
+                    if real_task:
+                        out = {k: v for k, v in real_task.items() if not k.startswith('_')}
+                        self.send_json(out)
+                        return
+                self.send_json({
+                    'status': 'running',
+                    'prompt_id': prompt_id,
+                    'phase': '已提交',
+                    'queue_position': 0,
+                    'batch_size': st.get('batch_size', 1),
+                    'completed': 0,
+                    'message': st.get('message', '已提交到 ComfyUI，等待执行回执...'),
+                })
+                return
+
+            self.send_json({
+                'status': 'error',
+                'prompt_id': prompt_id,
+                'message': st.get('message', '提交失败'),
+            })
 
         elif path.startswith('/api/aesthetic/status'):
             query = parse_qs(parsed.query)
@@ -1829,17 +2699,184 @@ class APIHandler(BaseHTTPRequestHandler):
             else:
                 self.send_json({'status': 'error', 'message': 'ComfyUI not ready'})
         
+        elif path.startswith('/api/output/'):
+            # 提供本地生成图片（无 Azure 时 gallery 使用此端点）
+            fname = path[len('/api/output/'):]
+            # 安全：只允许纯文件名，不允许路径穿越
+            if '/' in fname or '\\' in fname or '..' in fname:
+                self.send_response(400); self.end_headers(); return
+            fpath = os.path.join(OUTPUT_DIR, fname)
+            if not os.path.isfile(fpath):
+                self.send_response(404); self.end_headers(); return
+            with open(fpath, 'rb') as img_f:
+                img_data = img_f.read()
+            self.send_response(200)
+            self.send_header('Content-Type', 'image/png')
+            self.send_header('Content-Length', str(len(img_data)))
+            self.send_header('Cache-Control', 'max-age=86400')
+            self.end_headers()
+            self.wfile.write(img_data)
+            return
+
+        elif path == '/api/gen-tracking/by-filename':
+            query = parse_qs(parsed.query)
+            filename_raw = query.get('filename', [''])[0]
+            filename = _image_key_from_ref(filename_raw)
+            if not filename:
+                self.send_json({'status': 'error', 'message': '缺少 filename'}, 400)
+                return
+
+            tracking = _load_gen_tracking()
+            matched_bid = ''
+            matched = None
+
+            for bid, v in tracking.items():
+                hit = False
+                refs = []
+                refs.extend(v.get('blob_urls') or [])
+                refs.extend(v.get('local_paths') or [])
+                for ref in refs:
+                    if _image_key_from_ref(ref) == filename:
+                        hit = True
+                        break
+
+                if not hit:
+                    raw_image_statuses = v.get('image_statuses', {})
+                    if isinstance(raw_image_statuses, dict) and filename in raw_image_statuses:
+                        hit = True
+
+                if hit:
+                    matched_bid = bid
+                    matched = v
+                    break
+
+            if not matched:
+                self.send_json({'status': 'error', 'message': f'未找到文件名对应的追踪记录: {filename}'}, 404)
+                return
+
+            status_default = matched.get('status', 'pending_review')
+            if status_default not in _ALLOWED_TRACKING_STATUSES:
+                status_default = 'pending_review'
+
+            raw_image_statuses = matched.get('image_statuses', {})
+            image_status = status_default
+            if isinstance(raw_image_statuses, dict):
+                st = raw_image_statuses.get(filename)
+                if st in _ALLOWED_TRACKING_STATUSES:
+                    image_status = st
+
+            raw_gp = matched.get('gen_params', {})
+            gp = raw_gp if isinstance(raw_gp, dict) else {}
+            slim_gp = {
+                'checkpoint': gp.get('checkpoint', ''),
+                'loras': gp.get('loras', []) if isinstance(gp.get('loras', []), list) else [],
+                'prompt': gp.get('prompt', ''),
+                'negative_prompt': gp.get('negative_prompt', ''),
+                'width': gp.get('width', 0),
+                'height': gp.get('height', 0),
+                'steps': gp.get('steps', 0),
+                'cfg': gp.get('cfg', 0),
+                'sampler': gp.get('sampler', ''),
+                'scheduler': gp.get('scheduler', ''),
+                'seed': gp.get('seed', None),
+            }
+
+            self.send_json({
+                'status': 'ok',
+                'batch_id': matched_bid,
+                'filename': filename,
+                'entry': {
+                    'status': status_default,
+                    'image_status': image_status,
+                    'source_url': matched.get('source_url', ''),
+                    'created_at': matched.get('created_at', ''),
+                    'favorite_id': matched.get('favorite_id', ''),
+                    'gen_params': slim_gp,
+                }
+            })
+
+        elif path == '/api/gen-tracking/list':
+            # 纯本地读取，秒返回（Gallery 主数据源）
+            tracking = _load_gen_tracking()
+            # 后台同步 blob_urls（回填缺失 + 清理已删除的脏 URL）
+            if not getattr(self.__class__, '_backfill_running', False):
+                self.__class__._backfill_running = True
+                threading.Thread(target=_backfill_blob_urls, daemon=True).start()
+            # 精简返回：仅保留 Gallery 需要字段（含继承功能所需轻量 gen_params）
+            slim = {}
+            for bid, v in tracking.items():
+                blob_urls = v.get('blob_urls', [])
+                # 本地图片：转换为 /api/output/<filename> URL
+                local_urls = []
+                for lp in (v.get('local_paths') or []):
+                    fname = os.path.basename(lp)
+                    if os.path.isfile(lp):
+                        local_urls.append(f'/api/output/{fname}')
+                # 合并：优先 blob_urls，无 blob 时用 local_urls
+                display_urls = blob_urls if blob_urls else local_urls
+                status_default = v.get('status', 'pending_review')
+                if status_default not in _ALLOWED_TRACKING_STATUSES:
+                    status_default = 'pending_review'
+
+                # 返回单图状态（按文件名 key）
+                image_statuses = {}
+                raw_image_statuses = v.get('image_statuses', {})
+                if isinstance(raw_image_statuses, dict):
+                    for k, st in raw_image_statuses.items():
+                        kk = str(k).strip()
+                        if kk and st in _ALLOWED_TRACKING_STATUSES:
+                            image_statuses[kk] = st
+                for u in display_urls:
+                    key = _image_key_from_ref(u)
+                    if key and key not in image_statuses:
+                        image_statuses[key] = status_default
+
+                raw_gp = v.get('gen_params', {})
+                gp = raw_gp if isinstance(raw_gp, dict) else {}
+                slim_gp = {
+                    'checkpoint': gp.get('checkpoint', ''),
+                    'loras': gp.get('loras', []) if isinstance(gp.get('loras', []), list) else [],
+                    'prompt': gp.get('prompt', ''),
+                    'negative_prompt': gp.get('negative_prompt', ''),
+                    'width': gp.get('width', 0),
+                    'height': gp.get('height', 0),
+                    'steps': gp.get('steps', 0),
+                    'cfg': gp.get('cfg', 0),
+                    'sampler': gp.get('sampler', ''),
+                    'scheduler': gp.get('scheduler', ''),
+                    'seed': gp.get('seed', None),
+                }
+
+                slim[bid] = {
+                    'status': status_default,
+                    'image_statuses': image_statuses,
+                    'source_url': v.get('source_url', ''),
+                    'blob_urls': display_urls,
+                    'created_at': v.get('created_at', ''),
+                    'favorite_id': v.get('favorite_id', ''),
+                    'gen_params': slim_gp,
+                }
+            self.send_json({'status': 'ok', 'tracking': slim})
+
         elif path == '/api/azure/list':
-            # 查询 Azure Blob 列表（按时间倒序，最近100个）+ 追踪数据
+            # 查询 Azure Blob 列表 + 追踪数据（带内存缓存，避免每次遍历 Azure）
             query = parse_qs(parsed.query)
             prefix = query.get('prefix', ['generated/'])[0]
             limit = int(query.get('limit', ['100'])[0])
-            limit = min(limit, 500)  # 最大500条
-            
+            limit = min(limit, 5000)
+            force_refresh = query.get('refresh', ['0'])[0] == '1'
+
             try:
-                blob = BlobStorage(container='civitaidl')
-                urls = blob.list_recent_blobs(prefix=prefix, max_results=limit, return_urls=True)
-                # 加载追踪数据（batch_id → favorite_id 映射）
+                cache = getattr(self.__class__, '_blob_list_cache', None)
+                now = time.time()
+                # 缓存有效：60s 内且非强制刷新
+                if cache and not force_refresh and cache.get('prefix') == prefix and (now - cache.get('ts', 0)) < 60:
+                    urls = cache['urls'][:limit]
+                else:
+                    blob = BlobStorage(container='civitaidl')
+                    urls = blob.list_recent_blobs(prefix=prefix, max_results=limit, return_urls=True)
+                    self.__class__._blob_list_cache = {'prefix': prefix, 'urls': urls, 'ts': now}
+
                 tracking = _load_gen_tracking()
                 self.send_json({
                     'success': True,
@@ -2080,31 +3117,32 @@ class APIHandler(BaseHTTPRequestHandler):
                 for vi, vv in enumerate(data['variations']):
                     vp = vv.get('params', {})
                     print(f"[DEBUG]   variation[{vi}] '{vv.get('label')}': width={vp.get('width')}, height={vp.get('height')}")
-            result = run_comfyui_workflow(
-                workflow_name=data.get('workflow', 'nolora'),
-                checkpoint=data.get('checkpoint', ''),
-                positive_prompt=data.get('prompt', ''),
-                negative_prompt=data.get('negative_prompt', 'low quality, worst quality'),
-                width=data.get('width', 512),
-                height=data.get('height', 512),
-                steps=data.get('steps', 20),
-                cfg=data.get('cfg', 7.0),
-                sampler=data.get('sampler', 'dpmpp_2m'),
-                scheduler=data.get('scheduler', ''),
-                seed=data.get('seed'),
-                loras=data.get('loras'),
-                batch_size=data.get('batch_size', 4),
-                vary_sizes=data.get('vary_sizes', False),
-                variations=data.get('variations'),
-                favorite_id=data.get('favorite_id', ''),
-                source_url=data.get('source_url', ''),
-                upscale_denoise=data.get('upscale_denoise')
-            )
-            
-            if result['status'] in ('success', 'submitted'):
-                self.send_json(result)
-            else:
-                self.send_json(result, 500)
+            payload = {
+                'workflow_name': data.get('workflow', 'nolora'),
+                'checkpoint': data.get('checkpoint', ''),
+                'positive_prompt': data.get('prompt', ''),
+                'negative_prompt': data.get('negative_prompt', 'low quality, worst quality'),
+                'width': data.get('width', 512),
+                'height': data.get('height', 512),
+                'steps': data.get('steps', 20),
+                'cfg': data.get('cfg', 7.0),
+                'sampler': data.get('sampler', 'dpmpp_2m'),
+                'scheduler': data.get('scheduler', ''),
+                'seed': data.get('seed'),
+                'loras': data.get('loras'),
+                'batch_size': data.get('batch_size', 4),
+                'vary_sizes': data.get('vary_sizes', False),
+                'variations': data.get('variations'),
+                'favorite_id': data.get('favorite_id', ''),
+                'source_url': data.get('source_url', ''),
+                'upscale_denoise': data.get('upscale_denoise'),
+                'clip_skip': data.get('clip_skip'),
+                # 在队列 worker 中保证串行“慢提交”，避免前端等待
+                'queue_max_pending': 1,
+                'queue_wait_timeout': 1800,
+            }
+            result = _enqueue_workflow_submit(payload)
+            self.send_json(result)
         
         elif path == '/api/image/parse':
             # 解析 Civitai 图片URL，提取生成参数，检查D盘模型
@@ -2161,6 +3199,7 @@ class APIHandler(BaseHTTPRequestHandler):
                 }
 
             _fav_id = favorite_id  # 捕获到闭包
+            _force = bool(data.get('force', False))
 
             def _run_aesthetic():
                 try:
@@ -2184,7 +3223,11 @@ class APIHandler(BaseHTTPRequestHandler):
                     if _fav_id:
                         try:
                             from favorite_images import mark_done
-                            mark_done(_fav_id)
+                            mark_done(
+                                _fav_id,
+                                source='aesthetic_analyze',
+                                context={'task_id': task_id, 'image_url': image_url, 'force': _force}
+                            )
                             print(f"[Aesthetic] 收藏 {_fav_id} 已标记为 done")
                         except Exception as fav_err:
                             print(f"[Aesthetic] 更新收藏状态失败: {fav_err}")
@@ -2247,7 +3290,7 @@ class APIHandler(BaseHTTPRequestHandler):
             if not item_id or not new_status:
                 self.send_json({'status': 'error', 'message': '缺少 id 或 status 参数'}, 400)
                 return
-            if new_status not in ('pending', 'processing', 'done', 'fail'):
+            if new_status not in ('pending', 'processing', 'fail'):
                 self.send_json({'status': 'error', 'message': '无效的 status 值'}, 400)
                 return
             result = update_status(item_id, new_status, fail_reason=fail_reason or None, retry_reason=retry_reason or None)
@@ -2270,6 +3313,184 @@ class APIHandler(BaseHTTPRequestHandler):
             from favorite_images import cleanup_done
             result = cleanup_done()
             self.send_json(result)
+
+        elif path == '/api/favorite/bulk-reset':
+            # 批量重置待调整条目为纯 pending（清除 retry_reason）
+            from favorite_images import update_status as _fav_update
+            fav_ids = data.get('fav_ids', [])
+            if not fav_ids:
+                self.send_json({'status': 'error', 'message': '缺少 fav_ids'}, 400)
+                return
+            ok = 0
+            for fid in fav_ids:
+                r = _fav_update(fid, 'pending')
+                if r.get('status') == 'ok':
+                    ok += 1
+            self.send_json({'status': 'ok', 'message': f'已重置 {ok}/{len(fav_ids)} 条'})
+
+        elif path == '/api/favorite/bulk-recheck-models':
+            # 批量重新判定：仅检查模型是否已齐全（不触发下载）
+            import threading as _thr
+            fav_ids = data.get('fav_ids', [])
+            if not fav_ids:
+                self.send_json({'status': 'error', 'message': '缺少 fav_ids'}, 400)
+                return
+
+            def _collect_missing_models(parse_result):
+                checks = parse_result.get('checks', {}) or {}
+                missing = []
+
+                ckpt = checks.get('checkpoint', {}) or {}
+                if not ckpt.get('found'):
+                    missing.append({
+                        'kind': 'checkpoint',
+                        'name': parse_result.get('checkpoint', '') or ckpt.get('name', ''),
+                    })
+
+                for lc in checks.get('loras', []) or []:
+                    if not lc.get('found'):
+                        missing.append({
+                            'kind': 'lora',
+                            'name': lc.get('requested_name', '') or lc.get('name', ''),
+                        })
+
+                for ec in checks.get('embeddings', []) or []:
+                    if not ec.get('found'):
+                        missing.append({
+                            'kind': 'embedding',
+                            'name': ec.get('requested_name', '') or ec.get('name', ''),
+                        })
+
+                return missing
+
+            def _bulk_recheck(ids):
+                from favorite_images import list_all, update_status as _fav_upd
+                entries = list_all()
+                id_map = {e['id']: e for e in entries}
+                scanned = 0
+                ready = 0
+                still_missing = 0
+                skipped = 0
+
+                for fid in ids:
+                    entry = id_map.get(fid)
+                    if not entry:
+                        continue
+                    if (entry.get('status') or 'pending') != 'pending':
+                        continue
+                    rr = entry.get('retry_reason', '') or ''
+                    if not rr.startswith('等待模型下载'):
+                        skipped += 1
+                        continue
+
+                    url = entry.get('url', '')
+                    if not url:
+                        skipped += 1
+                        continue
+
+                    scanned += 1
+                    try:
+                        pr = parse_civitai_image(url)
+                        if pr.get('status') == 'error':
+                            # 判定失败时保持原 retry_reason，避免误改分类
+                            continue
+
+                        missing = _collect_missing_models(pr)
+                        if missing:
+                            names = [f"{m.get('kind')} '{m.get('name', '')}'" for m in missing]
+                            _fav_upd(fid, 'pending', retry_reason=f"等待模型下载: {', '.join(names)}")
+                            still_missing += 1
+                        else:
+                            # 模型齐全，清空 retry_reason，允许自动复刻重新消费
+                            _fav_upd(fid, 'pending')
+                            ready += 1
+                    except Exception as ex:
+                        print(f"[BulkRecheck] 重新判定失败 {fid}: {ex}")
+
+                print(
+                    f"[BulkRecheck] 完成: 扫描 {scanned}/{len(ids)} 条，"
+                    f"可绘制 {ready}，仍缺模型 {still_missing}，跳过 {skipped}"
+                )
+
+            _thr.Thread(target=_bulk_recheck, args=(fav_ids,), daemon=True).start()
+            self.send_json({'status': 'ok', 'message': f'已提交 {len(fav_ids)} 条到后台重新判定'})
+
+        elif path == '/api/favorite/bulk-redownload':
+            # 批量重新解析缺失模型并加入下载队列
+            import threading as _thr
+            fav_ids = data.get('fav_ids', [])
+            if not fav_ids:
+                self.send_json({'status': 'error', 'message': '缺少 fav_ids'}, 400)
+                return
+
+            def _bulk_dl(ids):
+                from favorite_images import list_all, update_status as _fav_upd
+                entries = list_all()
+                id_map = {e['id']: e for e in entries}
+                queued = 0
+                for fid in ids:
+                    entry = id_map.get(fid)
+                    if not entry or (entry.get('status') or 'pending') != 'pending':
+                        continue
+                    url = entry.get('url', '')
+                    if not url:
+                        continue
+                    try:
+                        pr = parse_civitai_image(url)
+                        if pr.get('status') == 'error':
+                            continue
+                        checks = pr.get('checks', {})
+                        missing = []
+                        ckpt = checks.get('checkpoint', {})
+                        if not ckpt.get('found') and (ckpt.get('modelVersionId') or ckpt.get('modelId')):
+                            missing.append({
+                                'kind': 'checkpoint',
+                                'name': ckpt.get('name', ''),
+                                'model_id': ckpt.get('modelId'),
+                                'version_id': ckpt.get('modelVersionId'),
+                                'base_model': pr.get('base_model', ''),
+                            })
+                        for lc in checks.get('loras', []):
+                            if not lc.get('found') and (lc.get('modelVersionId') or lc.get('modelId')):
+                                missing.append({
+                                    'kind': 'lora',
+                                    'name': lc.get('name', ''),
+                                    'model_id': lc.get('modelId'),
+                                    'version_id': lc.get('modelVersionId'),
+                                    'base_model': pr.get('base_model', ''),
+                                })
+                        if missing:
+                            from auto_replicate import _enqueue_download
+                            names = [f"{m['kind']} '{m['name']}'" for m in missing]
+                            for mm in missing:
+                                _enqueue_download(mm, fid, url)
+                            _fav_upd(fid, 'pending', retry_reason=f"等待模型下载: {', '.join(names)}")
+                            queued += 1
+                        else:
+                            # 模型已齐全，清除 retry_reason 让自动复刻重新处理
+                            _fav_upd(fid, 'pending')
+                            queued += 1
+                    except Exception as ex:
+                        print(f"[BulkDL] 解析失败 {fid}: {ex}")
+                print(f"[BulkDL] 完成: {queued}/{len(ids)} 条已处理")
+
+            _thr.Thread(target=_bulk_dl, args=(fav_ids,), daemon=True).start()
+            self.send_json({'status': 'ok', 'message': f'已提交 {len(fav_ids)} 条到后台解析+下载'})
+
+        elif path == '/api/gen-tracking/update-status':
+            batch_id = data.get('batch_id', '')
+            status = data.get('status', '')
+            image_key = _image_key_from_ref((data.get('image_key', '') or '').strip())
+            if not batch_id or status not in ('pending_review', 'perfect', 'done'):
+                self.send_json({'status': 'error', 'message': '缺少 batch_id 或 status 非法'}, 400)
+                return
+            ok = _update_gen_tracking_status(batch_id, status, image_key=image_key)
+            self.send_json({
+                'status': 'ok' if ok else 'error',
+                'batch_id': batch_id,
+                'image_key': image_key,
+                'new_status': status,
+            })
 
         elif path == '/api/discard-log/add':
             # 记录一条废弃生成参数（blob 删除且非标记失败时调用）
@@ -2294,7 +3515,8 @@ class APIHandler(BaseHTTPRequestHandler):
 
         elif path == '/api/auto-replicate/start':
             import auto_replicate
-            result = auto_replicate.start()
+            shuffle = bool(data.get('shuffle', False))
+            result = auto_replicate.start(shuffle=shuffle)
             self.send_json(result)
 
         elif path == '/api/auto-replicate/stop':
@@ -2354,6 +3576,13 @@ class APIHandler(BaseHTTPRequestHandler):
                 'log': cleanup_log,
             })
 
+        elif path == '/api/favorites/cleanup-perfect-pending':
+            # 已禁用：收藏 done 仅允许“手动美学分析完成”路径设置
+            self.send_json({
+                'status': 'error',
+                'message': '该接口已禁用：收藏仅可在手动美学分析完成后置为已完成'
+            }, 403)
+
         elif path == '/api/admin/manual-register':
             # 手动注册：用户已手工下载模型，提供 c 站 URL + 本地文件名 + 失效别名
             import re as _re
@@ -2394,17 +3623,60 @@ class APIHandler(BaseHTTPRequestHandler):
                     self.send_json({'status': 'error', 'message': f'文件不存在: {local_path}'}, 400)
                     return
 
-            # 3. 从 Civitai URL 获取模型信息
+            # 3. 从 Civitai URL 获取模型信息（支持 /models/xxx 和 /images/xxx）
             try:
                 dl = CivitaiDownloader()
-                parse_result = dl.parse_url(civitai_url)
-                if parse_result['status'] != 'ok':
-                    self.send_json({'status': 'error', 'message': f'URL 解析失败: {parse_result.get("message")}'}, 400)
-                    return
-                model_info = dl.get_model_info(parse_result['model_id'], parse_result.get('version_id'))
-                if model_info['status'] != 'ok':
-                    self.send_json({'status': 'error', 'message': f'获取模型信息失败: {model_info.get("message")}'})
-                    return
+                image_match = _re.search(r'civitai\.com/images/(\d+)', civitai_url)
+                if image_match:
+                    # 图片 URL → 从图片 resources 提取模型信息
+                    image_id = int(image_match.group(1))
+                    import json as _json2
+                    from config import CIVITAI_API_TOKEN
+                    _img_params = {'input': _json2.dumps({'json': {'id': image_id}})}
+                    if CIVITAI_API_TOKEN:
+                        _img_params['token'] = CIVITAI_API_TOKEN
+                    import requests as _req2
+                    _img_resp = _req2.get(f'{CIVITAI_API_BASE}/trpc/image.getGenerationData',
+                                          params=_img_params, timeout=30,
+                                          headers={'User-Agent': 'Mozilla/5.0'})
+                    _img_resp.raise_for_status()
+                    _gen = _img_resp.json().get('result', {}).get('data', {}).get('json', {})
+                    _meta = _gen.get('meta') or {}
+                    # 合并 civitaiResources + 顶层 resources
+                    _all_res = list(_meta.get('civitaiResources', [])) + list(_gen.get('resources', []))
+                    # 按 type_subtype 的主类型匹配
+                    _want_type = main_type  # ckpt / lora / embedding
+                    _type_map = {'ckpt': 'checkpoint', 'lora': 'lora', 'embedding': 'textualinversion'}
+                    _want = _type_map.get(_want_type, _want_type)
+                    _matched_res = None
+                    for _r in _all_res:
+                        _rt = (_r.get('type') or _r.get('modelType') or '').lower()
+                        if _rt == _want:
+                            _matched_res = _r
+                            break
+                    if not _matched_res:
+                        self.send_json({'status': 'error', 'message': f'图片 {image_id} 的 resources 中未找到类型为 {_want} 的模型'}, 400)
+                        return
+                    _res_vid = _matched_res.get('modelVersionId') or _matched_res.get('versionId')
+                    _res_mid = _matched_res.get('modelId')
+                    if not _res_vid and not _res_mid:
+                        self.send_json({'status': 'error', 'message': f'图片资源缺少 version_id/model_id'}, 400)
+                        return
+                    parse_result = {'status': 'ok', 'model_id': str(_res_mid or ''), 'version_id': int(_res_vid) if _res_vid else None}
+                    model_info = dl.get_model_info(str(_res_mid), int(_res_vid) if _res_vid else None)
+                    if model_info['status'] != 'ok':
+                        self.send_json({'status': 'error', 'message': f'获取模型信息失败: {model_info.get("message")}'})
+                        return
+                else:
+                    # 标准模型 URL
+                    parse_result = dl.parse_url(civitai_url)
+                    if parse_result['status'] != 'ok':
+                        self.send_json({'status': 'error', 'message': f'URL 解析失败: {parse_result.get("message")}'}, 400)
+                        return
+                    model_info = dl.get_model_info(parse_result['model_id'], parse_result.get('version_id'))
+                    if model_info['status'] != 'ok':
+                        self.send_json({'status': 'error', 'message': f'获取模型信息失败: {model_info.get("message")}'})
+                        return
             except Exception as e:
                 self.send_json({'status': 'error', 'message': f'Civitai API 错误: {e}'})
                 return
@@ -2613,6 +3885,31 @@ class APIHandler(BaseHTTPRequestHandler):
                             print(f"[Delete] ⚠️ 本地文件删除失败: {le}")
 
                 if success:
+                    # 同步从 tracking 的 blob_urls 中移除已删除的 URL
+                    try:
+                        batch_id = filename.split('_')[0] if filename else ''
+                        if batch_id:
+                            tracking = _load_gen_tracking()
+                            entry = tracking.get(batch_id)
+                            if entry and entry.get('blob_urls'):
+                                # 构造完整 Azure URL 用于匹配
+                                old_urls = entry['blob_urls']
+                                entry['blob_urls'] = [u for u in old_urls if not u.endswith('/' + filename)]
+                                if len(entry['blob_urls']) != len(old_urls):
+                                    text = json.dumps(tracking, ensure_ascii=False, indent=2)
+                                    os.makedirs(os.path.dirname(_TRACKING_LOCAL_PATH), exist_ok=True)
+                                    with open(_TRACKING_LOCAL_PATH, 'w', encoding='utf-8') as f:
+                                        f.write(text)
+                                    if _azure_available():
+                                        try:
+                                            b2 = BlobStorage(container='civitaidl')
+                                            b2.put_json('data', 'gen_tracking.json', tracking)
+                                        except Exception:
+                                            pass
+                                    print(f"[Delete] tracking blob_urls 已更新: {batch_id}")
+                    except Exception as te:
+                        print(f"[Delete] ⚠️ tracking 更新失败: {te}")
+
                     msg = f'已删除: {blob_path}'
                     if local_deleted:
                         msg += '（含本地文件）'
@@ -2632,12 +3929,14 @@ class APIHandler(BaseHTTPRequestHandler):
 
 def run_server():
     """启动 API 服务器"""
-    # 启动时自动同步本地 ↔ Azure 数据
-    try:
-        from data_sync import sync_all
-        sync_all()
-    except Exception as e:
-        print(f"[Startup] 数据同步失败（不影响启动）: {e}")
+    # 启动时自动同步本地 ↔ Azure 数据（后台线程，不阻塞启动）
+    def _bg_sync():
+        try:
+            from data_sync import sync_all
+            sync_all()
+        except Exception as e:
+            print(f"[Startup] 数据同步失败（不影响启动）: {e}")
+    threading.Thread(target=_bg_sync, daemon=True).start()
 
     class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
         daemon_threads = True

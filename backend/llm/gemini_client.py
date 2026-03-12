@@ -90,9 +90,10 @@ def _reverse_via_gpt(img_b64, max_tokens=500):
     api_key, api_base, _ = _load_credential()
     _new_param_models = ('gpt-5', 'o1', 'o3', 'o4')
 
-    # 使用 credential 中配置的模型
-    from .credential import OPENAI_MODEL
-    model = OPENAI_MODEL or 'gpt-5.2'
+    # 模型可选：优先环境变量，再读 credential（可省略 OPENAI_MODEL）
+    import os
+    from . import credential as cred
+    model = os.environ.get('OPENAI_MODEL') or getattr(cred, 'OPENAI_MODEL', '') or 'gpt-5.2'
     use_new = any(model.startswith(p) for p in _new_param_models)
 
     messages = [

@@ -11,5 +11,6 @@ OPENAI_API_KEY = ""
 # 留空则使用 OpenAI 官方地址 https://api.openai.com/v1
 OPENAI_API_BASE = ""
 
-# 模型名称（默认 gpt-4o）
-OPENAI_MODEL = "gpt-4o"
+# 说明：
+# - 某些功能（如美学分析）会在代码中固定使用指定模型，不读取 OPENAI_MODEL。
+# - 若需全局默认模型，请使用环境变量 OPENAI_MODEL。

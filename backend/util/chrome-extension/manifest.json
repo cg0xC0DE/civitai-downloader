@@ -1,0 +1,30 @@
+﻿{
+  "manifest_version": 3,
+  "name": "Civitai 收藏助手",
+  "version": "1.2",
+  "description": "在 Civitai 图片卡片上一键加入复刻收藏队列",
+  "permissions": [
+    "contextMenus",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://civitai.com/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://civitai.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Civitai 收藏助手"
+  },
+  "icons": {}
+}

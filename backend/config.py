@@ -106,41 +106,69 @@ def scan_files(main_type, subtype):
     return files
 
 
-def find_model_on_disk(model_name, main_type=None, alt_names=None, version_id=None):
+def find_model_on_disk(model_name, main_type=None, alt_names=None, version_id=None, model_id=None):
     """
     在仓库目录中搜索模型文件。
-    严格匹配：仅通过 modelVersionId 查索引，确保版本精确一致。
+    1) 优先通过 modelVersionId 精确查索引
+    2) 若未命中且有 model_id，按 modelId 回退到同模型的最新可用版本
     匹配不到则返回 found: False。
     """
+    from util import model_index
+
+    def _make_found(entry, fallback_version=None):
+        fp = entry['path']
+        if not os.path.isfile(fp):
+            return None
+        for mt in (['ckpt', 'lora', 'embedding'] if not main_type else [main_type]):
+            base = get_base_dir(mt)
+            if fp.replace('\\', '/').startswith(base.replace('\\', '/')):
+                rel = os.path.relpath(fp, base)
+                sub = rel.split(os.sep)[0] if os.sep in rel else rel.split('/')[0]
+                result = {
+                    'found': True, 'type': mt, 'subtype': sub,
+                    'filename': os.path.basename(fp),
+                    'path': fp,
+                }
+                if fallback_version:
+                    result['fallback_version'] = fallback_version
+                return result
+        # 指定了 main_type 时，禁止跨类型路径误命中（例如 ckpt 请求命中到 D:/lora）
+        if main_type:
+            return None
+
+        # 未指定 main_type 时，路径不在已知 base_dir 下，尝试从路径推断 subtype（取文件所在目录名）
+        _inferred_sub = os.path.basename(os.path.dirname(fp))
+        result = {
+            'found': True, 'type': main_type or 'unknown', 'subtype': _inferred_sub,
+            'filename': os.path.basename(fp),
+            'path': fp,
+        }
+        if fallback_version:
+            result['fallback_version'] = fallback_version
+        return result
+
+    mismatch_reason = None
+
+    # 1) 精确版本匹配
     if version_id:
-        from util import model_index
         entry = model_index.find_by_version_id(version_id)
         if entry:
-            fp = entry['path']
-            # 验证文件确实存在于磁盘上
-            if not os.path.isfile(fp):
-                return {'found': False, 'name': model_name, 'version_id': version_id,
-                        'reason': f'索引中有记录但文件不存在: {fp}'}
-            # 从路径反推 type / subtype
-            for mt in (['ckpt', 'lora', 'embedding'] if not main_type else [main_type]):
-                base = get_base_dir(mt)
-                if fp.replace('\\', '/').startswith(base.replace('\\', '/')):
-                    rel = os.path.relpath(fp, base)
-                    sub = rel.split(os.sep)[0] if os.sep in rel else rel.split('/')[0]
-                    return {
-                        'found': True, 'type': mt, 'subtype': sub,
-                        'filename': entry.get('filename', os.path.basename(fp)),
-                        'path': fp,
-                    }
-            # 路径不在已知仓库下，仍然返回 found
-            return {
-                'found': True, 'type': main_type or 'unknown', 'subtype': '',
-                'filename': entry.get('filename', os.path.basename(fp)),
-                'path': fp,
-            }
+            r = _make_found(entry)
+            if r:
+                return r
+            mismatch_reason = f'索引命中版本但路径类型不匹配: {entry["path"]}'
+
+    # 2) 按 model_id 回退：取同模型下第一个磁盘上存在的版本
+    if model_id:
+        model_info = model_index.find_by_model_id(model_id)
+        if model_info and model_info.get('versions'):
+            for vid, ver_entry in model_info['versions'].items():
+                r = _make_found(ver_entry, fallback_version=ver_entry.get('version_name', vid))
+                if r:
+                    return r
 
     return {'found': False, 'name': model_name, 'version_id': version_id,
-            'reason': '索引中无此 versionId 记录，请先下载模型'}
+            'reason': mismatch_reason or '索引中无此 versionId 记录，请先下载模型'}
 
 
 def find_embedding_on_disk(emb_name):

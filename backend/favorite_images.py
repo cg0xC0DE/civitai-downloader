@@ -24,6 +24,7 @@ from urllib.parse import urlparse
 # ============== 存储配置 ==============
 _BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 _LOCAL_PATH = os.path.join(_BACKEND_DIR, 'cache', 'favorite_images', 'queue.jsonl')
+_DONE_AUDIT_PATH = os.path.join(_BACKEND_DIR, 'cache', 'favorite_images', 'done_audit.jsonl')
 
 _BLOB_CONTAINER = 'civitaidl'
 _BLOB_SUBFOLDER = 'data'
@@ -135,6 +136,16 @@ def _write_all_entries(entries: list):
         except Exception as e:
             print(f"[Favorites] Azure 写入失败（本地已保存）: {e}")
 
+
+def _append_done_audit(record: dict):
+    """追加一条 done 状态审计日志（本地 JSONL）"""
+    try:
+        os.makedirs(os.path.dirname(_DONE_AUDIT_PATH), exist_ok=True)
+        with open(_DONE_AUDIT_PATH, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(record, ensure_ascii=False) + '\n')
+    except Exception as e:
+        print(f"[Favorites] done 审计日志写入失败: {e}")
+
 # URL 正则验证
 IMAGE_URL_PATTERN = re.compile(r'^https://civitai\.com/images/\d+$')
 
@@ -237,27 +248,48 @@ def consume_one() -> dict:
         return {"status": "error", "message": str(e)}
 
 
-def mark_done(entry_id: str) -> dict:
+def mark_done(entry_id: str, source: str = 'unknown', context: dict = None) -> dict:
     """
     标记某条记录为已完成（供消费进程调用）
     """
+    import traceback
+    caller = ''.join(traceback.format_stack(limit=8)[-4:-1])
+    print(f"[mark_done] entry_id={entry_id}, caller:\n{caller.rstrip()}")
     try:
+        changed = None
+        prev_status = ''
         with _queue_lock:
             entries = _read_all_entries()
             updated = False
             for entry in entries:
                 if entry.get('id') == entry_id:
+                    prev_status = str(entry.get('status', 'pending'))
                     entry['status'] = 'done'
                     entry['done_at'] = __import__('datetime').datetime.now().isoformat()
+                    entry.pop('fail_reason', None)
+                    entry.pop('retry_reason', None)
+                    changed = dict(entry)
                     updated = True
                     break
-            
+
             if not updated:
                 return {"status": "error", "message": "未找到对应记录"}
-            
+
             _write_all_entries(entries)
-            return {"status": "ok", "message": "已标记完成"}
-    
+
+        _append_done_audit({
+            'at': changed.get('done_at') if changed else __import__('datetime').datetime.now().isoformat(),
+            'entry_id': entry_id,
+            'url': (changed or {}).get('url', ''),
+            'from_status': prev_status,
+            'to_status': 'done',
+            'source': source or 'unknown',
+            'context': context or {},
+            'caller': caller.rstrip(),
+        })
+
+        return {"status": "ok", "message": "已标记完成"}
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -271,7 +303,7 @@ def cleanup_done():
             removed = len(entries) - len(remaining)
             _write_all_entries(remaining)
             return {"status": "ok", "removed": removed, "remaining": len(remaining)}
-    
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -306,6 +338,10 @@ def update_status(entry_id: str, new_status: str, fail_reason: str = None, retry
     返回: {"status": "ok"/"error", "message": "..."}
     """
     try:
+        if new_status == 'done':
+            # 统一约束：done 只能通过 mark_done（手动美学分析完成）设置
+            return {"status": "error", "message": "禁止通过 update_status 设置 done；请走 mark_done"}
+
         with _queue_lock:
             entries = _read_all_entries()
             updated = False
@@ -314,10 +350,6 @@ def update_status(entry_id: str, new_status: str, fail_reason: str = None, retry
                     entry['status'] = new_status
                     if new_status == 'processing':
                         entry['processing_at'] = __import__('datetime').datetime.now().isoformat()
-                        entry.pop('fail_reason', None)
-                        entry.pop('retry_reason', None)
-                    elif new_status == 'done':
-                        entry['done_at'] = __import__('datetime').datetime.now().isoformat()
                         entry.pop('fail_reason', None)
                         entry.pop('retry_reason', None)
                     elif new_status == 'fail':
