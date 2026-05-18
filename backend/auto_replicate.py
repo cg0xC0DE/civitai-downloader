@@ -72,6 +72,7 @@ _dl_seen: set = set()          # 已入队的 version_id（去重）
 _dl_seen_lock = threading.Lock()
 _dl_seen_meta: dict = {}       # key -> {kind, name} 用于前端展示
 _dl_current_key: str = ""      # 当前正在下载的 key
+_dl_pending_fav_ids: dict = {} # fav_id 等待集合：key -> set of fav_id
 _dl_worker_thread = None
 _dl_worker_started = False
 
@@ -101,10 +102,6 @@ def _enqueue_download(mm: dict, fav_id: str, url_hint: str) -> bool:
         _dl_worker_thread.start()
         _dl_worker_started = True
     return True
-
-
-# fav_id 等待集合：key -> set of fav_id
-_dl_pending_fav_ids: dict = {}
 
 
 def _dl_worker_loop():

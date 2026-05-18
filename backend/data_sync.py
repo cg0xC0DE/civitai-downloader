@@ -20,13 +20,7 @@ _CACHE_DIR = os.path.join(_BACKEND_DIR, 'cache')
 
 _BLOB_CONTAINER = 'civitaidl'
 
-
-def _azure_available() -> bool:
-    try:
-        from azure_blob.credentials import CONNECTION_STRING
-        return bool(CONNECTION_STRING)
-    except Exception:
-        return False
+from util.azure_utils import _azure_available
 
 
 def _get_blob():

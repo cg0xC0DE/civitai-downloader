@@ -27,6 +27,7 @@ if _BACKEND_DIR not in sys.path:
     sys.path.insert(0, _BACKEND_DIR)
 
 from llm.llm_client import chat_with_image_json
+from util.azure_utils import _azure_available
 _LOCAL_PATH = os.path.join(_BACKEND_DIR, 'cache', 'aesthetic_blueprints.json')
 _BLOB_CONTAINER = 'civitaidl'
 _BLOB_SUBFOLDER = 'data'
@@ -34,7 +35,7 @@ _BLOB_FILENAME = 'aesthetic_blueprints.json'
 _AESTHETIC_MODEL = 'gpt-5.2'
 _NSFW_MASK_TOKEN = 'XXXXXX'
 
-_NSFW_HINT_WORDS = {
+_NSFW_HINT_WORDS = frozenset({
     'nsfw', 'adult', 'explicit', 'erotic', 'sexual', 'fetish',
     'hentai', 'ecchi', 'ero', 'lewd',
     'nudity', 'nude', 'naked', 'topless', 'bottomless',
@@ -43,16 +44,7 @@ _NSFW_HINT_WORDS = {
     'breast', 'breasts', 'boob', 'boobs', 'nipple', 'nipples', 'areola',
     'vagina', 'genital', 'pussy', 'pubic',
     '露出', '下体', '羞耻', '羞辱', '羞耻play', '淫', '内裤', '裸', '全裸', 'エロ'
-}
-
-
-def _azure_available() -> bool:
-    """检查 Azure Blob 是否可用"""
-    try:
-        from azure_blob.credentials import CONNECTION_STRING
-        return bool(CONNECTION_STRING)
-    except Exception:
-        return False
+})
 
 
 def _get_blob():

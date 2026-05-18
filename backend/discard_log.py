@@ -32,11 +32,11 @@ _PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache', 'disca
 # ============ 内部 IO ============
 
 def _read() -> dict:
-    if not os.path.exists(_PATH):
-        return {}
     try:
         with open(_PATH, 'r', encoding='utf-8') as f:
             return json.load(f)
+    except FileNotFoundError:
+        return {}
     except Exception:
         return {}
 
